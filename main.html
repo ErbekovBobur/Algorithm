@@ -196,6 +196,7 @@
                     </div>
                     <div class="p-3 bg-slate-950 border-t border-slate-800 flex items-center gap-2 shrink-0 flex-wrap">
                         <button id="run-code-btn" class="flex-1 min-w-[100px] py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 font-extrabold text-white text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition focus-ring"><i class="fa-solid fa-play"></i> Запустить</button>
+                        <button id="complete-btn" class="flex-1 min-w-[100px] py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 font-extrabold text-white text-sm shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 transition focus-ring"><i class="fa-solid fa-flag-checkered"></i> Завершить</button>
                         <button id="pause-btn" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-bold transition focus-ring hidden" aria-label="Пауза"><i class="fa-solid fa-pause"></i></button>
                         <button id="step-btn" class="px-3 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold transition focus-ring" aria-label="Шаг"><i class="fa-solid fa-forward-step"></i></button>
                     </div>
@@ -1488,6 +1489,7 @@ class CodeQuestApp {
         document.getElementById('hint-btn').addEventListener('click', () => this.openHintModal());
         document.getElementById('clear-btn').addEventListener('click', () => this.clearProgram());
         document.getElementById('run-code-btn').addEventListener('click', () => this.runProgram());
+        document.getElementById('complete-btn').addEventListener('click', () => this.completeLevel());
         document.getElementById('pause-btn').addEventListener('click', () => this.togglePause());
         document.getElementById('step-btn').addEventListener('click', () => this.stepOnce());
         document.getElementById('tab-blocks-btn').addEventListener('click', () => this.setEditorTab('blocks'));
@@ -1931,11 +1933,36 @@ class CodeQuestApp {
             return;
         }
         if (this.interpreter.checkObjective()) {
-            this.onVictory();
+            sound.playSuccess();
+            this.setStatus('Цель достигнута! Нажмите «Завершить», чтобы зафиксировать результат.', 'success');
         } else {
             sound.playError();
             this.setStatus('Программа завершилась, но цель не достигнута. Проверьте алгоритм!', 'warn');
         }
+    }
+
+    completeLevel() {
+        return safeAction('completeLevel', () => {
+            if (this.isExecuting) {
+                this.setStatus('Дождитесь окончания выполнения или поставьте на паузу.', 'warn');
+                return;
+            }
+            if (!this.world || !this.interpreter) {
+                this.setStatus('Сначала откройте уровень и запустите программу.', 'error');
+                return;
+            }
+            if (this.world.failed) {
+                sound.playError();
+                this.setStatus(this.world.failReason || 'Последний запуск завершился ошибкой. Исправьте алгоритм и запустите снова.', 'error');
+                return;
+            }
+            if (!this.interpreter.checkObjective()) {
+                sound.playError();
+                this.setStatus('Цель ещё не достигнута. Запустите программу и убедитесь, что задание выполнено.', 'warn');
+                return;
+            }
+            this.onVictory();
+        });
     }
 
     stopExecution() {
