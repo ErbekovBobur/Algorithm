@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -129,7 +128,7 @@
             <div class="flex items-center space-x-1.5 bg-slate-900/80 px-3 py-1.5 rounded-full border border-amber-500/30"
                 title="Звёзды">
                 <i class="fa-solid fa-star text-amber-400 text-base" aria-hidden="true"></i>
-                <span id="hud-stars" class="font-bold text-amber-300">0 / 900</span>
+                <span id="hud-stars" class="font-bold text-amber-300">0 / 2070</span>
             </div>
             <div class="flex items-center space-x-1.5 bg-slate-900/80 px-3 py-1.5 rounded-full border border-yellow-500/30"
                 title="Монеты">
@@ -197,7 +196,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-gamepad text-cyan-400" aria-hidden="true"></i> Каталог Обучающих Игр (20
+                        <i class="fa-solid fa-gamepad text-cyan-400" aria-hidden="true"></i> Каталог Обучающих Игр (30
                         Модулей)
                     </h3>
                     <div id="games-grid"
@@ -224,12 +223,12 @@
                 </div>
                 <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800">
                     <div class="mb-4 flex items-center justify-between">
-                        <span class="text-sm font-bold text-slate-300">Выберите уровень (1–15):</span>
+                        <span class="text-sm font-bold text-slate-300">Уровни 1–20 + 3 бонусных:</span>
                         <span id="level-select-stars-count"
                             class="text-xs font-bold text-amber-400 flex items-center gap-1"><i
-                                class="fa-solid fa-star"></i> 0 / 45</span>
+                                class="fa-solid fa-star"></i> 0 / 69</span>
                     </div>
-                    <div id="levels-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4" role="list"></div>
+                    <div id="levels-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4" role="list" style="grid-auto-flow: row;"></div>
                 </div>
             </div>
         </div>
@@ -536,6 +535,13 @@
             const SAVE_KEY = 'codequest_ru_save_v2';
             const LEGACY_KEY = 'codequest_ru_save';
             const DEBUG = new URLSearchParams(location.search).get('debug') === '1';
+            const LEVELS_MAIN = 20;
+            const LEVELS_BONUS = 3;
+            const LEVELS_PER_GAME = LEVELS_MAIN + LEVELS_BONUS; // 23
+            const MODULE_COUNT = 30;
+            const MAX_STARS_PER_GAME = LEVELS_PER_GAME * 3; // 69
+            const MAX_STARS_TOTAL = MODULE_COUNT * MAX_STARS_PER_GAME; // 2070
+
             /*===================== Supabase ==========================*/
             // const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
             // const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ';
@@ -707,26 +713,43 @@
 
             /* ===================== GAMES DATA ===================== */
             const GAMES_DATA = [
-                { id: 1, title: 'Алго-Лабиринт', category: 'Последовательности', icon: 'fa-compass', desc: 'Управление движением героя по сетке через пошаговые команды.', mechanics: ['move'] },
-                { id: 2, title: 'Спасение Робота', category: 'Обход Препятствий', icon: 'fa-robot', desc: 'Проведение робота через ямы, лаву и стены.', mechanics: ['move', 'hazard'] },
-                { id: 3, title: 'Космический Сборщик', category: 'Переменные', icon: 'fa-meteor', desc: 'Сбор кристаллов и их учёт в переменных.', mechanics: ['move', 'collect', 'variable'] },
-                { id: 4, title: 'Страж Замка', category: 'Условия IF / ELSE', icon: 'fa-shield-halved', desc: 'Проверка ключей и условий для доступа в ворота.', mechanics: ['move', 'if', 'key', 'door'] },
-                { id: 5, title: 'Фабрика Чисел', category: 'Циклы FOR / WHILE', icon: 'fa-industry', desc: 'Автоматизация повторяющихся шагов и сбора элементов.', mechanics: ['move', 'loop', 'collect'] },
-                { id: 6, title: 'Мастер Функций', category: 'Функции и Вызовы', icon: 'fa-cubes-stacked', desc: 'Вызов переиспользуемых цепочек движений.', mechanics: ['move', 'function'] },
-                { id: 7, title: 'Детектив Ошибок', category: 'Отладка (Bug Fixing)', icon: 'fa-bug', desc: 'Поиск и исправление ошибочных шагов в алгоритме.', mechanics: ['move', 'debug'] },
-                { id: 8, title: 'Питон-Змейка', category: 'Python и Списки', icon: 'fa-staff-snake', desc: 'Управление траекторией движения хвоста змейки.', mechanics: ['move', 'list'] },
-                { id: 9, title: 'Магический Алхимик', category: 'Типы Данных', icon: 'fa-flask-vial', desc: 'Трансформация ресурсов и подсчёт их количества.', mechanics: ['move', 'collect', 'type'] },
-                { id: 10, title: 'Кибер-Оборона', category: 'Логика AND/OR/NOT', icon: 'fa-network-wired', desc: 'Активация силовых полей при выполнении логических условий.', mechanics: ['move', 'logic', 'switch'] },
-                { id: 11, title: 'Сортировщик Сундуков', category: 'Массивы и Индексы', icon: 'fa-boxes-packing', desc: 'Перемещение по ячейкам массива к нужным сундукам.', mechanics: ['move', 'array'] },
-                { id: 12, title: 'Забытый Пароль', category: 'Строковые Операции', icon: 'fa-key', desc: 'Сбор букв на карте в правильное слово-пароль.', mechanics: ['move', 'string', 'collect'] },
-                { id: 13, title: 'Робо-Фестиваль', category: 'События (Events)', icon: 'fa-bolt', desc: 'Реакция персонажа на сигналы датчиков и препятствий.', mechanics: ['move', 'event'] },
-                { id: 14, title: 'Подземелье Рекурсии', category: 'Рекурсия', icon: 'fa-dungeon', desc: 'Пошаговый спуск по этажам фрактального замка.', mechanics: ['move', 'recursion'] },
-                { id: 15, title: 'Охотник за Памятью', category: 'Область Видимости', icon: 'fa-microchip', desc: 'Управление глобальными и локальными ресурсами.', mechanics: ['move', 'scope', 'variable'] },
-                { id: 16, title: 'Матрица Кода', category: '2D Массивы', icon: 'fa-table-cells', desc: 'Навигация по двумерной сетке координат [x][y].', mechanics: ['move', 'matrix'] },
-                { id: 17, title: 'Оптимизатор Задач', category: 'Сложность O(N)', icon: 'fa-gauge-high', desc: 'Поиск кратчайшего маршрута к цели.', mechanics: ['move', 'optimize'] },
-                { id: 18, title: 'Веб-Конструктор', category: 'HTML & CSS', icon: 'fa-code', desc: 'Сборка блоков интерфейса и прохождение по точкам.', mechanics: ['move', 'build'] },
-                { id: 19, title: 'Хакер Квестов', category: 'Арифметика %', icon: 'fa-terminal', desc: 'Перемещение по чётным и нечётным клеткам сетки.', mechanics: ['move', 'modulo'] },
-                { id: 20, title: 'Легенда Python', category: 'Финальный Синтез', icon: 'fa-dragon', desc: 'Сложные лабиринты и финальная битва с багами.', mechanics: ['move', 'collect', 'if', 'loop', 'function'] }
+                // Этап 1: основы движения (1–4)
+                { id: 1, title: 'Первые Шаги', category: 'Последовательности', icon: 'fa-shoe-prints', desc: 'Научись давать команды по порядку: шаг вперёд.', teach: ['move'], prior: [], mechanics: ['move'] },
+                { id: 2, title: 'Повороты', category: 'Направление', icon: 'fa-rotate', desc: 'Поворот влево и вправо — меняем направление героя.', teach: ['turn'], prior: ['move'], mechanics: ['move', 'turn'] },
+                { id: 3, title: 'Лабиринт Стен', category: 'Планирование', icon: 'fa-border-all', desc: 'Обходи стены: думай на несколько шагов вперёд.', teach: ['walls'], prior: ['move', 'turn'], mechanics: ['move', 'walls'] },
+                { id: 4, title: 'Опасная Зона', category: 'Безопасность', icon: 'fa-fire', desc: 'Лава и ямы: один неверный шаг — провал.', teach: ['hazard'], prior: ['move', 'turn', 'walls'], mechanics: ['move', 'hazard'] },
+                // Этап 2: данные и счёт (5–8)
+                { id: 5, title: 'Сборщик', category: 'Действия', icon: 'fa-gem', desc: 'Команда «Собрать»: подбирай предметы на клетке.', teach: ['collect'], prior: ['move', 'turn'], mechanics: ['move', 'collect'] },
+                { id: 6, title: 'Миссия: Собрать Всё', category: 'Цели', icon: 'fa-list-check', desc: 'Сначала собери все кристаллы, потом к финишу.', teach: ['collect_all'], prior: ['move', 'collect'], mechanics: ['move', 'collect'] },
+                { id: 7, title: 'Переменная count', category: 'Переменные', icon: 'fa-1', desc: 'Счётчик: заведи переменную и увеличивай её при сборе.', teach: ['variable'], prior: ['move', 'collect'], mechanics: ['move', 'collect', 'variable'] },
+                { id: 8, title: 'Сколько Собрали?', category: 'Условия числа', icon: 'fa-calculator', desc: 'Победа, только если count равен нужному числу.', teach: ['collect_amount'], prior: ['variable', 'collect'], mechanics: ['move', 'collect', 'variable'] },
+                // Этап 3: циклы (9–12)
+                { id: 9, title: 'Повтори 2 Раза', category: 'Цикл FOR', icon: 'fa-redo', desc: 'Блок «Повторить 2 раза» — меньше одинаковых команд.', teach: ['loop2'], prior: ['move', 'turn'], mechanics: ['move', 'loop'] },
+                { id: 10, title: 'Циклы 3 и 4', category: 'Цикл FOR', icon: 'fa-sync', desc: 'Длинные прямые удобнее проходить циклом.', teach: ['loop34'], prior: ['loop2', 'move'], mechanics: ['move', 'loop'] },
+                { id: 11, title: 'Цикл + Сбор', category: 'Цикл + действие', icon: 'fa-recycle', desc: 'Внутри цикла: шаг и сбор.', teach: ['loop_collect'], prior: ['loop34', 'collect'], mechanics: ['move', 'loop', 'collect'] },
+                { id: 12, title: 'Пока count < N', category: 'Цикл WHILE', icon: 'fa-infinity', desc: 'Цикл «пока» связан с переменной.', teach: ['while'], prior: ['variable', 'loop'], mechanics: ['move', 'loop', 'variable', 'collect'] },
+                // Этап 4: условия (13–17)
+                { id: 13, title: 'ЕСЛИ стена', category: 'IF', icon: 'fa-question', desc: 'Условие: если впереди стена — поверни.', teach: ['if_wall'], prior: ['move', 'turn', 'walls'], mechanics: ['move', 'if'] },
+                { id: 14, title: 'Ключ и Дверь', category: 'IF + объект', icon: 'fa-key', desc: 'Найди ключ, открой дверь командой «Взаимодействовать».', teach: ['key_door'], prior: ['if_wall', 'move'], mechanics: ['move', 'if', 'key', 'door'] },
+                { id: 15, title: 'ЕСЛИ / ИНАЧЕ', category: 'IF-ELSE', icon: 'fa-code-branch', desc: 'Две ветки: если есть ключ — одно, иначе — другое.', teach: ['if_else'], prior: ['key_door'], mechanics: ['move', 'if', 'key', 'door'] },
+                { id: 16, title: 'Логика И', category: 'AND', icon: 'fa-link', desc: 'Условие «A и B»: оба должны быть истинны.', teach: ['and'], prior: ['if_else'], mechanics: ['move', 'logic', 'switch'] },
+                { id: 17, title: 'ИЛИ и НЕ', category: 'OR / NOT', icon: 'fa-project-diagram', desc: '«Или» и «не»: гибкие условия.', teach: ['or_not'], prior: ['and'], mechanics: ['move', 'logic', 'switch'] },
+                // Этап 5: функции и отладка (18–21)
+                { id: 18, title: 'Своя Функция', category: 'Функции', icon: 'fa-puzzle-piece', desc: 'Определи функцию с шагами и вызови её.', teach: ['function'], prior: ['move', 'turn', 'loop'], mechanics: ['move', 'function'] },
+                { id: 19, title: 'Функция Повторяется', category: 'Вызовы', icon: 'fa-cubes', desc: 'Одна функция — несколько вызовов.', teach: ['function_reuse'], prior: ['function'], mechanics: ['move', 'function', 'loop'] },
+                { id: 20, title: 'Найди Ошибку', category: 'Отладка', icon: 'fa-bug', desc: 'В программе уже есть ошибка — исправь её.', teach: ['debug'], prior: ['move', 'turn'], mechanics: ['move', 'debug'] },
+                { id: 21, title: 'Отладка + Условия', category: 'Отладка+', icon: 'fa-stethoscope', desc: 'Сломанный алгоритм с IF — почини.', teach: ['debug_if'], prior: ['debug', 'if_else'], mechanics: ['move', 'debug', 'if'] },
+                // Этап 6: строки и структуры (22–25)
+                { id: 22, title: 'Буквы и Пароль', category: 'Строки', icon: 'fa-font', desc: 'Собери буквы в слово-пароль.', teach: ['string'], prior: ['collect', 'move'], mechanics: ['move', 'string', 'collect'] },
+                { id: 23, title: 'Переключатели', category: 'Состояние', icon: 'fa-toggle-on', desc: 'Включи все переключатели, затем к финишу.', teach: ['switch'], prior: ['interact', 'move'], mechanics: ['move', 'switch', 'logic'] },
+                { id: 24, title: 'Кратчайший Путь', category: 'Оптимизация', icon: 'fa-route', desc: 'Мало шагов — больше звёзд. Ищи оптимальный маршрут.', teach: ['optimize'], prior: ['move', 'walls'], mechanics: ['move', 'optimize'] },
+                { id: 25, title: 'Чёт и Нечет', category: 'Арифметика %', icon: 'fa-percentage', desc: 'Ходи только по «правильным» клеткам (чётность).', teach: ['modulo'], prior: ['move', 'walls'], mechanics: ['move', 'modulo'] },
+                // Этап 7: синтез (26–30)
+                { id: 26, title: 'Цикл + IF', category: 'Синтез', icon: 'fa-layer-group', desc: 'Соедини циклы и условия в одном алгоритме.', teach: ['synth_loop_if'], prior: ['loop', 'if'], mechanics: ['move', 'loop', 'if', 'collect'] },
+                { id: 27, title: 'Функция + Ключ', category: 'Синтез', icon: 'fa-box-open', desc: 'Функция помогает открыть путь с ключом.', teach: ['synth_fn_key'], prior: ['function', 'key_door'], mechanics: ['move', 'function', 'key', 'door', 'if'] },
+                { id: 28, title: 'Сбор + WHILE', category: 'Синтез', icon: 'fa-boxes', desc: 'Пока не набрал нужное — продолжай цикл.', teach: ['synth_while'], prior: ['while', 'collect_amount'], mechanics: ['move', 'loop', 'variable', 'collect'] },
+                { id: 29, title: 'Полный Набор', category: 'Синтез', icon: 'fa-toolbox', desc: 'Стены, сбор, условия и циклы вместе.', teach: ['synth_full'], prior: ['loop', 'if', 'collect', 'hazard'], mechanics: ['move', 'loop', 'if', 'collect', 'hazard'] },
+                { id: 30, title: 'Финал Пикселя', category: 'Финальный экзамен', icon: 'fa-dragon', desc: 'Все приёмы курса в сложных лабиринтах.', teach: ['final'], prior: ['function', 'loop', 'if', 'collect', 'key'], mechanics: ['move', 'function', 'loop', 'if', 'collect', 'key', 'door', 'hazard'] }
             ];
 
             /* ===================== BLOCK CATALOG ===================== */
@@ -827,11 +850,28 @@
             function generateLevel(gameId, levelNum) {
                 const seed = gameId * 1000 + levelNum * 17 + 42;
                 const rnd = seedRandom(seed);
-                const difficulty = levelNum <= 3 ? 1 : levelNum <= 6 ? 2 : levelNum <= 9 ? 3 : levelNum <= 12 ? 4 : 5;
+                const game = GAMES_DATA.find(g => g.id === gameId) || GAMES_DATA[0];
+                const teach = game.teach || [];
+                const isBonus = levelNum > LEVELS_MAIN;
+                const phase = isBonus ? 4 : (levelNum <= 5 ? 1 : levelNum <= 12 ? 2 : levelNum <= 17 ? 3 : 4);
+                // phase 1 intro, 2 practice, 3 combine prior, 4 hard/bonus
+
+                const difficulty = isBonus
+                    ? (6 + (levelNum - LEVELS_MAIN))
+                    : Math.min(1 + Math.floor((levelNum - 1) / 4), 5);
+
                 const gridCols = 5;
                 const gridRows = 5;
                 let startPos = { x: 0, y: 0, dir: 1 };
-                let goalPos = { x: 4, y: Math.min(Math.floor((levelNum - 1) / 3), 4) };
+                // Early levels: short path; later: goal farther
+                let goalPos;
+                if (phase === 1) {
+                    goalPos = { x: Math.min(2 + Math.floor(levelNum / 2), 4), y: 0 };
+                } else if (phase === 2) {
+                    goalPos = { x: 4, y: Math.min(Math.floor(levelNum / 4), 3) };
+                } else {
+                    goalPos = { x: 4, y: Math.min(Math.floor((levelNum - 1) / 4), 4) };
+                }
                 if (startPos.x === goalPos.x && startPos.y === goalPos.y) goalPos = { x: 4, y: 4 };
 
                 const obstacles = [];
@@ -841,15 +881,30 @@
                 const doors = [];
                 const switches = [];
                 let objective = { type: 'reach_goal' };
-                let blocks = [BLOCK_CATALOG.fwd, BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l];
+                let blocks = [BLOCK_CATALOG.fwd];
                 let instructions = '';
                 let hint1 = '', hint2 = '', hint3 = '';
-                let minStepsRequired = 3;
                 let variables = {};
                 let prefilledProgram = null;
                 let requiredCollect = 0;
 
-                // Place obstacles based on difficulty
+                // Progressive block unlock within module
+                if (phase >= 1) {
+                    blocks = [BLOCK_CATALOG.fwd];
+                    if (teach.includes('turn') || teach.includes('walls') || teach.includes('hazard') || game.id >= 2 || phase >= 2) {
+                        blocks.push(BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l);
+                    }
+                    if (game.id === 1 && phase === 1) {
+                        // module 1 intro: only forward on first levels
+                        if (levelNum <= 2) blocks = [BLOCK_CATALOG.fwd];
+                        else blocks = [BLOCK_CATALOG.fwd, BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l];
+                    }
+                }
+                if (phase >= 2 || teach.some(t => ['collect', 'collect_all', 'variable', 'collect_amount', 'string', 'loop_collect'].includes(t))) {
+                    if (!blocks.find(b => b.id === 'turn_r')) blocks.push(BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l);
+                }
+
+                // Walls by difficulty / phase
                 const wallCandidates = [];
                 for (let y = 0; y < gridRows; y++) {
                     for (let x = 0; x < gridCols; x++) {
@@ -858,33 +913,39 @@
                         }
                     }
                 }
-                // shuffle
                 for (let i = wallCandidates.length - 1; i > 0; i--) {
                     const j = Math.floor(rnd() * (i + 1));
                     [wallCandidates[i], wallCandidates[j]] = [wallCandidates[j], wallCandidates[i]];
                 }
-                const wallCount = Math.min(difficulty + (levelNum > 8 ? 1 : 0), 6);
+                let wallCount = 0;
+                if (phase === 1) wallCount = teach.includes('walls') || teach.includes('hazard') ? Math.min(levelNum, 3) : (levelNum <= 2 ? 0 : 1);
+                else if (phase === 2) wallCount = Math.min(2 + Math.floor(levelNum / 5), 4);
+                else wallCount = Math.min(difficulty + 1, 6);
+                if (isBonus) wallCount = Math.min(wallCount + 2, 8);
+                // Module 1-2: keep maps open early
+                if (game.id <= 2 && phase === 1) wallCount = Math.min(wallCount, levelNum <= 3 ? 0 : 1);
                 for (let i = 0; i < wallCount; i++) {
                     if (wallCandidates[i]) obstacles.push(wallCandidates[i]);
                 }
 
-                const game = GAMES_DATA.find(g => g.id === gameId);
-                const mech = game.mechanics || [];
+                const need = (tag) => teach.includes(tag) || (phase >= 3 && (game.prior || []).some(p => String(p).includes(tag)));
 
-                // --- Specialized per game ---
-                if (mech.includes('hazard')) {
-                    if (levelNum > 2) {
+                // --- Teach-specific content ---
+                // Hazards
+                if (teach.includes('hazard') || (phase >= 3 && game.mechanics.includes('hazard'))) {
+                    if (phase >= 1 && levelNum >= (teach.includes('hazard') ? 2 : 6)) {
                         const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
                         if (free[0]) hazards.push({ x: free[0].x, y: free[0].y, type: 'lava' });
-                        if (levelNum > 7 && free[1]) hazards.push({ x: free[1].x, y: free[1].y, type: 'pit' });
+                        if ((phase >= 2 || isBonus) && free[1]) hazards.push({ x: free[1].x, y: free[1].y, type: 'pit' });
                     }
-                    instructions = 'Дойдите до финиша 🏁, избегая лавы 🔥 и ям 🕳️. Столкновение с опасностью провалит уровень.';
-                    hint1 = 'Опасности нельзя пересекать.';
-                    hint2 = 'Планируйте обход вокруг лавы.';
-                    hint3 = 'Используйте повороты и шаги, чтобы обойти опасные клетки.';
+                    instructions = 'Дойдите до финиша 🏁, не наступая на лаву 🔥 и ямы 🕳️.';
+                    hint1 = 'Опасные клетки нельзя пересекать.';
+                    hint2 = 'Обойдите их поворотами.';
+                    hint3 = 'Спланируйте путь заранее.';
                 }
 
-                if (mech.includes('collect')) {
+                // Collect family
+                if (teach.includes('collect') || teach.includes('collect_all') || teach.includes('variable') || teach.includes('collect_amount') || teach.includes('string') || teach.includes('loop_collect') || teach.includes('synth_while') || teach.includes('synth_full') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('collect'))) {
                     const free = [];
                     for (let y = 0; y < gridRows; y++) {
                         for (let x = 0; x < gridCols; x++) {
@@ -894,134 +955,202 @@
                             }
                         }
                     }
-                    const colCount = Math.min(1 + Math.floor(levelNum / 4), 3);
+                    let colCount = 1;
+                    if (phase === 1) colCount = teach.includes('collect') && levelNum <= 3 ? 1 : Math.min(1 + Math.floor(levelNum / 4), 2);
+                    else if (phase === 2) colCount = Math.min(2 + Math.floor(levelNum / 8), 3);
+                    else colCount = Math.min(2 + Math.floor(levelNum / 6), 3);
+                    if (teach.includes('collect') && phase === 1 && levelNum <= 2) colCount = 1;
                     for (let i = 0; i < colCount && free[i]; i++) {
                         collectibles.push({ x: free[i].x, y: free[i].y, type: 'crystal', collected: false, value: 1 });
                     }
-                    requiredCollect = colCount;
-                    blocks.push(BLOCK_CATALOG.collect);
-                    if (mech.includes('variable')) {
-                        blocks.push(BLOCK_CATALOG.set_var, BLOCK_CATALOG.inc_var);
-                        variables = { count: 0 };
-                        objective = { type: 'collect_amount', amount: requiredCollect };
-                        instructions = `Соберите все кристаллы 💎 (нужно ${requiredCollect}) и дойдите до финиша. Используйте переменную для подсчёта.`;
-                        hint1 = 'Команда «Собрать» подбирает кристалл на клетке.';
-                        hint2 = 'После сбора можно увеличивать переменную.';
-                        hint3 = 'Соберите все предметы, затем идите к 🏁.';
-                    } else if (mech.includes('string')) {
-                        const letters = 'PYTHON'.slice(0, colCount).split('');
+                    requiredCollect = collectibles.length;
+                    if (!blocks.find(b => b.id === 'collect')) blocks.push(BLOCK_CATALOG.collect);
+
+                    if (teach.includes('string') || (phase >= 3 && game.mechanics.includes('string'))) {
+                        const letters = 'CODE'.slice(0, Math.max(1, colCount)).split('');
                         collectibles.forEach((c, i) => { c.type = 'letter'; c.letter = letters[i] || 'A'; });
                         objective = { type: 'collect_all', password: letters.join('') };
-                        instructions = `Соберите буквы в правильном порядке, чтобы собрать пароль, и дойдите до финиша.`;
-                        hint1 = 'Буквы нужно собрать все.';
-                        hint2 = 'Порядок сбора формирует пароль.';
-                        hint3 = 'Соберите все буквы и идите к 🏁.';
+                        instructions = 'Соберите буквы и составьте пароль, затем дойдите до 🏁.';
+                        hint1 = 'На клетке с буквой нажмите «Собрать».';
+                        hint2 = 'Нужны все буквы.';
+                        hint3 = 'Потом идите к финишу.';
+                    } else if (teach.includes('variable') || teach.includes('collect_amount') || teach.includes('while') || teach.includes('synth_while')) {
+                        if (!blocks.find(b => b.id === 'set_var')) blocks.push(BLOCK_CATALOG.set_var, BLOCK_CATALOG.inc_var);
+                        variables = { count: 0 };
+                        objective = { type: 'collect_amount', amount: requiredCollect };
+                        instructions = phase === 1
+                            ? 'Соберите кристаллы. Заведите переменную и увеличивайте count при сборе. Нужно: ' + requiredCollect + '.'
+                            : 'Соберите ровно ' + requiredCollect + ' кристалл(ов), следя за переменной count, и дойдите до финиша.';
+                        hint1 = 'Сначала «Переменная = 0».';
+                        hint2 = 'После «Собрать» — «Переменная += 1».';
+                        hint3 = 'count должен стать ' + requiredCollect + '.';
+                    } else if (teach.includes('collect_all') || teach.includes('loop_collect') || phase >= 2) {
+                        objective = { type: 'collect_all' };
+                        instructions = 'Соберите все кристаллы 💎, затем дойдите до финиша 🏁.';
+                        hint1 = '«Собрать» работает на клетке с предметом.';
+                        hint2 = 'Сначала предметы, потом финиш.';
+                        hint3 = 'Не оставляйте кристаллы.';
                     } else {
                         objective = { type: 'collect_all' };
-                        instructions = `Соберите все кристаллы 💎 и дойдите до финиша 🏁.`;
-                        hint1 = 'Используйте «Собрать» на клетке с предметом.';
-                        hint2 = 'Сначала соберите предметы, потом к цели.';
-                        hint3 = 'Обойдите все кристаллы и финиш.';
+                        instructions = 'Подберите кристалл командой «Собрать» и дойдите до 🏁.';
+                        hint1 = 'Встаньте на кристалл.';
+                        hint2 = 'Нажмите «Собрать».';
+                        hint3 = 'Идите к финишу.';
                     }
                 }
 
-                if (mech.includes('if') || mech.includes('key')) {
+                // Loops
+                if (teach.includes('loop2') || teach.includes('loop34') || teach.includes('loop') || teach.includes('loop_collect') || teach.includes('while') || teach.includes('synth_loop_if') || teach.includes('function_reuse') || teach.includes('synth_full') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('loop'))) {
+                    if (teach.includes('loop2') && phase === 1) {
+                        blocks.push(BLOCK_CATALOG.repeat_2, BLOCK_CATALOG.end_loop);
+                        instructions = instructions || 'Используйте «Повторить 2 раза» для одинаковых шагов.';
+                        hint1 = 'Оберните шаги в цикл.';
+                        hint2 = 'Не забудьте «Конец цикла».';
+                        hint3 = 'Цикл экономит блоки.';
+                    } else {
+                        blocks.push(BLOCK_CATALOG.repeat_2, BLOCK_CATALOG.repeat_3, BLOCK_CATALOG.repeat_4, BLOCK_CATALOG.end_loop);
+                        if (teach.includes('while') || teach.includes('synth_while') || (phase >= 3 && teach.includes('variable'))) {
+                            blocks.push(BLOCK_CATALOG.while_lt, BLOCK_CATALOG.set_var, BLOCK_CATALOG.inc_var);
+                        }
+                        instructions = instructions || 'Повторяющиеся шаги делайте циклом — так проще и короче программа.';
+                        hint1 = 'Найдите повтор в маршруте.';
+                        hint2 = 'Повторить 3–4 раза для длинных прямых.';
+                        hint3 = 'Закройте цикл блоком «Конец».';
+                    }
+                }
+
+                // Conditions / key / door
+                if (teach.includes('if_wall') || teach.includes('key_door') || teach.includes('if_else') || teach.includes('debug_if') || teach.includes('synth_loop_if') || teach.includes('synth_fn_key') || teach.includes('final') || (phase >= 3 && (game.mechanics.includes('if') || game.mechanics.includes('key')))) {
+                    blocks.push(BLOCK_CATALOG.if_wall, BLOCK_CATALOG.end_if);
+                    if (teach.includes('key_door') || teach.includes('if_else') || teach.includes('synth_fn_key') || teach.includes('final') || game.mechanics.includes('key')) {
+                        const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
+                        if (free[0]) keys.push({ x: free[0].x, y: free[0].y, collected: false });
+                        const doorX = Math.max(0, goalPos.x - 1);
+                        const doorY = goalPos.y;
+                        if (!(doorX === startPos.x && doorY === startPos.y) && !obstacles.some(o => o.x === doorX && o.y === doorY)) {
+                            doors.push({ x: doorX, y: doorY, locked: true });
+                        }
+                        blocks.push(BLOCK_CATALOG.if_key, BLOCK_CATALOG.interact);
+                        if (teach.includes('if_else') || phase >= 3) blocks.push(BLOCK_CATALOG.else);
+                        objective = { type: 'open_door' };
+                        instructions = 'Найдите ключ 🔑, откройте дверь «Взаимодействовать», дойдите до 🏁.';
+                        hint1 = 'Сначала ключ.';
+                        hint2 = 'У двери — «Взаимодействовать».';
+                        hint3 = 'Используйте «ЕСЛИ есть ключ».';
+                    } else {
+                        instructions = instructions || 'Если впереди стена — поверните. Используйте блок «ЕСЛИ стена».';
+                        hint1 = 'Проверяйте путь условием.';
+                        hint2 = 'Внутри IF — поворот.';
+                        hint3 = 'Закройте условие «Конец».';
+                    }
+                }
+
+                // Logic switches
+                if (teach.includes('and') || teach.includes('or_not') || teach.includes('switch') || (phase >= 3 && game.mechanics.includes('logic'))) {
                     const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
-                    if (free[0]) keys.push({ x: free[0].x, y: free[0].y, collected: false });
-                    // place door near goal
-                    const doorX = Math.max(0, goalPos.x - 1);
-                    const doorY = goalPos.y;
-                    if (!(doorX === startPos.x && doorY === startPos.y) && !obstacles.some(o => o.x === doorX && o.y === doorY)) {
-                        doors.push({ x: doorX, y: doorY, locked: true });
+                    if (free[0]) switches.push({ x: free[0].x, y: free[0].y, on: false });
+                    if ((phase >= 2 || isBonus) && free[1]) switches.push({ x: free[1].x, y: free[1].y, on: false });
+                    blocks.push(BLOCK_CATALOG.interact, BLOCK_CATALOG.end_if);
+                    if (teach.includes('and') || teach.includes('or_not') || phase >= 3) {
+                        blocks.push(BLOCK_CATALOG.and_check, BLOCK_CATALOG.or_check, BLOCK_CATALOG.not_check);
                     }
-                    blocks.push(BLOCK_CATALOG.if_key, BLOCK_CATALOG.else, BLOCK_CATALOG.end_if, BLOCK_CATALOG.interact);
-                    objective = { type: 'open_door' };
-                    instructions = 'Найдите ключ 🔑, откройте дверь 🚪 командой «Взаимодействовать» и дойдите до финиша. Используйте условие ЕСЛИ есть ключ.';
-                    hint1 = 'Сначала найдите ключ.';
-                    hint2 = 'Используйте блок «ЕСЛИ есть ключ».';
-                    hint3 = 'Ключ → к двери → взаимодействовать → к финишу.';
+                    objective = { type: 'activate_switches' };
+                    instructions = 'Активируйте все переключатели ⚡ («Взаимодействовать»), затем финиш.';
+                    hint1 = 'Встаньте на переключатель.';
+                    hint2 = 'Взаимодействовать включает его.';
+                    hint3 = 'Все должны быть включены.';
                 }
 
-                if (mech.includes('loop')) {
-                    blocks.push(BLOCK_CATALOG.repeat_2, BLOCK_CATALOG.repeat_3, BLOCK_CATALOG.repeat_4, BLOCK_CATALOG.end_loop);
-                    if (levelNum > 6) blocks.push(BLOCK_CATALOG.while_lt, BLOCK_CATALOG.set_var, BLOCK_CATALOG.inc_var);
-                    instructions = instructions || 'Используйте циклы, чтобы повторять шаги. Дойдите до финиша эффективнее.';
-                    hint1 = 'Цикл «Повторить N раз» экономит блоки.';
-                    hint2 = 'Оберните последовательность шагов в цикл.';
-                    hint3 = 'Попробуйте repeat 3–4 раза для длинных прямых.';
+                // Functions
+                if (teach.includes('function') || teach.includes('function_reuse') || teach.includes('synth_fn_key') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('function'))) {
+                    blocks.push(BLOCK_CATALOG.def_fn, BLOCK_CATALOG.call_fn, BLOCK_CATALOG.end_fn);
+                    if (!blocks.find(b => b.id === 'repeat_2')) blocks.push(BLOCK_CATALOG.repeat_2, BLOCK_CATALOG.end_loop);
+                    instructions = instructions || 'Определите функцию с полезной последовательностью и вызывайте её.';
+                    hint1 = 'ОПРЕДЕЛИТЬ … Конец функции.';
+                    hint2 = 'Внутри — шаги и повороты.';
+                    hint3 = 'Вызовите функцию нужное число раз.';
                 }
 
-                if (mech.includes('function')) {
-                    blocks.push(BLOCK_CATALOG.def_fn, BLOCK_CATALOG.call_fn, BLOCK_CATALOG.end_fn, BLOCK_CATALOG.repeat_2, BLOCK_CATALOG.end_loop);
-                    instructions = 'Определите функцию с полезной последовательностью и вызывайте её. Дойдите до финиша.';
-                    hint1 = 'ОПРЕДЕЛИТЬ функцию … Конец функции.';
-                    hint2 = 'Внутри функции — шаги и повороты.';
-                    hint3 = 'Вызовите функцию несколько раз.';
-                }
-
-                if (mech.includes('debug')) {
-                    // Pre-filled broken program
+                // Debug
+                if (teach.includes('debug') || teach.includes('debug_if')) {
                     const solver = solveGrid({ gridCols, gridRows, startPos, goalPos, obstacles, hazards: [] });
                     if (solver.solvable && solver.path.length > 2) {
                         const broken = solver.path.map(id => BLOCK_CATALOG[id] || BLOCK_CATALOG.fwd);
-                        // inject a wrong turn
                         const mid = Math.floor(broken.length / 2);
                         broken[mid] = BLOCK_CATALOG.turn_r;
+                        if (teach.includes('debug_if') && broken.length > 4) {
+                            broken.splice(1, 0, BLOCK_CATALOG.if_wall);
+                            broken.push(BLOCK_CATALOG.end_if);
+                        }
                         prefilledProgram = broken;
                     }
-                    instructions = 'В программе уже есть ошибки. Исправьте алгоритм, чтобы герой дошёл до финиша.';
-                    hint1 = 'Запустите код и посмотрите, где герой отклоняется.';
-                    hint2 = 'Удалите лишний поворот или добавьте недостающий шаг.';
-                    hint3 = 'Сравните с оптимальным маршрутом.';
+                    if (!blocks.find(b => b.id === 'turn_r')) blocks.push(BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l);
+                    instructions = 'В программе уже есть ошибка. Исправьте алгоритм, чтобы герой дошёл до финиша.';
+                    hint1 = 'Запустите и посмотрите, где сбивается путь.';
+                    hint2 = 'Удалите лишний поворот или добавьте шаг.';
+                    hint3 = 'Сравните с коротким маршрутом.';
                 }
 
-                if (mech.includes('logic') || mech.includes('switch')) {
-                    const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
-                    if (free[0]) switches.push({ x: free[0].x, y: free[0].y, on: false });
-                    if (levelNum > 5 && free[1]) switches.push({ x: free[1].x, y: free[1].y, on: false });
-                    blocks.push(BLOCK_CATALOG.and_check, BLOCK_CATALOG.or_check, BLOCK_CATALOG.not_check, BLOCK_CATALOG.end_if, BLOCK_CATALOG.interact);
-                    objective = { type: 'activate_switches' };
-                    instructions = 'Активируйте все переключатели ⚡ и дойдите до финиша. Используйте логику AND/OR/NOT.';
-                    hint1 = 'Встаньте на переключатель и используйте «Взаимодействовать».';
-                    hint2 = 'Условия помогают выбирать путь.';
-                    hint3 = 'Активируйте все, затем к 🏁.';
-                }
-
-                if (mech.includes('recursion')) {
-                    blocks.push(BLOCK_CATALOG.def_fn, BLOCK_CATALOG.call_fn, BLOCK_CATALOG.end_fn);
-                    instructions = 'Используйте рекурсивный вызов функции (ограниченный стек). Дойдите до финиша.';
-                    hint1 = 'Функция может вызывать сама себя.';
-                    hint2 = 'Добавьте условие выхода, иначе будет переполнение.';
-                    hint3 = 'Простая рекурсия: шаг + вызов.';
-                }
-
-                if (mech.includes('optimize')) {
-                    instructions = 'Найдите кратчайший путь. Звёзды зависят от оптимальности решения.';
+                // Optimize / modulo text
+                if (teach.includes('optimize')) {
+                    instructions = 'Найдите кратчайший путь. Лишние шаги сильно снижают звёзды.';
                     hint1 = 'Меньше шагов — больше звёзд.';
-                    hint2 = 'Избегайте лишних поворотов.';
-                    hint3 = 'Планируйте маршрут заранее.';
+                    hint2 = 'Без лишних поворотов.';
+                    hint3 = 'Планируйте маршрут.';
+                }
+                if (teach.includes('modulo')) {
+                    instructions = 'Двигайтесь с учётом чётности клеток (x+y). Дойдите до финиша аккуратно.';
+                    hint1 = 'Смотрите на координаты.';
+                    hint2 = 'Чётные и нечётные клетки чередуются.';
+                    hint3 = 'Не делайте лишних шагов.';
                 }
 
-                if (mech.includes('modulo')) {
-                    instructions = 'Двигайтесь только по чётным или нечётным клеткам согласно правилам уровня. Дойдите до финиша.';
-                    hint1 = 'Клетки (x+y) % 2 имеют значение.';
-                    hint2 = 'Выбирайте шаги, сохраняющие чётность.';
-                    hint3 = 'Проверьте координаты перед каждым шагом.';
+                // Ensure turns available when walls exist
+                if (obstacles.length && !blocks.find(b => b.id === 'turn_r')) {
+                    blocks.push(BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l);
                 }
 
                 if (!instructions) {
-                    instructions = 'Направьте героя от старта к финишу 🏁. Избегайте стенок 🧱. Каждая команда выполняется пошагово!';
-                    hint1 = 'Составьте пошаговый маршрут.';
-                    hint2 = 'Используйте повороты и шаги вперёд.';
-                    hint3 = 'Двигайтесь клетка за клеткой к цели.';
+                    if (game.id === 1 && phase === 1) {
+                        instructions = 'Дайте команды «Шаг вперёд», чтобы дойти до 🏁. Команды выполняются по порядку!';
+                        hint1 = 'Добавляйте шаги по одному.';
+                        hint2 = 'Столько шагов, сколько клеток до цели.';
+                        hint3 = 'Нажмите «Запустить».';
+                    } else if (teach.includes('turn') || game.id === 2) {
+                        instructions = 'Используйте повороты влево/вправо и шаги, чтобы дойти до 🏁.';
+                        hint1 = 'Поворот меняет направление.';
+                        hint2 = 'После поворота снова шагайте.';
+                        hint3 = 'Смотрите, куда смотрит герой.';
+                    } else {
+                        instructions = 'Направьте героя к финишу 🏁. Избегайте стен 🧱.';
+                        hint1 = 'Составьте пошаговый маршрут.';
+                        hint2 = 'Повороты и шаги вперёд.';
+                        hint3 = 'Клетка за клеткой.';
+                    }
                 }
 
-                // Ensure path exists — if not, clear some walls
+                if (isBonus) {
+                    instructions = '🔥 БОНУС: ' + instructions + ' Сложная карта, строгая оценка по шагам.';
+                    hint1 = 'Бонус — для закрепления модуля.';
+                    hint2 = hint2 || 'Оптимизируйте путь.';
+                    hint3 = hint3 || 'Меньше лишних команд.';
+                } else if (phase === 1) {
+                    instructions = '📚 Новая тема: ' + instructions;
+                }
+
+                // Unique blocks
+                const seen = new Set();
+                blocks = blocks.filter(b => {
+                    if (seen.has(b.id)) return false;
+                    seen.add(b.id);
+                    return true;
+                });
+
                 let config = {
                     id: levelNum,
                     gameId,
                     seed,
-                    title: `Уровень ${levelNum}`,
+                    title: isBonus ? ('Бонус ' + (levelNum - LEVELS_MAIN)) : ('Уровень ' + levelNum),
                     instructions,
                     hints: [hint1, hint2, hint3],
                     gridCols, gridRows,
@@ -1037,27 +1166,35 @@
                     objective,
                     variables: deepClone(variables),
                     requiredCollect,
-                    minStepsRequired,
+                    minStepsRequired: 3,
                     prefilledProgram: prefilledProgram ? prefilledProgram.map(b => ({ ...b })) : null,
                     difficulty,
-                    starThresholds: { three: 1.2, two: 1.8 } // multipliers of optimal
+                    isBonus,
+                    phase,
+                    teach: teach.slice(),
+                    starThresholds: isBonus || phase >= 4
+                        ? { three: 1.08, two: 1.4 }
+                        : phase === 1
+                            ? { three: 1.5, two: 2.2 }
+                            : { three: 1.25, two: 1.9 }
                 };
 
                 let solution = solveGrid(config);
                 let attempts = 0;
-                while (!solution.solvable && attempts < 8) {
+                while (!solution.solvable && attempts < 10) {
                     if (config.obstacles.length) config.obstacles.pop();
+                    else if (config.hazards.length) config.hazards.pop();
+                    else break;
                     solution = solveGrid(config);
                     attempts++;
                 }
-                // also ensure no wall on start/goal
                 config.obstacles = config.obstacles.filter(o => !(o.x === config.startPos.x && o.y === config.startPos.y) && !(o.x === config.goalPos.x && o.y === config.goalPos.y));
                 config.hazards = config.hazards.filter(h => !(h.x === config.startPos.x && h.y === config.startPos.y) && !(h.x === config.goalPos.x && h.y === config.goalPos.y));
                 solution = solveGrid(config);
                 config.optimalSteps = solution.solvable ? solution.optimalSteps : 20;
                 config.solvable = solution.solvable;
                 config.examplePath = solution.path || [];
-                config.minStepsRequired = Math.max(3, Math.floor(config.optimalSteps * 0.9));
+                config.minStepsRequired = Math.max(2, Math.floor(config.optimalSteps * (phase === 1 ? 0.7 : 0.9)));
 
                 return config;
             }
@@ -1066,7 +1203,7 @@
                 const all = {};
                 GAMES_DATA.forEach(g => {
                     all[g.id] = [];
-                    for (let l = 1; l <= 15; l++) {
+                    for (let l = 1; l <= LEVELS_PER_GAME; l++) {
                         all[g.id].push(generateLevel(g.id, l));
                     }
                 });
@@ -1667,10 +1804,10 @@
                         { id: 'stars_15', name: 'Звёздный Кодер', desc: 'Соберите 15 звёзд', icon: '⭐', check: s => Object.values(s.completedLevels).reduce((a, b) => a + (b.stars || b || 0), 0) >= 15 },
                         { id: 'coins_100', name: 'Богач', desc: 'Заработайте 100 монет', icon: '💰', check: s => s.coins >= 100 },
                         {
-                            id: 'game_master', name: 'Мастер Модуля', desc: 'Пройдите все 15 уровней в одной игре', icon: '👑', check: s => {
-                                for (let g = 1; g <= 20; g++) {
+                            id: 'game_master', name: 'Мастер Модуля', desc: 'Пройдите все 20 основных уровней одного модуля', icon: '👑', check: s => {
+                                for (let g = 1; g <= MODULE_COUNT; g++) {
                                     let ok = true;
-                                    for (let l = 1; l <= 15; l++) {
+                                    for (let l = 1; l <= LEVELS_MAIN; l++) {
                                         if (!s.completedLevels[`${g}_${l}`]) { ok = false; break; }
                                     }
                                     if (ok) return true;
@@ -1757,8 +1894,8 @@
                         });
                     }
                     d.achievementsUnlocked = Array.isArray(data.achievementsUnlocked) ? data.achievementsUnlocked : [];
-                    d.lastGameId = Math.min(20, Math.max(1, Number(data.lastGameId) || 1));
-                    d.lastLevelNum = Math.min(15, Math.max(1, Number(data.lastLevelNum) || 1));
+                    d.lastGameId = Math.min(MODULE_COUNT, Math.max(1, Number(data.lastGameId) || 1));
+                    d.lastLevelNum = Math.min(LEVELS_PER_GAME, Math.max(1, Number(data.lastLevelNum) || 1));
                     d.settings = Object.assign({ muted: false, speed: 1 }, data.settings || {});
                     d.version = SAVE_VERSION;
                     return d;
@@ -1957,16 +2094,17 @@
                     Object.values(this.userState.completedLevels).forEach(v => {
                         totalStars += (typeof v === 'object' ? (v.stars || 0) : (v || 0));
                     });
-                    document.getElementById('hud-stars').textContent = `${totalStars} / 900`;
+                    document.getElementById('hud-stars').textContent = `${totalStars} / ${MAX_STARS_TOTAL}`;
                     document.getElementById('hud-coins').textContent = this.userState.coins;
                     document.getElementById('hud-avatar').textContent = this.userState.avatar;
                     const displayName = (currentStudent && currentStudent.student_name) || this.userState.username;
                     document.getElementById('hud-username').textContent = displayName;
                     let rank = 'Новичок';
-                    if (totalStars > 50) rank = 'Джуниор';
-                    if (totalStars > 150) rank = 'Мидл Кодер';
-                    if (totalStars > 300) rank = 'Сеньор Разработчик';
-                    if (totalStars > 600) rank = 'Мастер Питона';
+                    if (totalStars > 80) rank = 'Джуниор';
+                    if (totalStars > 250) rank = 'Мидл Кодер';
+                    if (totalStars > 500) rank = 'Сеньор Разработчик';
+                    if (totalStars > 1000) rank = 'Мастер Питона';
+                    if (totalStars > 1600) rank = 'Легенда CodeQuest';
                     document.getElementById('hud-rank').textContent = rank;
                     const badge = document.getElementById('profile-rank-badge');
                     if (badge) badge.textContent = `Звание: ${rank}`;
@@ -2010,7 +2148,7 @@
                     grid.innerHTML = '';
                     GAMES_DATA.forEach(game => {
                         let starsCount = 0, levelsDone = 0;
-                        for (let l = 1; l <= 15; l++) {
+                        for (let l = 1; l <= LEVELS_PER_GAME; l++) {
                             const rec = this.userState.completedLevels[`${game.id}_${l}`];
                             if (rec) {
                                 starsCount += (typeof rec === 'object' ? rec.stars : rec) || 0;
@@ -2035,8 +2173,8 @@
                     <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">${escapeHtml(game.desc)}</p>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold">
-                    <span class="text-slate-400"><i class="fa-solid fa-flag text-indigo-400 mr-1"></i> ${levelsDone}/15 ув.</span>
-                    <span class="text-amber-400"><i class="fa-solid fa-star mr-1"></i> ${starsCount}/45</span>
+                    <span class="text-slate-400"><i class="fa-solid fa-flag text-indigo-400 mr-1"></i> ${levelsDone}/${LEVELS_PER_GAME} ув.</span>
+                    <span class="text-amber-400"><i class="fa-solid fa-star mr-1"></i> ${starsCount}/${MAX_STARS_PER_GAME}</span>
                 </div>`;
                         grid.appendChild(card);
                     });
@@ -2060,7 +2198,9 @@
                     const grid = document.getElementById('levels-grid');
                     grid.innerHTML = '';
                     let totalGameStars = 0;
-                    for (let lvl = 1; lvl <= 15; lvl++) {
+
+                    // Обычные уровни 1–15
+                    for (let lvl = 1; lvl <= LEVELS_MAIN; lvl++) {
                         const rec = this.userState.completedLevels[`${this.currentGameId}_${lvl}`];
                         const stars = rec ? (typeof rec === 'object' ? rec.stars : rec) : 0;
                         totalGameStars += stars || 0;
@@ -2084,7 +2224,48 @@
                         }
                         grid.appendChild(btn);
                     }
-                    document.getElementById('level-select-stars-count').innerHTML = `<i class="fa-solid fa-star"></i> ${totalGameStars} / 45`;
+
+                    // Разделитель бонусных
+                    const sep = document.createElement('div');
+                    sep.className = 'col-span-full flex items-center gap-2 my-2';
+                    sep.innerHTML = `<div class="flex-1 h-px bg-rose-500/40"></div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-400 whitespace-nowrap"><i class="fa-solid fa-fire mr-1"></i> Бонус (сложно)</span>
+                        <div class="flex-1 h-px bg-rose-500/40"></div>`;
+                    grid.appendChild(sep);
+
+                    // Бонусные 16–18
+                    for (let lvl = LEVELS_MAIN + 1; lvl <= LEVELS_PER_GAME; lvl++) {
+                        const rec = this.userState.completedLevels[`${this.currentGameId}_${lvl}`];
+                        const stars = rec ? (typeof rec === 'object' ? rec.stars : rec) : 0;
+                        totalGameStars += stars || 0;
+                        // Бонус открывается после прохождения 15-го (и предыдущего бонуса)
+                        const prevKey = lvl === LEVELS_MAIN + 1
+                            ? `${this.currentGameId}_${LEVELS_MAIN}`
+                            : `${this.currentGameId}_${lvl - 1}`;
+                        const isUnlocked = this.userState.completedLevels[prevKey] !== undefined;
+                        const bonusIdx = lvl - LEVELS_MAIN;
+                        const btn = document.createElement('button');
+                        btn.disabled = !isUnlocked;
+                        btn.setAttribute('aria-label', `Бонусный уровень ${bonusIdx}`);
+                        if (isUnlocked) {
+                            btn.className = 'glass-panel p-4 rounded-2xl border border-rose-500/50 hover:border-rose-400 flex flex-col items-center justify-center space-y-2 group transition duration-200 transform hover:scale-105 bg-rose-950/40 focus-ring';
+                            btn.addEventListener('click', () => this.startLevel(lvl));
+                            btn.innerHTML = `
+                    <span class="text-[10px] font-bold text-rose-400 uppercase">Бонус</span>
+                    <span class="text-lg font-black text-rose-200 group-hover:text-rose-100">${bonusIdx}</span>
+                    <div class="flex text-xs space-x-0.5">
+                        <i class="fa-solid fa-star ${stars >= 1 ? 'text-amber-400' : 'text-slate-700'}"></i>
+                        <i class="fa-solid fa-star ${stars >= 2 ? 'text-amber-400' : 'text-slate-700'}"></i>
+                        <i class="fa-solid fa-star ${stars >= 3 ? 'text-amber-400' : 'text-slate-700'}"></i>
+                    </div>`;
+                        } else {
+                            btn.className = 'bg-slate-900/40 p-4 rounded-2xl border border-rose-900/40 flex flex-col items-center justify-center space-y-2 opacity-50 cursor-not-allowed';
+                            btn.innerHTML = `<i class="fa-solid fa-lock text-rose-900 text-base"></i><span class="text-[10px] text-rose-800 font-bold">Бонус ${bonusIdx}</span>`;
+                        }
+                        grid.appendChild(btn);
+                    }
+
+                    document.getElementById('level-select-stars-count').innerHTML = `<i class="fa-solid fa-star"></i> ${totalGameStars} / ${MAX_STARS_PER_GAME}`;
                 }
 
                 continueLastGame() {
@@ -2121,7 +2302,9 @@
                         this.interpreter = new Interpreter([], this.world);
 
                         document.getElementById('play-game-title').textContent = game.title;
-                        document.getElementById('play-level-num').textContent = 'Уровень ' + levelNum;
+                        document.getElementById('play-level-num').textContent = levelNum > LEVELS_MAIN
+                            ? ('Бонус ' + (levelNum - LEVELS_MAIN) + ' 🔥')
+                            : ('Уровень ' + levelNum);
                         document.getElementById('play-instructions').textContent = config.instructions || 'Выполните задание.';
 
                         if (config.prefilledProgram) {
@@ -2502,7 +2685,7 @@
 
                 nextLevel() {
                     this.closeVictoryModal();
-                    if (this.currentLevelNum < 15) this.startLevel(this.currentLevelNum + 1);
+                    if (this.currentLevelNum < LEVELS_PER_GAME) this.startLevel(this.currentLevelNum + 1);
                     else this.showScreen('levels');
                 }
 
@@ -2694,7 +2877,7 @@
                     })();
 
                     app.init();
-                    console.log('[CodeQuest] Boot OK — 20 games × 15 levels ready');
+                    console.log('[CodeQuest] Boot OK — ' + MODULE_COUNT + ' modules × ' + LEVELS_PER_GAME + ' levels (20+3 bonus) ready');
                     if (new URLSearchParams(location.search).get('selftest') === '1') {
                         setTimeout(runSelfTest, 100);
                     }
@@ -2710,13 +2893,13 @@
                 const log = (ok, msg) => { report.push((ok ? 'OK  ' : 'FAIL') + ' ' + msg); if (!ok) pass = false; };
                 try {
                     log(!!app, 'App instance');
-                    log(GAMES_DATA.length === 20, 'Games: ' + GAMES_DATA.length + '/20');
+                    log(GAMES_DATA.length === MODULE_COUNT, 'Games: ' + GAMES_DATA.length + '/' + MODULE_COUNT);
                     let levelCount = 0, startOk = 0, worldOk = 0, blocksOk = 0;
-                    for (let g = 1; g <= 20; g++) {
+                    for (let g = 1; g <= MODULE_COUNT; g++) {
                         const levels = app.levelsData[g];
-                        if (!levels || levels.length !== 15) { log(false, 'Game ' + g + ' levels: ' + (levels && levels.length)); continue; }
+                        if (!levels || levels.length !== LEVELS_PER_GAME) { log(false, 'Game ' + g + ' levels: ' + (levels && levels.length)); continue; }
                         levelCount += levels.length;
-                        for (let l = 1; l <= 15; l++) {
+                        for (let l = 1; l <= LEVELS_PER_GAME; l++) {
                             try {
                                 app.currentGameId = g;
                                 app.startLevel(l);
@@ -2728,10 +2911,11 @@
                             }
                         }
                     }
-                    log(levelCount === 300, 'Levels: ' + levelCount + '/300');
-                    log(startOk === 300, 'Start level: ' + startOk + '/300');
-                    log(worldOk === 300, 'WorldState: ' + worldOk + '/300');
-                    log(blocksOk === 300, 'Palette blocks: ' + blocksOk + '/300');
+                    const totalExpected = MODULE_COUNT * LEVELS_PER_GAME;
+                    log(levelCount === totalExpected, 'Levels: ' + levelCount + '/' + totalExpected);
+                    log(startOk === totalExpected, 'Start level: ' + startOk + '/' + totalExpected);
+                    log(worldOk === totalExpected, 'WorldState: ' + worldOk + '/' + totalExpected);
+                    log(blocksOk === totalExpected, 'Palette blocks: ' + blocksOk + '/' + totalExpected);
                     log(!!app.renderer && !!app.renderer.ctx, 'Renderer');
                     // save/load
                     try {
