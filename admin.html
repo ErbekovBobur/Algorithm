@@ -1,91 +1,228 @@
-
 <!DOCTYPE html>
 <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Регистрация ученика</title>
-    </head>
-    <body>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация ученика</title>
+</head>
+<style>
+    * {
+        box-sizing: border-box;
+    }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    form {
+        width: 300px;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #218838;
+    }
+
+    p {
+        margin-top: 10px;
+    }
+    #password-error {
+        display: block;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    #password-error:empty {
+        display: none;
+    }
+    #message {
+        /* color: green; */
+        font-weight: bold;
+        font-size: 12px;
+        height: 10px;
+    }
+    #message:empty {
+        display: none;
+    }
+    #message.error {
+        color: red;
+    }
+    #message.error:empty {
+        display: none;
+    }
+    #message.success {
+        color: green;
+    }
+    #message.success:empty {
+        display: none;
+    }
+    #password::invalid {
+        border-color: #ccc;
+    }
+    #password::before {
+        content: 'Пароль должен быть не менее 6 символов';
+        color: red;
+        display: block;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    #password::after {
+        content: '';
+        display: block;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    #password:valid::before {
+        content: '';
+        display: block;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    #password:valid::after {
+        content: '';
+        display: block;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    #visibility-toggle:hover {
+        filter: brightness(0.9);
+    }
+    .password-container {
+        position: relative;
+    }
+    #visibility-toggle {
+        display: block;
+        border: none;
+        height: 20px;
+        width: 20px;
+        position: absolute;
+        right: 5px;
+        top: 60%;
+        z-index: 1;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
+    #visibility-toggle img {
+        height: 100%;
+        width: 100%;
+        border-radius: 50%;
+    }
+</style>
+
+<body>
     <form>
+        <label for="student_name">Имя ученика:</label>
         <input type="text" id="student_name" placeholder="Имя ученика" value="Ivanov Ivan">
-        <input type="text" id="login" placeholder="Login (email)" value="ivanov@school.local">
-        <input type="password" id="password" placeholder="Пароль" value="12345">
+        <label for="class">Класс:</label>
+        <input type="number" id="class" placeholder="Класс" value="6">
+        <label for="login">Логин:</label>
+        <input type="text" id="login" placeholder="Логин" value="ivanov">
+        <div class="password-container" style="position: relative;">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" placeholder="Пароль" value="admin123">
+            <span id="visibility-toggle" style="cursor: pointer; color: blue; text-decoration: underline;">
+                <img src="./eye-icon.png" alt="">
+            </span>
+            <span id="password-error" style="color: red;"></span>
+        </div>
         <button type="submit">Зарегистрировать</button>
         <p id="message"></p>
     </form>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-        console.log('Supabase JS SDK loaded:');
-        // const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co/rest/v1/';
-        const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsdmxjcmtkbWxmZ3lud2FocXdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNTY4ODAsImV4cCI6MjEwNTkzMjg4MH0.1sA3lqEIbDukRvAGiD81fxc0rPOa9kPZCkrxrw38r7I';
-        // Важно: клиент должен быть создан
-        // const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ'; // anon-ключ, не service_role
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const { data } = async () => await supabase
-            .from('profiles')
-            .select('*')
-            .maybeSingle();
-        if (!data) console.log('Профиль не найден');
-        console.log('Профиль:', data);            
+    const form = document.querySelector('form');
+    const messageElement = document.getElementById('message');
+    const passwordInput = document.getElementById('password');
+    const visibilityToggle = document.getElementById('visibility-toggle');
 
-        const form = document.querySelector('form');
-        const messageElement = document.getElementById('message');
-
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            messageElement.textContent = 'Регистрация...';
-
-            const studentName = document.getElementById('student_name').value.trim();
-            const login = document.getElementById('login').value.trim();
-            const password = document.getElementById('password').value;
-
-            if (!studentName || !login || !password) {
-                messageElement.textContent = 'Заполни все поля';
+    visibilityToggle.addEventListener('click', () => {
+        passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+    });
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        messageElement.className = '';
+        messageElement.textContent = 'Регистрация...';
+        const studentName = document.getElementById('student_name').value.trim();
+        const classValue = document.getElementById('class').value.trim();
+        const login = document.getElementById('login').value.trim().toLowerCase();
+        const password = document.getElementById('password').value;
+        if (!studentName || !classValue || !login || !password) {
+            messageElement.className = 'error';
+            messageElement.textContent = 'Заполни все поля';
+            return;
+        }
+        if (password.length < 4) {
+            messageElement.className = 'error';
+            messageElement.textContent = 'Пароль слишком короткий';
+            return;
+        }
+        try {
+            const { data, error } = await supabaseClient
+                .from('game_saves')
+                .insert({
+                    student_name: studentName,
+                    class: parseInt(classValue),
+                    login: login,
+                    password: password,
+                    save_data: {}
+                })
+                .select()
+                .single();
+            if (error) {
+                messageElement.className = 'error';
+                if (error.code === '23505') {
+                    messageElement.textContent = 'Такой логин уже существует';
+                } else {
+                    messageElement.textContent = 'Ошибка: ' + error.message;
+                }
+                console.error(error);
                 return;
             }
-
-            try {
-                // 1. Создаём пользователя в auth.users
-                const { data: authData, error: authError } = await supabase.auth.signUp({
-                    email: login,
-                    password: password,
-                });
-
-                if (authError) {
-                    messageElement.textContent = 'Ошибка регистрации: ' + authError.message;
-                    console.error(authError);
-                    return;
-                }
-
-                if (!authData.user) {
-                    messageElement.textContent = 'Не удалось создать пользователя';
-                    return;
-                }
-
-                // 2. Создаём запись в таблице save_data
-                const { error: insertError } = await supabase.from('game_saves').insert({
-                    id: authData.user.id,
-                    student_name: studentName,
-                    class: 6,
-                    save_data: {}          // или save_data — смотри, как называется колонка у тебя
-                });
-
-                if (insertError) {
-                    messageElement.textContent = 'Ошибка при создании записи студента: ' + insertError.message;
-                    console.error(insertError);
-                    return;
-                }
-
-                messageElement.textContent = 'Ученик успешно зарегистрирован!';
-                form.reset();
-
-            } catch (err) {
-                messageElement.textContent = 'Произошла ошибка';
-                console.error(err);
-            }
-        });
-    </script>
+            messageElement.className = 'success';
+            messageElement.textContent = 'Ученик успешно зарегистрирован!';
+            form.reset();
+            console.log('Создан:', data);
+        } catch (err) {
+            messageElement.className = 'error';
+            messageElement.textContent = 'Произошла ошибка';
+            console.error(err);
+        }
+    });
+</script>
 </body>
+
 </html>

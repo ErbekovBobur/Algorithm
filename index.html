@@ -147,6 +147,16 @@
                     <span id="hud-rank" class="text-[10px] text-cyan-400 leading-none mt-1">Новичок</span>
                 </div>
             </button>
+            <button id="login-btn"
+                class="px-3 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition focus-ring"
+                title="Войти">
+                <i class="fa-solid fa-right-to-bracket mr-1"></i><span class="hidden sm:inline">Войти</span>
+            </button>
+            <button id="logout-btn"
+                class="hidden px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-rose-600 text-slate-200 text-xs font-bold transition focus-ring"
+                title="Выйти">
+                <i class="fa-solid fa-right-from-bracket mr-1"></i><span class="hidden sm:inline">Выйти</span>
+            </button>
             <div class="flex items-center space-x-1">
                 <button id="shop-btn"
                     class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-yellow-400 transition focus-ring"
@@ -475,6 +485,37 @@
         </div>
     </div>
 
+    <!-- LOGIN MODAL -->
+    <div id="modal-login"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden"
+        role="dialog" aria-modal="true" aria-labelledby="login-title">
+        <div class="glass-panel max-w-sm w-full p-6 rounded-3xl border border-cyan-500/40 space-y-4">
+            <h3 id="login-title" class="text-xl font-black text-cyan-300 flex items-center gap-2">
+                <i class="fa-solid fa-right-to-bracket"></i> Вход ученика
+            </h3>
+            <p class="text-xs text-slate-400">Введите логин и пароль, которые выдал учитель.</p>
+            <div>
+                <label for="login-input" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Логин</label>
+                <input id="login-input" type="text" autocomplete="username"
+                    class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
+                    placeholder="ivanov">
+            </div>
+            <div>
+                <label for="password-input" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Пароль</label>
+                <input id="password-input" type="password" autocomplete="current-password"
+                    class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
+                    placeholder="••••••">
+            </div>
+            <p id="login-error" class="text-xs text-rose-400 min-h-[1rem]"></p>
+            <div class="flex gap-2">
+                <button type="button" id="login-cancel-btn"
+                    class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm focus-ring">Отмена</button>
+                <button type="button" id="login-submit-btn"
+                    class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 font-extrabold text-white text-sm focus-ring">Войти</button>
+            </div>
+        </div>
+    </div>
+
     <div id="achievement-toast"
         class="fixed bottom-6 right-6 z-50 glass-panel border border-amber-500/50 p-4 rounded-2xl flex items-center space-x-4 shadow-2xl transition-all duration-300 transform translate-y-32 opacity-0"
         role="status" aria-live="polite">
@@ -500,13 +541,105 @@
             // const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ';
             /*VITE_SUPABASE_URL=https://hlvlcrkdmlfgynwahqwi.supabase.co
             VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ*/
-            const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co/rest/v1/';
-            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsdmxjcmtkbWxmZ3lud2FocXdpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDM1Njg4MCwiZXhwIjoyMTA1OTMyODgwfQ.Z5qhQUZmFXUvXrUSjSqBNnGsqpgLZVkGQt3Agyoy8qk';
+            const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
+            const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ';
 
-            const supabase = window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
-            );
+            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            let currentStudent = null; // текущий вошедший ученик
+
+            function updateAuthUI() {
+                const loginBtn = document.getElementById('login-btn');
+                const logoutBtn = document.getElementById('logout-btn');
+                if (!loginBtn || !logoutBtn) return;
+                if (currentStudent) {
+                    loginBtn.classList.add('hidden');
+                    logoutBtn.classList.remove('hidden');
+                    if (currentStudent.student_name && window.app) {
+                        window.app.userState.username = currentStudent.student_name;
+                    }
+                } else {
+                    loginBtn.classList.remove('hidden');
+                    logoutBtn.classList.add('hidden');
+                }
+            }
+
+            function openLoginModal() {
+                const modal = document.getElementById('modal-login');
+                const err = document.getElementById('login-error');
+                if (err) err.textContent = '';
+                if (modal) modal.classList.remove('hidden');
+                const input = document.getElementById('login-input');
+                if (input) setTimeout(() => input.focus(), 50);
+            }
+
+            function closeLoginModal() {
+                const modal = document.getElementById('modal-login');
+                if (modal) modal.classList.add('hidden');
+            }
+
+            async function loginStudent(login, password) {
+                const { data, error } = await supabaseClient
+                    .from('game_saves')
+                    .select('*')
+                    .eq('login', login.trim().toLowerCase())
+                    .eq('password', password)
+                    .maybeSingle();
+
+                if (error) {
+                    console.error(error);
+                    return { ok: false, message: 'Ошибка сервера: ' + (error.message || '') };
+                }
+                if (!data) {
+                    return { ok: false, message: 'Неверный логин или пароль' };
+                }
+
+                currentStudent = data;
+                localStorage.setItem('codequest_student_id', data.id);
+
+                if (window.app) {
+                    if (data.save_data && typeof data.save_data === 'object' && Object.keys(data.save_data).length) {
+                        window.app.userState = window.app.normalizeSave(data.save_data);
+                    }
+                    if (data.student_name) {
+                        window.app.userState.username = data.student_name;
+                    }
+                    try {
+                        localStorage.setItem(SAVE_KEY, JSON.stringify(window.app.userState));
+                    } catch (_) {}
+                    window.app.updateHUD();
+                }
+
+                updateAuthUI();
+                return { ok: true, student: data };
+            }
+
+            function logoutStudent() {
+                // Сохранить прогресс текущего ученика в облако перед выходом
+                if (window.app && currentStudent) {
+                    try { window.app.uploadSave(); } catch (_) {}
+                }
+
+                currentStudent = null;
+                localStorage.removeItem('codequest_student_id');
+
+                // Сброс локального прогресса — за одним ПК сидят разные ученики
+                if (window.app) {
+                    window.app.userState = window.app.defaultState();
+                    try {
+                        localStorage.setItem(SAVE_KEY, JSON.stringify(window.app.userState));
+                    } catch (_) {}
+                    window.app.updateHUD();
+                    try {
+                        window.app.renderGamesGrid();
+                        window.app.renderShop();
+                        window.app.renderAchievements();
+                        window.app.renderProfile();
+                    } catch (_) {}
+                }
+
+                updateAuthUI();
+            }
 
             /* ===================== SOUND ENGINE ===================== */
             class SoundEngine {
@@ -1550,6 +1683,13 @@
                 }
 
                 loadState() {
+                    // Без входа прогресс всегда с нуля (за ПК разные ученики)
+                    const studentId = localStorage.getItem('codequest_student_id');
+                    if (!studentId) {
+                        try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
+                        return this.defaultState();
+                    }
+
                     let raw = localStorage.getItem(SAVE_KEY);
                     if (!raw) {
                         const legacy = localStorage.getItem(LEGACY_KEY);
@@ -1627,19 +1767,34 @@
                 saveState() {
                     try {
                         this.userState.version = SAVE_VERSION;
-
-                        localStorage.setItem(
-                            SAVE_KEY,
-                            JSON.stringify(this.userState)
-                        );
-
-                        this.uploadSave();
+                        // Локально и в облако — только если ученик вошёл
+                        if (currentStudent) {
+                            localStorage.setItem(SAVE_KEY, JSON.stringify(this.userState));
+                            this.uploadSave();
+                        } else {
+                            // Без входа прогресс не сохраняем на диск
+                            try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
+                        }
                     } catch (e) {
                         console.warn('Save failed', e);
                     }
-
                     this.updateHUD();
                 }
+                // saveState() {
+                //     try {
+                //         this.userState.version = SAVE_VERSION;
+                //         localStorage.setItem(
+                //             SAVE_KEY,
+                //             JSON.stringify(this.userState)
+                //         );
+
+                //         this.uploadSave();
+                //     } catch (e) {
+                //         console.warn('Save failed', e);
+                //     }
+
+                //     this.updateHUD();
+                // }
                 /* ===================== OLD SAVE State ===================== */
                 // saveState() {
                 //     try {
@@ -1650,46 +1805,46 @@
                 //     }
                 //     this.updateHUD();
                 // }
+
                 /* ===================== CLOUD SAVE ===================== */
                 async downloadSave() {
-                    const {
-                        data: { user }
-                    } = await supabase.auth.getUser();
+                    // авто-вход, если раньше логинился
+                    const id = localStorage.getItem('codequest_student_id');
+                    if (!id) return;
 
-                    if (!user) return;
-
-                    const { data } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('game_saves')
-                        .select('save_data')
-                        .eq('user_id', user.id)
-                        .single();
-                    if (!data) return;
-                    this.userState = data.save_data;
-                    localStorage.setItem(
-                        SAVE_KEY,
-                        JSON.stringify(this.userState)
-                    );
+                        .select('*')
+                        .eq('id', id)
+                        .maybeSingle();
 
+                    if (error || !data) return;
+
+                    currentStudent = data;
+                    if (data.save_data && typeof data.save_data === 'object') {
+                        this.userState = this.normalizeSave(data.save_data);
+                        localStorage.setItem(SAVE_KEY, JSON.stringify(this.userState));
+                    }
+                    if (data.student_name) {
+                        this.userState.username = data.student_name;
+                    }
                     this.updateHUD();
+                    updateAuthUI();
                 }
                 /* ===================== CLOUD SAVE ===================== */
                 async uploadSave() {
+                    if (!currentStudent) return;
+
                     try {
-                        const {
-                            data: { user }
-                        } = await supabase.auth.getUser();
-
-                        if (!user) return;
-
-                        await supabase
+                        await supabaseClient
                             .from('game_saves')
-                            .upsert({
-                                user_id: user.id,
+                            .update({
                                 save_data: this.userState,
-                                updated_at: new Date()
-                            });
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', currentStudent.id);
                     } catch (e) {
-                        console.error(e);
+                        console.error('uploadSave error', e);
                     }
                 }
                 /* ===================== INIT ===================== */
@@ -1698,6 +1853,7 @@
                     this.renderer = new CanvasRenderer(document.getElementById('game-canvas'));
                     this.renderGamesGrid();
                     this.updateHUD();
+                    updateAuthUI();
                     this.renderShop();
                     this.renderAchievements();
                     this.renderProfile();
@@ -1723,6 +1879,36 @@
                     document.getElementById('logo-btn').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') this.showScreen('games'); });
                     document.getElementById('continue-btn').addEventListener('click', () => this.continueLastGame());
                     document.getElementById('profile-btn').addEventListener('click', () => this.showScreen('profile'));
+                    document.getElementById('login-btn').addEventListener('click', () => {
+                        openLoginModal();
+                        this.showScreen('games');
+                    });
+                    document.getElementById('logout-btn').addEventListener('click', () => {
+                        this.showScreen('games');
+                        if (confirm('Выйти из аккаунта ученика?')) logoutStudent();
+                    });
+                    document.getElementById('login-cancel-btn').addEventListener('click', () => closeLoginModal());
+                    document.getElementById('login-submit-btn').addEventListener('click', async () => {
+                        const login = document.getElementById('login-input').value;
+                        const password = document.getElementById('password-input').value;
+                        const errEl = document.getElementById('login-error');
+                        errEl.textContent = 'Вход...';
+                        const res = await loginStudent(login, password);
+                        if (!res.ok) {
+                            errEl.textContent = res.message;
+                            return;
+                        }
+                        errEl.textContent = '';
+                        closeLoginModal();
+                        document.getElementById('login-input').value = '';
+                        document.getElementById('password-input').value = '';
+                    });
+                    document.getElementById('password-input').addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') document.getElementById('login-submit-btn').click();
+                    });
+                    document.getElementById('login-input').addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') document.getElementById('password-input').focus();
+                    });
                     document.getElementById('shop-btn').addEventListener('click', () => this.showScreen('shop'));
                     document.getElementById('achievements-btn').addEventListener('click', () => this.showScreen('achievements'));
                     document.getElementById('sound-btn').addEventListener('click', () => sound.toggleSound());
@@ -1754,6 +1940,7 @@
                         if (e.key === 'Escape') {
                             this.closeVictoryModal();
                             this.closeHintModal();
+                            closeLoginModal();
                         }
                     });
                     window.addEventListener('error', e => {
@@ -1773,7 +1960,8 @@
                     document.getElementById('hud-stars').textContent = `${totalStars} / 900`;
                     document.getElementById('hud-coins').textContent = this.userState.coins;
                     document.getElementById('hud-avatar').textContent = this.userState.avatar;
-                    document.getElementById('hud-username').textContent = this.userState.username;
+                    const displayName = (currentStudent && currentStudent.student_name) || this.userState.username;
+                    document.getElementById('hud-username').textContent = displayName;
                     let rank = 'Новичок';
                     if (totalStars > 50) rank = 'Джуниор';
                     if (totalStars > 150) rank = 'Мидл Кодер';
@@ -2482,7 +2670,6 @@
                     return null;
                 }
             }
-
             /* ===================== BOOT ===================== */
             let app;
             let __booted = false;
@@ -2494,10 +2681,18 @@
                     ['games-grid', 'levels-grid', 'game-canvas', 'palette-list', 'program-sequence', 'screen-play', 'screen-games', 'screen-levels'].forEach(assertElement);
                     // app = new CodeQuestApp();
                     // window.app = app;
-                    window.app = new CodeQuestApp();
+                    app = new CodeQuestApp();
+                    window.app = app;
+
                     (async () => {
-                        await app.downloadSave();
+                        try {
+                            await app.downloadSave();
+                        } catch (e) {
+                            console.warn('downloadSave failed', e);
+                        }
+                        updateAuthUI();
                     })();
+
                     app.init();
                     console.log('[CodeQuest] Boot OK — 20 games × 15 levels ready');
                     if (new URLSearchParams(location.search).get('selftest') === '1') {
@@ -2564,6 +2759,7 @@
         })();
     </script>
 </body>
+
 </html>
 <!-- VITE_SUPABASE_URL=https://hlvlcrkdmlfgynwahqwi.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ -->
