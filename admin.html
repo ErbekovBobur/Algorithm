@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Регистрация ученика</title>
+    </head>
+    <body>
+    <form>
+        <input type="text" id="student_name" placeholder="Имя ученика" value="Ivanov Ivan">
+        <input type="text" id="login" placeholder="Login (email)" value="ivanov@school.local">
+        <input type="password" id="password" placeholder="Пароль" value="12345">
+        <button type="submit">Зарегистрировать</button>
+        <p id="message"></p>
+    </form>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        console.log('Supabase JS SDK loaded:');
+        // const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co/rest/v1/';
+        const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsdmxjcmtkbWxmZ3lud2FocXdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNTY4ODAsImV4cCI6MjEwNTkzMjg4MH0.1sA3lqEIbDukRvAGiD81fxc0rPOa9kPZCkrxrw38r7I';
+        // Важно: клиент должен быть создан
+        // const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const { data } = async () => await supabase
+            .from('profiles')
+            .select('*')
+            .maybeSingle();
+        if (!data) console.log('Профиль не найден');
+        console.log('Профиль:', data);            
+
+        const form = document.querySelector('form');
+        const messageElement = document.getElementById('message');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            messageElement.textContent = 'Регистрация...';
+
+            const studentName = document.getElementById('student_name').value.trim();
+            const login = document.getElementById('login').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!studentName || !login || !password) {
+                messageElement.textContent = 'Заполни все поля';
+                return;
+            }
+
+            try {
+                // 1. Создаём пользователя в auth.users
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: login,
+                    password: password,
+                });
+
+                if (authError) {
+                    messageElement.textContent = 'Ошибка регистрации: ' + authError.message;
+                    console.error(authError);
+                    return;
+                }
+
+                if (!authData.user) {
+                    messageElement.textContent = 'Не удалось создать пользователя';
+                    return;
+                }
+
+                // 2. Создаём запись в таблице save_data
+                const { error: insertError } = await supabase.from('game_saves').insert({
+                    id: authData.user.id,
+                    student_name: studentName,
+                    class: 6,
+                    save_data: {}          // или save_data — смотри, как называется колонка у тебя
+                });
+
+                if (insertError) {
+                    messageElement.textContent = 'Ошибка при создании записи студента: ' + insertError.message;
+                    console.error(insertError);
+                    return;
+                }
+
+                messageElement.textContent = 'Ученик успешно зарегистрирован!';
+                form.reset();
+
+            } catch (err) {
+                messageElement.textContent = 'Произошла ошибка';
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
