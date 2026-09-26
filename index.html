@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeQuest: Академия Программирования</title>
+    <title>CodeQuest: Школьная Академия Программирования</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="ico.png" type="image/x-icon">
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Nunito:wght@400;700;800;900&display=swap"
@@ -16,53 +16,42 @@
             background-color: #0b0f19;
             color: #f8fafc;
         }
-
         .code-font {
             font-family: 'Fira Code', monospace;
         }
-
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
-
         ::-webkit-scrollbar-track {
             background: #111827;
         }
-
         ::-webkit-scrollbar-thumb {
             background: #374151;
             border-radius: 4px;
         }
-
         ::-webkit-scrollbar-thumb:hover {
             background: #4b5563;
         }
-
         .glass-panel {
             background: rgba(17, 24, 39, 0.85);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-
         .block-active {
             border-color: #38bdf8 !important;
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
             transform: scale(1.02);
         }
-
         .block-btn {
             transition: all 0.15s ease-in-out;
         }
-
         .block-btn:hover {
             transform: translateY(-2px);
         }
-
         .block-btn:active {
             transform: translateY(1px);
         }
-
         @keyframes pulse-light {
 
             0%,
@@ -74,17 +63,13 @@
                 opacity: 0.6;
             }
         }
-
         .animate-pulse-slow {
             animation: pulse-light 3s infinite ease-in-out;
         }
-
         .selectable {
             user-select: text;
         }
-
         @media (prefers-reduced-motion: reduce) {
-
             .block-btn,
             .block-active,
             .animate-bounce,
@@ -93,21 +78,17 @@
                 animation: none !important;
             }
         }
-
         .focus-ring:focus-visible {
             outline: 2px solid #38bdf8;
             outline-offset: 2px;
         }
-
         #debug-panel {
             font-family: 'Fira Code', monospace;
             font-size: 11px;
         }
     </style>
 </head>
-
 <body class="h-screen flex flex-col overflow-hidden bg-slate-950 text-slate-100">
-
     <header
         class="h-16 glass-panel border-b border-slate-800 flex items-center justify-between px-4 sm:px-6 z-20 shrink-0"
         role="banner">
@@ -121,7 +102,7 @@
                 <h1
                     class="font-extrabold text-lg sm:text-xl tracking-wide bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">
                     CodeQuest</h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Академия Программирования</p>
+                <p class="text-xs text-slate-400 hidden sm:block">Школьная Академия, Программирования</p>
             </div>
         </div>
         <div class="flex items-center space-x-3 sm:space-x-6 text-sm" role="status" aria-live="polite">
@@ -170,7 +151,6 @@
             </div>
         </div>
     </header>
-
     <main class="flex-1 relative overflow-hidden" role="main">
         <!-- GAMES -->
         <div id="screen-games" class="absolute inset-0 p-4 sm:p-6 overflow-y-auto space-y-6">
@@ -181,7 +161,7 @@
                         <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-3xl shrink-0 animate-bounce"
                             aria-hidden="true">🐱</div>
                         <div>
-                            <h2 class="text-xl sm:text-2xl font-black text-white">Привет, Юный Кодер!</h2>
+                            <h2 id="welcome-heading" class="text-xl sm:text-2xl font-black text-white">Привет, Юный Кодер!</h2>
                             <p class="text-sm text-slate-300 max-w-xl mt-1 selectable">Составляй алгоритмы из блоков,
                                 наблюдай за пошаговым движением героя в реальном времени и пройди 300 увлекательных
                                 уровней!</p>
@@ -205,7 +185,6 @@
                 </div>
             </div>
         </div>
-
         <!-- LEVELS -->
         <div id="screen-levels" class="absolute inset-0 p-4 sm:p-6 overflow-y-auto hidden">
             <div class="max-w-5xl mx-auto space-y-6">
@@ -232,7 +211,6 @@
                 </div>
             </div>
         </div>
-
         <!-- PLAY -->
         <div id="screen-play" class="absolute inset-0 flex flex-col hidden overflow-hidden">
             <div
@@ -352,7 +330,6 @@
                 </div>
             </div>
         </div>
-
         <!-- SHOP -->
         <div id="screen-shop" class="absolute inset-0 p-4 sm:p-6 overflow-y-auto hidden">
             <div class="max-w-4xl mx-auto space-y-6">
@@ -367,7 +344,6 @@
                 <div id="shop-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
         </div>
-
         <!-- PROFILE -->
         <div id="screen-profile" class="absolute inset-0 p-4 sm:p-6 overflow-y-auto hidden">
             <div class="max-w-3xl mx-auto space-y-6">
@@ -413,7 +389,6 @@
                 </div>
             </div>
         </div>
-
         <!-- ACHIEVEMENTS -->
         <div id="screen-achievements" class="absolute inset-0 p-4 sm:p-6 overflow-y-auto hidden">
             <div class="max-w-4xl mx-auto space-y-6">
@@ -429,7 +404,6 @@
             </div>
         </div>
     </main>
-
     <!-- VICTORY MODAL -->
     <div id="modal-victory"
         class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden"
@@ -461,7 +435,6 @@
             </div>
         </div>
     </div>
-
     <!-- HINT MODAL -->
     <div id="modal-hint"
         class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden"
@@ -483,7 +456,6 @@
                 class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm focus-ring">Закрыть</button>
         </div>
     </div>
-
     <!-- LOGIN MODAL -->
     <div id="modal-login"
         class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden"
@@ -497,13 +469,19 @@
                 <label for="login-input" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Логин</label>
                 <input id="login-input" type="text" autocomplete="username"
                     class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
-                    placeholder="ivanov">
+                    placeholder="username"
+                    required>
             </div>
             <div>
                 <label for="password-input" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Пароль</label>
-                <input id="password-input" type="password" autocomplete="current-password"
-                    class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
-                    placeholder="••••••">
+                <div class="relative">
+                    <input id="password-input" type="password" autocomplete="current-password"
+                        class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-400"
+                        placeholder="••••••"
+                        required>
+                    <span id="password-toggle" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-500 cursor-pointer"
+                        title="Показать / Скрыть пароль"><i class="fa-solid fa-eye"></i></span>
+                </div>
             </div>
             <p id="login-error" class="text-xs text-rose-400 min-h-[1rem]"></p>
             <div class="flex gap-2">
@@ -514,7 +492,6 @@
             </div>
         </div>
     </div>
-
     <div id="achievement-toast"
         class="fixed bottom-6 right-6 z-50 glass-panel border border-amber-500/50 p-4 rounded-2xl flex items-center space-x-4 shadow-2xl transition-all duration-300 transform translate-y-32 opacity-0"
         role="status" aria-live="polite">
@@ -530,7 +507,6 @@
     <script>
         (function () {
             'use strict';
-
             const SAVE_VERSION = 2;
             const SAVE_KEY = 'codequest_ru_save_v2';
             const LEGACY_KEY = 'codequest_ru_save';
@@ -541,19 +517,28 @@
             const MODULE_COUNT = 30;
             const MAX_STARS_PER_GAME = LEVELS_PER_GAME * 3; // 69
             const MAX_STARS_TOTAL = MODULE_COUNT * MAX_STARS_PER_GAME; // 2070
-
-            /*===================== Supabase ==========================*/
-            // const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
-            // const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ';
-            /*VITE_SUPABASE_URL=https://hlvlcrkdmlfgynwahqwi.supabase.co
-            VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ*/
             const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ';
-
             const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+            const passwordToggle = document.getElementById('password-toggle');
+            passwordToggle.addEventListener('click', () => {
+                const passwordInput = document.getElementById('password-input');
+                if (passwordInput) {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        passwordToggle.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+                    } else {
+                        passwordInput.type = 'password';
+                        passwordToggle.innerHTML = '<i class="fa-solid fa-eye"></i>';
+                    }
+                }
+            }); 
+            async function sha256hex(text) {
+                const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text)));
+                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
             let currentStudent = null; // текущий вошедший ученик
-
+            const welcome_heading = document.getElementById('welcome-heading');
             function updateAuthUI() {
                 const loginBtn = document.getElementById('login-btn');
                 const logoutBtn = document.getElementById('logout-btn');
@@ -563,13 +548,13 @@
                     logoutBtn.classList.remove('hidden');
                     if (currentStudent.student_name && window.app) {
                         window.app.userState.username = currentStudent.student_name;
+                        welcome_heading.textContent = `Привет, Юный Кодер - ${currentStudent.student_name}!`;
                     }
                 } else {
                     loginBtn.classList.remove('hidden');
                     logoutBtn.classList.add('hidden');
                 }
             }
-
             function openLoginModal() {
                 const modal = document.getElementById('modal-login');
                 const err = document.getElementById('login-error');
@@ -578,20 +563,41 @@
                 const input = document.getElementById('login-input');
                 if (input) setTimeout(() => input.focus(), 50);
             }
-
             function closeLoginModal() {
                 const modal = document.getElementById('modal-login');
                 if (modal) modal.classList.add('hidden');
             }
-
             async function loginStudent(login, password) {
-                const { data, error } = await supabaseClient
+                const loginNorm = login.trim().toLowerCase();
+                const passHash = await sha256hex(password);
+                if (!loginNorm || !password) {
+                    return { ok: false, message: 'Введите логин и пароль' };
+                }
+                // 1) Try hashed password (new accounts / migrated)
+                let { data, error } = await supabaseClient
                     .from('game_saves')
                     .select('*')
-                    .eq('login', login.trim().toLowerCase())
-                    .eq('password', password)
+                    .eq('login', loginNorm)
+                    .eq('password', passHash)
                     .maybeSingle();
-
+                // 2) Fallback: plain-text (legacy) → auto-migrate to hash
+                if (!data && !error) {
+                    const res = await supabaseClient
+                        .from('game_saves')
+                        .select('*')
+                        .eq('login', loginNorm)
+                        .eq('password', password)
+                        .maybeSingle();
+                    data = res.data;
+                    error = res.error;
+                    if (data) {
+                        // upgrade stored password to hash (best-effort)
+                        try {
+                            await supabaseClient.from('game_saves').update({ password: passHash }).eq('id', data.id);
+                            data.password = passHash;
+                        } catch (_) {}
+                    }
+                }
                 if (error) {
                     console.error(error);
                     return { ok: false, message: 'Ошибка сервера: ' + (error.message || '') };
@@ -599,7 +605,9 @@
                 if (!data) {
                     return { ok: false, message: 'Неверный логин или пароль' };
                 }
-
+                if (data.disabled) {
+                    return { ok: false, message: 'Доступ временно ограничен учителем. Обратитесь к преподавателю.' };
+                }
                 currentStudent = data;
                 localStorage.setItem('codequest_student_id', data.id);
 
@@ -619,16 +627,13 @@
                 updateAuthUI();
                 return { ok: true, student: data };
             }
-
             function logoutStudent() {
                 // Сохранить прогресс текущего ученика в облако перед выходом
                 if (window.app && currentStudent) {
                     try { window.app.uploadSave(); } catch (_) {}
                 }
-
                 currentStudent = null;
                 localStorage.removeItem('codequest_student_id');
-
                 // Сброс локального прогресса — за одним ПК сидят разные ученики
                 if (window.app) {
                     window.app.userState = window.app.defaultState();
@@ -646,7 +651,6 @@
 
                 updateAuthUI();
             }
-
             /* ===================== SOUND ENGINE ===================== */
             class SoundEngine {
                 constructor() {
@@ -710,7 +714,6 @@
                 }
             }
             const sound = new SoundEngine();
-
             /* ===================== GAMES DATA ===================== */
             const GAMES_DATA = [
                 // Этап 1: основы движения (1–4)
@@ -751,7 +754,24 @@
                 { id: 29, title: 'Полный Набор', category: 'Синтез', icon: 'fa-toolbox', desc: 'Стены, сбор, условия и циклы вместе.', teach: ['synth_full'], prior: ['loop', 'if', 'collect', 'hazard'], mechanics: ['move', 'loop', 'if', 'collect', 'hazard'] },
                 { id: 30, title: 'Финал Пикселя', category: 'Финальный экзамен', icon: 'fa-dragon', desc: 'Все приёмы курса в сложных лабиринтах.', teach: ['final'], prior: ['function', 'loop', 'if', 'collect', 'key'], mechanics: ['move', 'function', 'loop', 'if', 'collect', 'key', 'door', 'hazard'] }
             ];
-
+            /* ===================== STAGES (curriculum roadmap / visual theming) ===================== */
+            const STAGES = [
+                { id: 1, range: [1, 4], title: 'Этап 1 · Первые шаги', subtitle: 'Последовательности и направление', icon: 'fa-shoe-prints', color: '#22d3ee',
+                    header: 'from-cyan-600/25 to-slate-900/10 border-cyan-500/40', chip: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40', dot: 'bg-cyan-400', ring: 'hover:border-cyan-400/70', text: 'text-cyan-400' },
+                { id: 2, range: [5, 8], title: 'Этап 2 · Данные и счёт', subtitle: 'Действия, переменные, счётчики', icon: 'fa-gem', color: '#34d399',
+                    header: 'from-emerald-600/25 to-slate-900/10 border-emerald-500/40', chip: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40', dot: 'bg-emerald-400', ring: 'hover:border-emerald-400/70', text: 'text-emerald-400' },
+                { id: 3, range: [9, 12], title: 'Этап 3 · Циклы', subtitle: 'FOR и WHILE — меньше кода, больше результата', icon: 'fa-repeat', color: '#818cf8',
+                    header: 'from-indigo-600/25 to-slate-900/10 border-indigo-500/40', chip: 'bg-indigo-500/20 text-indigo-300 border-indigo-400/40', dot: 'bg-indigo-400', ring: 'hover:border-indigo-400/70', text: 'text-indigo-400' },
+                { id: 4, range: [13, 17], title: 'Этап 4 · Условия', subtitle: 'IF / ELSE, И, ИЛИ, НЕ', icon: 'fa-code-branch', color: '#a78bfa',
+                    header: 'from-violet-600/25 to-slate-900/10 border-violet-500/40', chip: 'bg-violet-500/20 text-violet-300 border-violet-400/40', dot: 'bg-violet-400', ring: 'hover:border-violet-400/70', text: 'text-violet-400' },
+                { id: 5, range: [18, 21], title: 'Этап 5 · Функции и отладка', subtitle: 'Переиспользуй код, находи ошибки', icon: 'fa-puzzle-piece', color: '#fbbf24',
+                    header: 'from-amber-600/25 to-slate-900/10 border-amber-500/40', chip: 'bg-amber-500/20 text-amber-300 border-amber-400/40', dot: 'bg-amber-400', ring: 'hover:border-amber-400/70', text: 'text-amber-400' },
+                { id: 6, range: [22, 25], title: 'Этап 6 · Строки и структуры', subtitle: 'Пароли, состояния, оптимизация', icon: 'fa-font', color: '#e879f9',
+                    header: 'from-fuchsia-600/25 to-slate-900/10 border-fuchsia-500/40', chip: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/40', dot: 'bg-fuchsia-400', ring: 'hover:border-fuchsia-400/70', text: 'text-fuchsia-400' },
+                { id: 7, range: [26, 30], title: 'Этап 7 · Финальный синтез', subtitle: 'Собираем все приёмы курса вместе', icon: 'fa-dragon', color: '#fb7185',
+                    header: 'from-rose-600/25 to-slate-900/10 border-rose-500/40', chip: 'bg-rose-500/20 text-rose-300 border-rose-400/40', dot: 'bg-rose-400', ring: 'hover:border-rose-400/70', text: 'text-rose-400' }
+            ];
+            function stageOf(gameId) { return STAGES.find(s => gameId >= s.range[0] && gameId <= s.range[1]) || STAGES[0]; }
             /* ===================== BLOCK CATALOG ===================== */
             const BLOCK_CATALOG = {
                 fwd: { id: 'fwd', text: 'Шаг Вперёд', type: 'move', action: 'forward', python: 'hero.move_forward()' },
@@ -780,7 +800,6 @@
                 or_check: { id: 'or_check', text: 'ЕСЛИ A ИЛИ B {', type: 'logic', action: 'if_or', python: 'if A or B:' },
                 not_check: { id: 'not_check', text: 'ЕСЛИ НЕ A {', type: 'logic', action: 'if_not', python: 'if not A:' }
             };
-
             /* ===================== UTILITIES ===================== */
             function seedRandom(seed) {
                 let s = seed | 0;
@@ -789,15 +808,12 @@
                     return (s >>> 0) / 4294967296;
                 };
             }
-
             function escapeHtml(str) {
                 return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             }
-
             function deepClone(o) {
                 return JSON.parse(JSON.stringify(o));
             }
-
             /* ===================== BFS SOLVER ===================== */
             function solveGrid(config) {
                 const cols = config.gridCols;
@@ -845,7 +861,6 @@
                 }
                 return best ? { solvable: true, optimalSteps: best.steps, path: best.path } : { solvable: false, optimalSteps: Infinity, path: [] };
             }
-
             /* ===================== LEVEL GENERATOR ===================== */
             function generateLevel(gameId, levelNum) {
                 const seed = gameId * 1000 + levelNum * 17 + 42;
@@ -855,11 +870,9 @@
                 const isBonus = levelNum > LEVELS_MAIN;
                 const phase = isBonus ? 4 : (levelNum <= 5 ? 1 : levelNum <= 12 ? 2 : levelNum <= 17 ? 3 : 4);
                 // phase 1 intro, 2 practice, 3 combine prior, 4 hard/bonus
-
                 const difficulty = isBonus
                     ? (6 + (levelNum - LEVELS_MAIN))
                     : Math.min(1 + Math.floor((levelNum - 1) / 4), 5);
-
                 const gridCols = 5;
                 const gridRows = 5;
                 let startPos = { x: 0, y: 0, dir: 1 };
@@ -873,7 +886,6 @@
                     goalPos = { x: 4, y: Math.min(Math.floor((levelNum - 1) / 4), 4) };
                 }
                 if (startPos.x === goalPos.x && startPos.y === goalPos.y) goalPos = { x: 4, y: 4 };
-
                 const obstacles = [];
                 const hazards = [];
                 const collectibles = [];
@@ -887,7 +899,6 @@
                 let variables = {};
                 let prefilledProgram = null;
                 let requiredCollect = 0;
-
                 // Progressive block unlock within module
                 if (phase >= 1) {
                     blocks = [BLOCK_CATALOG.fwd];
@@ -903,7 +914,6 @@
                 if (phase >= 2 || teach.some(t => ['collect', 'collect_all', 'variable', 'collect_amount', 'string', 'loop_collect'].includes(t))) {
                     if (!blocks.find(b => b.id === 'turn_r')) blocks.push(BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l);
                 }
-
                 // Walls by difficulty / phase
                 const wallCandidates = [];
                 for (let y = 0; y < gridRows; y++) {
@@ -927,9 +937,7 @@
                 for (let i = 0; i < wallCount; i++) {
                     if (wallCandidates[i]) obstacles.push(wallCandidates[i]);
                 }
-
                 const need = (tag) => teach.includes(tag) || (phase >= 3 && (game.prior || []).some(p => String(p).includes(tag)));
-
                 // --- Teach-specific content ---
                 // Hazards
                 if (teach.includes('hazard') || (phase >= 3 && game.mechanics.includes('hazard'))) {
@@ -943,7 +951,6 @@
                     hint2 = 'Обойдите их поворотами.';
                     hint3 = 'Спланируйте путь заранее.';
                 }
-
                 // Collect family
                 if (teach.includes('collect') || teach.includes('collect_all') || teach.includes('variable') || teach.includes('collect_amount') || teach.includes('string') || teach.includes('loop_collect') || teach.includes('synth_while') || teach.includes('synth_full') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('collect'))) {
                     const free = [];
@@ -965,7 +972,6 @@
                     }
                     requiredCollect = collectibles.length;
                     if (!blocks.find(b => b.id === 'collect')) blocks.push(BLOCK_CATALOG.collect);
-
                     if (teach.includes('string') || (phase >= 3 && game.mechanics.includes('string'))) {
                         const letters = 'CODE'.slice(0, Math.max(1, colCount)).split('');
                         collectibles.forEach((c, i) => { c.type = 'letter'; c.letter = letters[i] || 'A'; });
@@ -998,7 +1004,6 @@
                         hint3 = 'Идите к финишу.';
                     }
                 }
-
                 // Loops
                 if (teach.includes('loop2') || teach.includes('loop34') || teach.includes('loop') || teach.includes('loop_collect') || teach.includes('while') || teach.includes('synth_loop_if') || teach.includes('function_reuse') || teach.includes('synth_full') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('loop'))) {
                     if (teach.includes('loop2') && phase === 1) {
@@ -1018,7 +1023,6 @@
                         hint3 = 'Закройте цикл блоком «Конец».';
                     }
                 }
-
                 // Conditions / key / door
                 if (teach.includes('if_wall') || teach.includes('key_door') || teach.includes('if_else') || teach.includes('debug_if') || teach.includes('synth_loop_if') || teach.includes('synth_fn_key') || teach.includes('final') || (phase >= 3 && (game.mechanics.includes('if') || game.mechanics.includes('key')))) {
                     blocks.push(BLOCK_CATALOG.if_wall, BLOCK_CATALOG.end_if);
@@ -1044,7 +1048,6 @@
                         hint3 = 'Закройте условие «Конец».';
                     }
                 }
-
                 // Logic switches
                 if (teach.includes('and') || teach.includes('or_not') || teach.includes('switch') || (phase >= 3 && game.mechanics.includes('logic'))) {
                     const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
@@ -1060,7 +1063,6 @@
                     hint2 = 'Взаимодействовать включает его.';
                     hint3 = 'Все должны быть включены.';
                 }
-
                 // Functions
                 if (teach.includes('function') || teach.includes('function_reuse') || teach.includes('synth_fn_key') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('function'))) {
                     blocks.push(BLOCK_CATALOG.def_fn, BLOCK_CATALOG.call_fn, BLOCK_CATALOG.end_fn);
@@ -1070,7 +1072,6 @@
                     hint2 = 'Внутри — шаги и повороты.';
                     hint3 = 'Вызовите функцию нужное число раз.';
                 }
-
                 // Debug
                 if (teach.includes('debug') || teach.includes('debug_if')) {
                     const solver = solveGrid({ gridCols, gridRows, startPos, goalPos, obstacles, hazards: [] });
@@ -1090,7 +1091,6 @@
                     hint2 = 'Удалите лишний поворот или добавьте шаг.';
                     hint3 = 'Сравните с коротким маршрутом.';
                 }
-
                 // Optimize / modulo text
                 if (teach.includes('optimize')) {
                     instructions = 'Найдите кратчайший путь. Лишние шаги сильно снижают звёзды.';
@@ -1104,12 +1104,10 @@
                     hint2 = 'Чётные и нечётные клетки чередуются.';
                     hint3 = 'Не делайте лишних шагов.';
                 }
-
                 // Ensure turns available when walls exist
                 if (obstacles.length && !blocks.find(b => b.id === 'turn_r')) {
                     blocks.push(BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l);
                 }
-
                 if (!instructions) {
                     if (game.id === 1 && phase === 1) {
                         instructions = 'Дайте команды «Шаг вперёд», чтобы дойти до 🏁. Команды выполняются по порядку!';
@@ -1128,7 +1126,6 @@
                         hint3 = 'Клетка за клеткой.';
                     }
                 }
-
                 if (isBonus) {
                     instructions = '🔥 БОНУС: ' + instructions + ' Сложная карта, строгая оценка по шагам.';
                     hint1 = 'Бонус — для закрепления модуля.';
@@ -1137,7 +1134,6 @@
                 } else if (phase === 1) {
                     instructions = '📚 Новая тема: ' + instructions;
                 }
-
                 // Unique blocks
                 const seen = new Set();
                 blocks = blocks.filter(b => {
@@ -1145,7 +1141,6 @@
                     seen.add(b.id);
                     return true;
                 });
-
                 let config = {
                     id: levelNum,
                     gameId,
@@ -1178,7 +1173,6 @@
                             ? { three: 1.5, two: 2.2 }
                             : { three: 1.25, two: 1.9 }
                 };
-
                 let solution = solveGrid(config);
                 let attempts = 0;
                 while (!solution.solvable && attempts < 10) {
@@ -1198,18 +1192,30 @@
 
                 return config;
             }
-
-            function generateAllLevels() {
-                const all = {};
-                GAMES_DATA.forEach(g => {
-                    all[g.id] = [];
+            const levelsCache = {};
+            function getLevelsForGame(gameId) {
+                if (!levelsCache[gameId]) {
+                    levelsCache[gameId] = [];
                     for (let l = 1; l <= LEVELS_PER_GAME; l++) {
-                        all[g.id].push(generateLevel(g.id, l));
+                        levelsCache[gameId].push(generateLevel(gameId, l));
+                    }
+                }
+                return levelsCache[gameId];
+            }
+            function generateAllLevels() {
+                // Lazy: only generate on demand via getLevelsForGame
+                return new Proxy({}, {
+                    get(_, prop) {
+                        const id = Number(prop);
+                        if (!Number.isFinite(id)) return undefined;
+                        return getLevelsForGame(id);
+                    },
+                    ownKeys() { return GAMES_DATA.map(g => String(g.id)); },
+                    getOwnPropertyDescriptor(_, prop) {
+                        return { enumerable: true, configurable: true, value: getLevelsForGame(Number(prop)) };
                     }
                 });
-                return all;
             }
-
             /* ===================== WORLD STATE ===================== */
             class WorldState {
                 constructor(config) {
@@ -1262,7 +1268,6 @@
                     return false;
                 }
             }
-
             /* ===================== INTERPRETER ===================== */
             class Interpreter {
                 constructor(program, world) {
@@ -1311,7 +1316,6 @@
                         this.finished = true;
                         return { done: true };
                     }
-
                     // Handle loop resume
                     while (this.loopStack.length && this.ip >= this.program.length) {
                         const loop = this.loopStack[this.loopStack.length - 1];
@@ -1333,13 +1337,11 @@
                             return { done: true };
                         }
                     }
-
                     const block = this.program[this.ip];
                     if (!block) {
                         this.ip++;
                         return { done: false, highlightIndex: this.ip - 1 };
                     }
-
                     // Function definition mode
                     if (this.definingFn !== null) {
                         if (block.action === 'end_fn') {
@@ -1353,7 +1355,6 @@
                         this.ip++;
                         return { done: false, highlightIndex: this.ip - 1 };
                     }
-
                     // Skip mode for if/else
                     if (this.skipUntil !== null) {
                         if (block.action === this.skipUntil || (this.skipUntil === 'end_if' && (block.action === 'end_if' || block.action === 'else'))) {
@@ -1367,10 +1368,8 @@
                         this.ip++;
                         return { done: false, highlightIndex: this.ip - 1 };
                     }
-
                     const hi = this.ip;
                     let advance = true;
-
                     switch (block.action) {
                         case 'forward':
                         case 'backward': {
@@ -1549,7 +1548,6 @@
                         default:
                             break;
                     }
-
                     // Handle function call execution via frame
                     if (block.action === 'call_fn' && this._fnFrame && this._fnFrame.body) {
                         // Run body by temporarily swapping
@@ -1594,12 +1592,10 @@
                         this.callStack.pop();
                         this._fnFrame = null;
                     }
-
                     if (advance) this.ip++;
                     this.stepCount++;
                     return { done: false, highlightIndex: hi };
                 }
-
                 checkObjective() {
                     const obj = this.world.config.objective || { type: 'reach_goal' };
                     const h = this.world.hero;
@@ -1625,7 +1621,6 @@
                     return atGoal;
                 }
             }
-
             /* ===================== RENDERER ===================== */
             class CanvasRenderer {
                 constructor(canvas) {
@@ -1643,7 +1638,7 @@
                     if (!parent) return;
                     this.resizeObserver = new ResizeObserver(() => {
                         this.fit();
-                        if (this._lastWorld) this.render(this._lastWorld, this._lastAvatar);
+                        if (this._lastWorld) this.render(this._lastWorld, this._lastAvatar, this._lastStageColor);
                     });
                     this.resizeObserver.observe(parent);
                     this.fit();
@@ -1664,31 +1659,37 @@
                     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                     this.logicalSize = size;
                 }
-                render(world, avatar) {
+                render(world, avatar, stageColor) {
                     this._lastWorld = world;
                     this._lastAvatar = avatar || '🐱';
+                    this._lastStageColor = stageColor || '#38bdf8';
                     const ctx = this.ctx;
                     const size = this.logicalSize || 400;
                     const cols = world.config.gridCols;
                     const rows = world.config.gridRows;
                     const cellW = size / cols;
                     const cellH = size / rows;
-
-                    ctx.fillStyle = '#0f172a';
+                    const accent = stageColor || '#38bdf8';
+                    // Stage-tinted background
+                    ctx.fillStyle = '#0b1220';
                     ctx.fillRect(0, 0, size, size);
-
+                    // subtle radial accent
+                    const grad = ctx.createRadialGradient(size/2, size/2, size*0.1, size/2, size/2, size*0.75);
+                    grad.addColorStop(0, accent + '18');
+                    grad.addColorStop(1, 'transparent');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, size, size);
                     for (let r = 0; r < rows; r++) {
                         for (let c = 0; c < cols; c++) {
-                            ctx.strokeStyle = '#1e293b';
+                            ctx.strokeStyle = accent + '22';
                             ctx.lineWidth = 1;
                             ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
                             if ((r + c) % 2 === 0) {
-                                ctx.fillStyle = 'rgba(255,255,255,0.02)';
+                                ctx.fillStyle = accent + '08';
                                 ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
                             }
                         }
                     }
-
                     // obstacles
                     world.config.obstacles.forEach(obs => {
                         ctx.fillStyle = '#334155';
@@ -1698,7 +1699,6 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText('🧱', obs.x * cellW + cellW / 2, obs.y * cellH + cellH / 2);
                     });
-
                     // hazards
                     (world.config.hazards || []).forEach(h => {
                         ctx.font = Math.floor(cellW * 0.5) + 'px sans-serif';
@@ -1706,7 +1706,6 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText(h.type === 'lava' ? '🔥' : '🕳️', h.x * cellW + cellW / 2, h.y * cellH + cellH / 2);
                     });
-
                     // collectibles
                     world.collectibles.forEach(c => {
                         if (c.collected) return;
@@ -1716,7 +1715,6 @@
                         const icon = c.type === 'letter' ? (c.letter || '?') : '💎';
                         ctx.fillText(icon, c.x * cellW + cellW / 2, c.y * cellH + cellH / 2);
                     });
-
                     // keys
                     world.keys.forEach(k => {
                         if (k.collected) return;
@@ -1725,7 +1723,6 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText('🔑', k.x * cellW + cellW / 2, k.y * cellH + cellH / 2);
                     });
-
                     // doors
                     world.doors.forEach(d => {
                         ctx.font = Math.floor(cellW * 0.45) + 'px sans-serif';
@@ -1733,7 +1730,6 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText(d.locked ? '🚪' : '🔓', d.x * cellW + cellW / 2, d.y * cellH + cellH / 2);
                     });
-
                     // switches
                     world.switches.forEach(s => {
                         ctx.font = Math.floor(cellW * 0.4) + 'px sans-serif';
@@ -1741,39 +1737,69 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText(s.on ? '🟢' : '⚡', s.x * cellW + cellW / 2, s.y * cellH + cellH / 2);
                     });
-
-                    // goal
-                    ctx.font = Math.floor(cellW * 0.55) + 'px sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('🏁', world.config.goalPos.x * cellW + cellW / 2, world.config.goalPos.y * cellH + cellH / 2);
-
-                    // hero
-                    const hx = world.hero.x * cellW + cellW / 2;
-                    const hy = world.hero.y * cellH + cellH / 2;
-                    ctx.beginPath();
-                    ctx.arc(hx, hy, cellW / 2 - 6, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
-                    ctx.fill();
-                    ctx.strokeStyle = '#38bdf8';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                    ctx.font = Math.floor(cellW * 0.5) + 'px sans-serif';
-                    ctx.fillText(avatar || '🐱', hx, hy);
-
-                    // direction indicator
-                    const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
-                    const d = dirs[world.hero.dir];
-                    ctx.beginPath();
-                    ctx.moveTo(hx + d.dx * cellW * 0.35, hy + d.dy * cellH * 0.35);
-                    ctx.lineTo(hx + d.dx * cellW * 0.15 - d.dy * 6, hy + d.dy * cellH * 0.15 + d.dx * 6);
-                    ctx.lineTo(hx + d.dx * cellW * 0.15 + d.dy * 6, hy + d.dy * cellH * 0.15 - d.dx * 6);
-                    ctx.closePath();
-                    ctx.fillStyle = '#38bdf8';
-                    ctx.fill();
+                    // goal — high visibility with glow ring
+                    {
+                        const gx = world.config.goalPos.x * cellW + cellW / 2;
+                        const gy = world.config.goalPos.y * cellH + cellH / 2;
+                        ctx.beginPath();
+                        ctx.arc(gx, gy, cellW * 0.42, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+                        ctx.fill();
+                        ctx.strokeStyle = '#34d399';
+                        ctx.lineWidth = 2.5;
+                        ctx.setLineDash([4, 3]);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.font = Math.floor(cellW * 0.58) + 'px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('🏁', gx, gy);
+                    }
+                    // hero — larger emoji + soft glow + clear direction chevron
+                    {
+                        const hx = world.hero.x * cellW + cellW / 2;
+                        const hy = world.hero.y * cellH + cellH / 2;
+                        // outer glow
+                        const glow = ctx.createRadialGradient(hx, hy, 2, hx, hy, cellW * 0.48);
+                        glow.addColorStop(0, accent + '55');
+                        glow.addColorStop(1, 'transparent');
+                        ctx.fillStyle = glow;
+                        ctx.beginPath();
+                        ctx.arc(hx, hy, cellW * 0.48, 0, Math.PI * 2);
+                        ctx.fill();
+                        // plate
+                        ctx.beginPath();
+                        ctx.arc(hx, hy, cellW * 0.38, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+                        ctx.fill();
+                        ctx.strokeStyle = accent;
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                        // avatar emoji (large)
+                        ctx.font = Math.floor(cellW * 0.55) + 'px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(avatar || '🐱', hx, hy + 1);
+                        // direction chevron (outside the plate)
+                        const dirs = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }];
+                        const d = dirs[world.hero.dir];
+                        const tipX = hx + d.dx * cellW * 0.48;
+                        const tipY = hy + d.dy * cellH * 0.48;
+                        const baseX = hx + d.dx * cellW * 0.30;
+                        const baseY = hy + d.dy * cellH * 0.30;
+                        ctx.beginPath();
+                        ctx.moveTo(tipX, tipY);
+                        ctx.lineTo(baseX - d.dy * 7, baseY + d.dx * 7);
+                        ctx.lineTo(baseX + d.dy * 7, baseY - d.dx * 7);
+                        ctx.closePath();
+                        ctx.fillStyle = accent;
+                        ctx.fill();
+                        ctx.strokeStyle = '#0f172a';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
                 }
             }
-
             /* ===================== MAIN APP ===================== */
             class CodeQuestApp {
                 constructor() {
@@ -1794,15 +1820,29 @@
                     this.hintLevelUsed = 0;
                     this.shopItems = [
                         { id: 'skin_cat', name: 'Кибер-Кот', icon: '🐱', cost: 0, type: 'avatar' },
-                        { id: 'skin_robot', name: 'Робот-Кодер', icon: '🤖', cost: 50, type: 'avatar' },
+                        { id: 'skin_robot', name: 'Робот-Кодер', icon: '🤖', cost: 40, type: 'avatar' },
+                        { id: 'skin_fox', name: 'Хитрая Лиса', icon: '🦊', cost: 60, type: 'avatar' },
+                        { id: 'skin_owl', name: 'Мудрая Сова', icon: '🦉', cost: 80, type: 'avatar' },
                         { id: 'skin_alien', name: 'Инопланетянин', icon: '👾', cost: 100, type: 'avatar' },
-                        { id: 'skin_ninja', name: 'Кибер-Ниндзя', icon: '🥷', cost: 200, type: 'avatar' },
-                        { id: 'skin_dragon', name: 'Дракон Питона', icon: '🐉', cost: 350, type: 'avatar' }
+                        { id: 'skin_panda', name: 'Панда-Прогер', icon: '🐼', cost: 120, type: 'avatar' },
+                        { id: 'skin_unicorn', name: 'Единорог', icon: '🦄', cost: 150, type: 'avatar' },
+                        { id: 'skin_ninja', name: 'Кибер-Ниндзя', icon: '🥷', cost: 180, type: 'avatar' },
+                        { id: 'skin_wizard', name: 'Маг Кода', icon: '🧙', cost: 220, type: 'avatar' },
+                        { id: 'skin_astronaut', name: 'Космонавт', icon: '🧑‍🚀', cost: 260, type: 'avatar' },
+                        { id: 'skin_dragon', name: 'Дракон Питона', icon: '🐉', cost: 320, type: 'avatar' },
+                        { id: 'skin_phoenix', name: 'Феникс', icon: '🔥', cost: 400, type: 'avatar' },
+                        { id: 'skin_pixel', name: 'Пиксель (легенда)', icon: '👾', cost: 500, type: 'avatar' }
                     ];
                     this.achievements = [
                         { id: 'first_win', name: 'Первый Шаг', desc: 'Пройдите самый первый уровень', icon: '🐣', check: s => Object.keys(s.completedLevels).length >= 1 },
-                        { id: 'stars_15', name: 'Звёздный Кодер', desc: 'Соберите 15 звёзд', icon: '⭐', check: s => Object.values(s.completedLevels).reduce((a, b) => a + (b.stars || b || 0), 0) >= 15 },
+                        { id: 'stars_15', name: 'Звёздный Кодер', desc: 'Соберите 15 звёзд', icon: '⭐', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 15 },
+                        { id: 'stars_100', name: 'Созвездие', desc: 'Соберите 100 звёзд', icon: '✨', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 100 },
                         { id: 'coins_100', name: 'Богач', desc: 'Заработайте 100 монет', icon: '💰', check: s => s.coins >= 100 },
+                        { id: 'coins_500', name: 'Казначей', desc: 'Накопите 500 монет', icon: '🏦', check: s => s.coins >= 500 },
+                        { id: 'levels_10', name: 'Десятка', desc: 'Пройдите 10 уровней', icon: '🔟', check: s => Object.keys(s.completedLevels).length >= 10 },
+                        { id: 'levels_50', name: 'Полтинник', desc: 'Пройдите 50 уровней', icon: '🏅', check: s => Object.keys(s.completedLevels).length >= 50 },
+                        { id: 'perfect_3', name: 'Перфекционист', desc: 'Получите 3 звезды на любом уровне', icon: '🌟', check: s => Object.values(s.completedLevels).some(v => ((typeof v === 'object' ? v.stars : v) || 0) >= 3) },
+                        { id: 'collector', name: 'Коллекционер', desc: 'Откройте 5 аватаров', icon: '🎭', check: s => (s.unlockedItems || []).length >= 5 },
                         {
                             id: 'game_master', name: 'Мастер Модуля', desc: 'Пройдите все 20 основных уровней одного модуля', icon: '👑', check: s => {
                                 for (let g = 1; g <= MODULE_COUNT; g++) {
@@ -1814,11 +1854,25 @@
                                 }
                                 return false;
                             }
+                        },
+                        {
+                            id: 'stage_complete', name: 'Этап пройден', desc: 'Полностью пройдите любой учебный этап (все модули стадии)', icon: '🗺️', check: s => {
+                                for (const stage of STAGES) {
+                                    let ok = true;
+                                    for (let g = stage.range[0]; g <= stage.range[1]; g++) {
+                                        for (let l = 1; l <= LEVELS_MAIN; l++) {
+                                            if (!s.completedLevels[`${g}_${l}`]) { ok = false; break; }
+                                        }
+                                        if (!ok) break;
+                                    }
+                                    if (ok) return true;
+                                }
+                                return false;
+                            }
                         }
                     ];
                     if (this.userState.settings?.muted) sound.muted = true;
                 }
-
                 loadState() {
                     // Без входа прогресс всегда с нуля (за ПК разные ученики)
                     const studentId = localStorage.getItem('codequest_student_id');
@@ -1847,7 +1901,6 @@
                     }
                     return this.defaultState();
                 }
-
                 defaultState() {
                     return {
                         version: SAVE_VERSION,
@@ -1862,7 +1915,6 @@
                         settings: { muted: false, speed: 1 }
                     };
                 }
-
                 migrateSave(old) {
                     const s = this.defaultState();
                     s.username = old.username || s.username;
@@ -1878,7 +1930,6 @@
                     }
                     return this.normalizeSave(s);
                 }
-
                 normalizeSave(data) {
                     const d = this.defaultState();
                     if (!data || typeof data !== 'object') return d;
@@ -1917,46 +1968,23 @@
                     }
                     this.updateHUD();
                 }
-                // saveState() {
-                //     try {
-                //         this.userState.version = SAVE_VERSION;
-                //         localStorage.setItem(
-                //             SAVE_KEY,
-                //             JSON.stringify(this.userState)
-                //         );
-
-                //         this.uploadSave();
-                //     } catch (e) {
-                //         console.warn('Save failed', e);
-                //     }
-
-                //     this.updateHUD();
-                // }
-                /* ===================== OLD SAVE State ===================== */
-                // saveState() {
-                //     try {
-                //         this.userState.version = SAVE_VERSION;
-                //         localStorage.setItem(SAVE_KEY, JSON.stringify(this.userState));
-                //     } catch (e) {
-                //         console.warn('Save failed', e);
-                //     }
-                //     this.updateHUD();
-                // }
-
-                /* ===================== CLOUD SAVE ===================== */
                 async downloadSave() {
                     // авто-вход, если раньше логинился
                     const id = localStorage.getItem('codequest_student_id');
                     if (!id) return;
-
                     const { data, error } = await supabaseClient
                         .from('game_saves')
                         .select('*')
                         .eq('id', id)
                         .maybeSingle();
-
                     if (error || !data) return;
-
+                    if (data.disabled) {
+                        // Ученику закрыли доступ, пока он был вне сети — выходим и чистим локальный вход
+                        localStorage.removeItem('codequest_student_id');
+                        currentStudent = null;
+                        updateAuthUI();
+                        return;
+                    }
                     currentStudent = data;
                     if (data.save_data && typeof data.save_data === 'object') {
                         this.userState = this.normalizeSave(data.save_data);
@@ -2010,7 +2038,6 @@
                         console.log('Unsolvable levels after generation:', unsolv);
                     }
                 }
-
                 bindEvents() {
                     document.getElementById('logo-btn').addEventListener('click', () => this.showScreen('games'));
                     document.getElementById('logo-btn').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') this.showScreen('games'); });
@@ -2088,7 +2115,6 @@
                         console.error('Unhandled rejection', e.reason);
                     });
                 }
-
                 updateHUD() {
                     let totalStars = 0;
                     Object.values(this.userState.completedLevels).forEach(v => {
@@ -2109,7 +2135,6 @@
                     const badge = document.getElementById('profile-rank-badge');
                     if (badge) badge.textContent = `Звание: ${rank}`;
                 }
-
                 showScreen(name) {
                     this.stopExecution();
                     try { sound.playClick(); } catch (_) { }
@@ -2124,11 +2149,10 @@
                     if (name === 'play' && this.renderer && this.world) {
                         requestAnimationFrame(() => {
                             this.renderer.fit();
-                            this.renderer.render(this.world, this.userState.avatar);
+                            this.renderWorld();
                         });
                     }
                 }
-
                 setSpeed(spd) {
                     sound.playClick();
                     this.execSpeed = spd;
@@ -2142,46 +2166,93 @@
                     const active = document.getElementById(`spd-${spd}x`);
                     if (active) active.className = 'px-2 py-0.5 rounded bg-cyan-500 text-slate-950 focus-ring';
                 }
-
+                isModuleUnlocked(gameId) {
+                    // Совместимость: если учитель ещё не настроил доступ (поле отсутствует/не массив) — модули открыты как раньше.
+                    if (!currentStudent) return true;
+                    const list = currentStudent.unlocked_modules;
+                    if (!Array.isArray(list)) return true;
+                    return list.includes(gameId);
+                }
+                getStageColor(gameId) {
+                    const stage = STAGES.find(s => gameId >= s.range[0] && gameId <= s.range[1]);
+                    return (stage && stage.color) || '#38bdf8';
+                }
+                renderWorld() {
+                    if (!this.renderer || !this.world) return;
+                    this.renderer.render(this.world, this.userState.avatar, this.getStageColor(this.currentGameId));
+                }
                 renderGamesGrid() {
                     const grid = document.getElementById('games-grid');
                     grid.innerHTML = '';
-                    GAMES_DATA.forEach(game => {
-                        let starsCount = 0, levelsDone = 0;
-                        for (let l = 1; l <= LEVELS_PER_GAME; l++) {
-                            const rec = this.userState.completedLevels[`${game.id}_${l}`];
-                            if (rec) {
-                                starsCount += (typeof rec === 'object' ? rec.stars : rec) || 0;
-                                levelsDone++;
+                    STAGES.forEach(stage => {
+                        const stageGames = GAMES_DATA.filter(g => g.id >= stage.range[0] && g.id <= stage.range[1]);
+                        let stageStars = 0, stageMax = 0;
+                        stageGames.forEach(g => {
+                            for (let l = 1; l <= LEVELS_PER_GAME; l++) {
+                                const rec = this.userState.completedLevels[`${g.id}_${l}`];
+                                stageStars += rec ? ((typeof rec === 'object' ? rec.stars : rec) || 0) : 0;
                             }
-                        }
-                        const card = document.createElement('div');
-                        card.className = 'glass-panel p-5 rounded-2xl border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 flex flex-col justify-between group focus-ring';
-                        card.setAttribute('role', 'listitem');
-                        card.tabIndex = 0;
-                        card.addEventListener('click', () => this.openGameLevels(game.id));
-                        card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') this.openGameLevels(game.id); });
-                        card.innerHTML = `
+                            stageMax += MAX_STARS_PER_GAME;
+                        });
+                        const header = document.createElement('div');
+                        header.className = `col-span-full rounded-2xl border bg-gradient-to-r ${stage.header} px-4 py-3 flex items-center justify-between gap-3 ${stage.id > 1 ? 'mt-2' : ''}`;
+                        header.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-950/50 border border-white/10 flex items-center justify-center text-base"><i class="fa-solid ${stage.icon}" aria-hidden="true"></i></div>
+                                <div>
+                                    <div class="font-extrabold text-sm text-white leading-tight">${escapeHtml(stage.title)}</div>
+                                    <div class="text-[11px] text-slate-300/80 leading-tight">${escapeHtml(stage.subtitle)}</div>
+                                </div>
+                            </div>
+                            <div class="text-[11px] font-bold text-amber-300 flex items-center gap-1 shrink-0"><i class="fa-solid fa-star"></i> ${stageStars}/${stageMax}</div>`;
+                        grid.appendChild(header);
+                        stageGames.forEach(game => {
+                            let starsCount = 0, levelsDone = 0;
+                            for (let l = 1; l <= LEVELS_PER_GAME; l++) {
+                                const rec = this.userState.completedLevels[`${game.id}_${l}`];
+                                if (rec) {
+                                    starsCount += (typeof rec === 'object' ? rec.stars : rec) || 0;
+                                    levelsDone++;
+                                }
+                            }
+                            const unlocked = this.isModuleUnlocked(game.id);
+                            const card = document.createElement('div');
+                            card.className = `glass-panel p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between group focus-ring ${unlocked ? `border-slate-800 ${stage.ring} cursor-pointer transform hover:-translate-y-1` : 'border-slate-800/60 opacity-60 cursor-not-allowed'}`;
+                            card.setAttribute('role', 'listitem');
+                            card.tabIndex = 0;
+                            if (unlocked) {
+                                card.addEventListener('click', () => this.openGameLevels(game.id));
+                                card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') this.openGameLevels(game.id); });
+                            } else {
+                                card.setAttribute('aria-disabled', 'true');
+                                card.addEventListener('click', () => this.showLockedModuleMsg());
+                                card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') this.showLockedModuleMsg(); });
+                            }
+                            card.innerHTML = `
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500/20 transition duration-200">
-                            <i class="fa-solid ${game.icon}" aria-hidden="true"></i>
+                        <div class="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xl text-cyan-400 ${unlocked ? 'group-hover:scale-110 group-hover:bg-cyan-500/20' : ''} transition duration-200">
+                            <i class="fa-solid ${unlocked ? game.icon : 'fa-lock'}" aria-hidden="true"></i>
                         </div>
-                        <span class="text-[10px] uppercase font-extrabold px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700">${escapeHtml(game.category)}</span>
+                        <span class="text-[10px] uppercase font-extrabold px-2 py-1 rounded border ${stage.chip}">${escapeHtml(game.category)}</span>
                     </div>
-                    <h4 class="font-extrabold text-white text-base group-hover:text-cyan-300 transition">${game.id}. ${escapeHtml(game.title)}</h4>
-                    <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">${escapeHtml(game.desc)}</p>
+                    <h4 class="font-extrabold text-white text-base ${unlocked ? 'group-hover:text-cyan-300' : ''} transition">${game.id}. ${escapeHtml(game.title)}</h4>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">${unlocked ? escapeHtml(game.desc) : 'Модуль пока недоступен — откроется учителем.'}</p>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-bold">
                     <span class="text-slate-400"><i class="fa-solid fa-flag text-indigo-400 mr-1"></i> ${levelsDone}/${LEVELS_PER_GAME} ув.</span>
                     <span class="text-amber-400"><i class="fa-solid fa-star mr-1"></i> ${starsCount}/${MAX_STARS_PER_GAME}</span>
                 </div>`;
-                        grid.appendChild(card);
+                            grid.appendChild(card);
+                        });
                     });
                 }
-
+                showLockedModuleMsg() {
+                    this.showToast('Модуль закрыт', 'Учитель ещё не открыл доступ к этому модулю.');
+                }
                 openGameLevels(gameId) {
                     return safeAction('openGameLevels', () => {
+                        if (!this.isModuleUnlocked(gameId)) { this.showLockedModuleMsg(); return; }
                         this.currentGameId = gameId;
                         this.userState.lastGameId = gameId;
                         this.saveState();
@@ -2193,7 +2264,6 @@
                         this.showScreen('levels');
                     });
                 }
-
                 renderLevelsGrid() {
                     const grid = document.getElementById('levels-grid');
                     grid.innerHTML = '';
@@ -2224,7 +2294,6 @@
                         }
                         grid.appendChild(btn);
                     }
-
                     // Разделитель бонусных
                     const sep = document.createElement('div');
                     sep.className = 'col-span-full flex items-center gap-2 my-2';
@@ -2232,7 +2301,6 @@
                         <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-400 whitespace-nowrap"><i class="fa-solid fa-fire mr-1"></i> Бонус (сложно)</span>
                         <div class="flex-1 h-px bg-rose-500/40"></div>`;
                     grid.appendChild(sep);
-
                     // Бонусные 16–18
                     for (let lvl = LEVELS_MAIN + 1; lvl <= LEVELS_PER_GAME; lvl++) {
                         const rec = this.userState.completedLevels[`${this.currentGameId}_${lvl}`];
@@ -2267,11 +2335,14 @@
 
                     document.getElementById('level-select-stars-count').innerHTML = `<i class="fa-solid fa-star"></i> ${totalGameStars} / ${MAX_STARS_PER_GAME}`;
                 }
-
                 continueLastGame() {
                     return safeAction('continueLastGame', () => {
-                        const gid = this.userState.lastGameId || 1;
+                        let gid = this.userState.lastGameId || 1;
                         const lid = this.userState.lastLevelNum || 1;
+                        if (!this.isModuleUnlocked(gid)) {
+                            const firstUnlocked = GAMES_DATA.find(g => this.isModuleUnlocked(g.id));
+                            gid = firstUnlocked ? firstUnlocked.id : gid;
+                        }
                         this.openGameLevels(gid);
                         // If last level is unlocked, go straight into it
                         const prevKey = lid === 1 ? null : (gid + '_' + (lid - 1));
@@ -2281,16 +2352,15 @@
                         }
                     });
                 }
-
                 startLevel(levelNum) {
                     return safeAction('startLevel', () => {
+                        if (!this.isModuleUnlocked(this.currentGameId)) { this.showLockedModuleMsg(); return; }
                         this.stopExecution();
                         this.currentLevelNum = levelNum;
                         this.userState.lastLevelNum = levelNum;
                         this.userState.lastGameId = this.currentGameId;
                         this.saveState();
                         this.hintLevelUsed = 0;
-
                         const game = GAMES_DATA.find(g => g.id === this.currentGameId);
                         if (!game) throw new Error('Game not found: ' + this.currentGameId);
                         const gameLevels = this.levelsData[this.currentGameId];
@@ -2301,7 +2371,9 @@
                         this.world = new WorldState(config);
                         this.interpreter = new Interpreter([], this.world);
 
-                        document.getElementById('play-game-title').textContent = game.title;
+                        const playTitleEl = document.getElementById('play-game-title');
+                        playTitleEl.textContent = game.title;
+                        playTitleEl.className = 'font-bold ' + stageOf(game.id).text;
                         document.getElementById('play-level-num').textContent = levelNum > LEVELS_MAIN
                             ? ('Бонус ' + (levelNum - LEVELS_MAIN) + ' 🔥')
                             : ('Уровень ' + levelNum);
@@ -2322,7 +2394,7 @@
                         const doFitRender = () => {
                             if (!this.renderer || !this.world) return;
                             this.renderer.fit();
-                            this.renderer.render(this.world, this.userState.avatar);
+                            this.renderWorld();
                         };
                         // Double rAF: wait for layout after removing .hidden
                         requestAnimationFrame(() => requestAnimationFrame(doFitRender));
@@ -2330,7 +2402,6 @@
                         setTimeout(doFitRender, 50);
                     }); // end safeAction startLevel
                 }
-
                 renderPalette(blocks) {
                     const palette = document.getElementById('palette-list');
                     palette.innerHTML = '';
@@ -2342,21 +2413,18 @@
                         palette.appendChild(btn);
                     });
                 }
-
                 addBlockToProgram(block) {
                     if (this.isExecuting) return;
                     sound.playClick();
                     this.currentProgram.push({ ...block });
                     this.renderProgramSequence();
                 }
-
                 removeBlockFromProgram(index) {
                     if (this.isExecuting) return;
                     sound.playClick();
                     this.currentProgram.splice(index, 1);
                     this.renderProgramSequence();
                 }
-
                 clearProgram() {
                     if (this.isExecuting) return;
                     sound.playClick();
@@ -2364,11 +2432,10 @@
                     this.renderProgramSequence();
                     if (this.world) {
                         this.world.reset();
-                        this.renderer.render(this.world, this.userState.avatar);
+                        this.renderWorld();
                     }
                     this.setStatus('Составьте алгоритм и нажмите «Запустить».', 'info');
                 }
-
                 renderProgramSequence() {
                     const container = document.getElementById('program-sequence');
                     const pyView = document.getElementById('python-code-view');
@@ -2408,7 +2475,6 @@
                     });
                     pyView.textContent = pyCode;
                 }
-
                 setEditorTab(tab) {
                     this.activeTab = tab;
                     sound.playClick();
@@ -2429,7 +2495,6 @@
                         blocksBtn.className = 'px-3 py-1 rounded text-xs font-bold text-slate-400 hover:text-slate-200 focus-ring';
                     }
                 }
-
                 setStatus(msg, type) {
                     const el = document.getElementById('play-status-msg');
                     if (!el) return;
@@ -2441,7 +2506,6 @@
                     else if (type === 'run') el.className = base + 'bg-cyan-950/60 text-cyan-300 border-cyan-800';
                     else el.className = base + 'bg-slate-900 text-slate-400 border-slate-800';
                 }
-
                 updateDebug() {
                     if (!DEBUG) return;
                     const panel = document.getElementById('debug-panel');
@@ -2454,7 +2518,6 @@
                     const i = this.interpreter;
                     panel.textContent = `Game ${this.currentGameId} L${this.currentLevelNum} | Hero (${w.hero.x},${w.hero.y}) dir=${w.hero.dir} | IP=${i.ip} steps=${w.stepsExecuted} | vars=${JSON.stringify(w.variables)} | collected=${w.collectedCount} | key=${w.hasKey} | failed=${w.failed}`;
                 }
-
                 runProgram() {
                     return safeAction('runProgram', () => {
                         if (this.isExecuting && !this.isPaused) return;
@@ -2479,7 +2542,7 @@
                         document.getElementById('run-code-btn').classList.add('opacity-50');
                         document.getElementById('pause-btn').classList.remove('hidden');
                         this.setStatus('Выполнение алгоритма…', 'run');
-                        this.renderer.render(this.world, this.userState.avatar);
+                        this.renderWorld();
 
                         const delay = Math.max(60, 450 / this.execSpeed);
                         const tick = () => {
@@ -2489,7 +2552,7 @@
                                 return;
                             }
                             const result = this.interpreter.step();
-                            this.renderer.render(this.world, this.userState.avatar);
+                            this.renderWorld();
                             sound.playStep();
                             // highlight
                             this.currentProgram.forEach((_, idx) => {
@@ -2506,7 +2569,6 @@
                         this.execTimer = setTimeout(tick, delay);
                     }); // end safeAction runProgram
                 }
-
                 stepOnce() {
                     if (this.isExecuting && !this.isPaused) return;
                     if (this.currentProgram.length === 0) {
@@ -2524,7 +2586,7 @@
                         document.getElementById('pause-btn').classList.remove('hidden');
                     }
                     const result = this.interpreter.step();
-                    this.renderer.render(this.world, this.userState.avatar);
+                    this.renderWorld();
                     sound.playStep();
                     this.currentProgram.forEach((_, idx) => {
                         const el = document.getElementById(`program-block-${idx}`);
@@ -2533,7 +2595,6 @@
                     this.updateDebug();
                     if (result.done) this.finishExecution(result.error);
                 }
-
                 togglePause() {
                     if (!this.isExecuting) return;
                     this.isPaused = !this.isPaused;
@@ -2541,7 +2602,6 @@
                     btn.innerHTML = this.isPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
                     this.setStatus(this.isPaused ? 'Пауза' : 'Выполнение…', this.isPaused ? 'warn' : 'run');
                 }
-
                 finishExecution(error) {
                     this.stopExecution();
                     if (error) {
@@ -2557,7 +2617,6 @@
                         this.setStatus('Программа завершилась, но цель не достигнута. Проверьте алгоритм!', 'warn');
                     }
                 }
-
                 completeLevel() {
                     return safeAction('completeLevel', () => {
                         if (this.isExecuting) {
@@ -2581,7 +2640,6 @@
                         this.onVictory();
                     });
                 }
-
                 stopExecution() {
                     this.isExecuting = false;
                     this.isPaused = false;
@@ -2605,18 +2663,16 @@
                         if (el) el.classList.remove('block-active');
                     });
                 }
-
                 resetLevel() {
                     sound.playClick();
                     this.stopExecution();
                     if (this.world) {
                         this.world.reset();
-                        this.renderer.render(this.world, this.userState.avatar);
+                        this.renderWorld();
                     }
                     this.setStatus('Составьте алгоритм и нажмите «Запустить».', 'info');
                     this.updateDebug();
                 }
-
                 calculateStars(steps, optimal) {
                     if (!optimal || optimal === Infinity) return 2;
                     const ratio = steps / optimal;
@@ -2625,7 +2681,6 @@
                     if (ratio <= th.two) return 2;
                     return 1;
                 }
-
                 onVictory() {
                     sound.playSuccess();
                     this.setStatus('УРА! Уровень успешно пройден!', 'success');
@@ -2650,7 +2705,6 @@
                         coinsEarned = 3;
                     }
                     // zero on pure repeat without improvement
-
                     this.userState.completedLevels[key] = {
                         stars: Math.max(prevStars, stars),
                         bestSteps: prevBest == null ? steps : Math.min(prevBest, steps)
@@ -2660,7 +2714,6 @@
                     this.saveState();
                     this.showVictoryModal(stars, coinsEarned, steps);
                 }
-
                 showVictoryModal(stars, coins, steps) {
                     const modal = document.getElementById('modal-victory');
                     document.getElementById('vic-coins').textContent = coins > 0 ? `+${coins}` : '0';
@@ -2678,27 +2731,22 @@
                     modal.classList.remove('hidden');
                     document.getElementById('vic-next-btn').focus();
                 }
-
                 closeVictoryModal() {
                     document.getElementById('modal-victory').classList.add('hidden');
                 }
-
                 nextLevel() {
                     this.closeVictoryModal();
                     if (this.currentLevelNum < LEVELS_PER_GAME) this.startLevel(this.currentLevelNum + 1);
                     else this.showScreen('levels');
                 }
-
                 openHintModal() {
                     sound.playClick();
                     document.getElementById('hint-content').innerHTML = '<p class="text-slate-400">Выберите уровень подсказки. Более сильные подсказки снижают максимальную награду.</p>';
                     document.getElementById('modal-hint').classList.remove('hidden');
                 }
-
                 closeHintModal() {
                     document.getElementById('modal-hint').classList.add('hidden');
                 }
-
                 showHint(level) {
                     const config = this.levelsData[this.currentGameId][this.currentLevelNum - 1];
                     const hints = config.hints || ['Подсказка недоступна.', '', ''];
@@ -2709,7 +2757,6 @@
                     }
                     document.getElementById('hint-content').textContent = text;
                 }
-
                 renderShop() {
                     const grid = document.getElementById('shop-items-grid');
                     grid.innerHTML = '';
@@ -2734,7 +2781,6 @@
                         grid.appendChild(card);
                     });
                 }
-
                 buyShopItem(itemId) {
                     const item = this.shopItems.find(i => i.id === itemId);
                     if (!item) return;
@@ -2754,7 +2800,6 @@
                     this.renderProfile();
                     this.updateHUD();
                 }
-
                 renderProfile() {
                     document.getElementById('profile-avatar-big').textContent = this.userState.avatar;
                     document.getElementById('profile-name-input').value = this.userState.username;
@@ -2783,7 +2828,6 @@
                         selector.appendChild(btn);
                     });
                 }
-
                 updateUsername(newName) {
                     const n = (newName || '').trim().slice(0, 20);
                     if (n) {
@@ -2792,7 +2836,6 @@
                         this.updateHUD();
                     }
                 }
-
                 checkAchievements() {
                     this.achievements.forEach(ach => {
                         if (this.userState.achievementsUnlocked.includes(ach.id)) return;
@@ -2804,7 +2847,6 @@
                     this.saveState();
                     this.renderAchievements();
                 }
-
                 showToast(title, desc) {
                     sound.playSuccess();
                     const toast = document.getElementById('achievement-toast');
@@ -2813,7 +2855,6 @@
                     toast.classList.remove('translate-y-32', 'opacity-0');
                     setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3500);
                 }
-
                 renderAchievements() {
                     const grid = document.getElementById('achievements-grid');
                     grid.innerHTML = '';
@@ -2831,7 +2872,6 @@
                     });
                 }
             }
-
             /* ===================== HELPERS ===================== */
             function assertElement(id) {
                 const el = document.getElementById(id);
@@ -2875,7 +2915,6 @@
                         }
                         updateAuthUI();
                     })();
-
                     app.init();
                     console.log('[CodeQuest] Boot OK — ' + MODULE_COUNT + ' modules × ' + LEVELS_PER_GAME + ' levels (20+3 bonus) ready');
                     if (new URLSearchParams(location.search).get('selftest') === '1') {
@@ -2886,7 +2925,6 @@
                     document.body.innerHTML = '<div style="padding:2rem;color:#f87171;font-family:sans-serif"><h1>Ошибка загрузки CodeQuest</h1><pre>' + escapeHtml(String(e.stack || e)) + '</pre></div>';
                 }
             }
-
             function runSelfTest() {
                 const report = [];
                 let pass = true;
@@ -2932,7 +2970,6 @@
                 console.log('CodeQuest Self-Test\\n' + report.join('\\n') + '\\n\\n' + (pass ? 'PASS' : 'FAIL'));
                 alert('Self-Test ' + (pass ? 'PASS' : 'FAIL') + '\\nSee console for details.');
             }
-
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', boot, { once: true });
             } else {
@@ -2943,7 +2980,4 @@
         })();
     </script>
 </body>
-
 </html>
-<!-- VITE_SUPABASE_URL=https://hlvlcrkdmlfgynwahqwi.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ -->
