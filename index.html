@@ -648,7 +648,6 @@
                         window.app.renderProfile();
                     } catch (_) {}
                 }
-
                 updateAuthUI();
             }
             /* ===================== SOUND ENGINE ===================== */
@@ -2048,8 +2047,11 @@
                         this.showScreen('games');
                     });
                     document.getElementById('logout-btn').addEventListener('click', () => {
-                        this.showScreen('games');
-                        if (confirm('Выйти из аккаунта ученика?')) logoutStudent();
+                        if (confirm('Выйти из аккаунта ученика?')){
+                            logoutStudent();
+                            welcome_heading.textContent = 'Привет, Юный Кодер!';
+                            this.showScreen('games');
+                        }
                     });
                     document.getElementById('login-cancel-btn').addEventListener('click', () => closeLoginModal());
                     document.getElementById('login-submit-btn').addEventListener('click', async () => {
