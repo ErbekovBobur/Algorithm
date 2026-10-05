@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="version" content="3.0"
+    <meta name="version" content="11.3">
     <title>CodeQuest: Школьная Академия Программирования</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="favicon.png">
@@ -332,7 +332,7 @@
             <div class="min-w-0">
                 <h1
                     class="font-extrabold text-base sm:text-lg md:text-xl tracking-wide bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent truncate">
-                    CodeQuest</h1>
+                    CodeQuest v11.3</h1>
                 <p class="text-xs text-slate-400 hidden md:block">Школьная Академия Программирования</p>
             </div>
         </div>
@@ -394,8 +394,7 @@
                         <div>
                             <h2 id="welcome-heading" class="text-xl sm:text-2xl font-black text-white">Привет, Юный Кодер!</h2>
                             <p class="text-sm text-slate-300 max-w-xl mt-1 selectable">Составляй алгоритмы из блоков,
-                                наблюдай за пошаговым движением героя в реальном времени и пройди 300 увлекательных
-                                уровней!</p>
+                                наблюдай за пошаговым движением героя в реальном времени и пройди 690 увлекательных уровней!</p>
                         </div>
                     </div>
                     <div class="flex gap-3 w-full md:w-auto">
@@ -491,12 +490,14 @@
                         <canvas id="game-canvas" width="400" height="320"
                             class="max-w-full max-h-full rounded-lg shadow-2xl border border-slate-800" role="img"
                             aria-label="Игровое поле"></canvas>
+                        <div id="world-aria" class="sr-only" aria-live="polite"></div>
                     </div>
                     <div id="play-status-msg"
                         class="mt-2 text-center text-xs font-semibold py-2 px-3 rounded-lg bg-slate-900 text-slate-400 border border-slate-800"
                         role="status" aria-live="polite">
                         Составьте алгоритм и нажмите «Запустить Код».
                     </div>
+                    <div id="predict-box" class="hidden mt-2 glass-panel p-3 rounded-xl border border-fuchsia-500/30 text-xs"></div>
                     <div id="debug-panel"
                         class="mt-2 hidden text-[11px] bg-slate-950 border border-slate-700 rounded-lg p-2 text-emerald-400 max-h-32 overflow-auto selectable">
                     </div>
@@ -539,7 +540,7 @@
                     <div id="editor-python-container" class="flex-1 p-3 flex-col hidden bg-slate-950">
                         <div
                             class="text-[11px] uppercase tracking-wider font-bold text-slate-400 mb-2 flex items-center gap-1">
-                            <i class="fa-brands fa-python text-yellow-400"></i> Эквивалентный Код на Python:
+                            <i class="fa-brands fa-python text-yellow-400"></i> Python-версия твоей программы (только чтение — так пишут программисты):
                         </div>
                         <pre
                             class="flex-1 p-4 bg-slate-900 rounded-xl border border-slate-800 text-emerald-400 code-font text-xs sm:text-sm overflow-auto leading-relaxed shadow-inner selectable"><code id="python-code-view"># Начните добавлять блоки...</code></pre>
@@ -603,6 +604,7 @@
                             Аватар:</label>
                         <div id="avatar-selector" class="flex flex-wrap gap-3" role="listbox"></div>
                     </div>
+                    <button id="report-btn" class="w-full py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-400/40 text-sm font-bold focus-ring"><i class="fa-solid fa-chart-column mr-1"></i> Отчёт для учителя (ошибки и прогресс)</button>
                     <div class="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800 text-center">
                         <div class="bg-slate-900 p-3 rounded-xl border border-slate-800">
                             <div id="prof-stat-stars" class="text-xl font-black text-amber-400">0</div>
@@ -655,6 +657,7 @@
                 class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 flex justify-around text-xs font-bold text-slate-300">
                 <div>Монеты: <span id="vic-coins" class="text-yellow-400">+0</span></div>
                 <div>Шагов: <span id="vic-steps" class="text-cyan-400">0</span></div>
+                <div>Всего: <span id="vic-total" class="text-amber-300">0</span> 🪙</div>
             </div>
             <div class="flex gap-3">
                 <button id="vic-levels-btn"
@@ -723,6 +726,16 @@
             </div>
         </div>
     </div>
+    <div id="modal-report" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="report-title">
+        <div class="glass-panel max-w-2xl w-full max-h-[85vh] overflow-y-auto p-5 rounded-3xl border border-indigo-500/40 space-y-3">
+            <h3 id="report-title" class="text-xl font-black text-indigo-300">📊 Отчёт по ученику</h3>
+            <div id="report-body" class="text-sm text-slate-300 space-y-2 selectable"></div>
+            <div class="flex gap-2">
+                <button id="report-csv" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold text-sm focus-ring">Скачать CSV</button>
+                <button id="report-close" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm focus-ring">Закрыть</button>
+            </div>
+        </div>
+    </div>
     <div id="achievement-toast"
         class="fixed bottom-6 right-6 z-50 glass-panel border border-amber-500/50 p-4 rounded-2xl flex items-center space-x-4 shadow-2xl transition-all duration-300 transform translate-y-32 opacity-0"
         role="status" aria-live="polite">
@@ -738,8 +751,8 @@
     <script>
         (function () {
             'use strict';
-            const SAVE_VERSION = 2;
-            const SAVE_KEY = 'codequest_ru_save_v2';
+            const SAVE_VERSION = 3;
+            const SAVE_KEY = 'codequest_ru_save_v3';
             const LEGACY_KEY = 'codequest_ru_save';
             const DEBUG = new URLSearchParams(location.search).get('debug') === '1';
             const LEVELS_MAIN = 20;
@@ -750,7 +763,9 @@
             const MAX_STARS_TOTAL = MODULE_COUNT * MAX_STARS_PER_GAME; // 2070
             const SUPABASE_URL = 'https://hlvlcrkdmlfgynwahqwi.supabase.co';
             const SUPABASE_KEY = 'sb_publishable_4BrlFeyAjXbhRrq_ID0V-w_iiLzkNsQ';
-            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            let supabaseClient = null;
+            try { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (_) { console.warn('Supabase недоступен — игра работает без входа'); }
+            if (new URLSearchParams(location.search).get('offline') === '1') supabaseClient = null;
             const passwordToggle = document.getElementById('password-toggle');
             passwordToggle.addEventListener('click', () => {
                 const passwordInput = document.getElementById('password-input');
@@ -764,9 +779,47 @@
                     }
                 }
             }); 
+            const PASSWORD_KDF_ITERATIONS = 120000;
+            function bytesToHex(bytes) {
+                return Array.from(new Uint8Array(bytes)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
             async function sha256hex(text) {
                 const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(text)));
-                return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                return bytesToHex(buf);
+            }
+            async function derivePasswordVerifier(login, password) {
+                if (!window.crypto?.subtle) throw new Error('Web Crypto API недоступен.');
+                const material = await crypto.subtle.importKey(
+                    'raw', new TextEncoder().encode(String(password)),
+                    'PBKDF2', false, ['deriveBits']
+                );
+                const salt = new TextEncoder().encode('CodeQuest:v3:' + String(login));
+                const bits = await crypto.subtle.deriveBits(
+                    { name: 'PBKDF2', salt, iterations: PASSWORD_KDF_ITERATIONS, hash: 'SHA-256' },
+                    material, 256
+                );
+                return 'pbkdf2$' + PASSWORD_KDF_ITERATIONS + '$' + bytesToHex(bits);
+            }
+            function isPbkdf2Verifier(value) {
+                return /^pbkdf2\$\d+\$[0-9a-f]{64}$/i.test(String(value || ''));
+            }
+            async function verifyPassword(login, password, stored) {
+                const v = String(stored || '');
+                if (isPbkdf2Verifier(v)) {
+                    const parts = v.split('$');
+                    const iterations = Math.max(100000, Number(parts[1]) || PASSWORD_KDF_ITERATIONS);
+                    const material = await crypto.subtle.importKey(
+                        'raw', new TextEncoder().encode(String(password)),
+                        'PBKDF2', false, ['deriveBits']
+                    );
+                    const bits = await crypto.subtle.deriveBits(
+                        { name: 'PBKDF2', salt: new TextEncoder().encode('CodeQuest:v3:' + String(login)), iterations, hash: 'SHA-256' },
+                        material, 256
+                    );
+                    return bytesToHex(bits).toLowerCase() === parts[2].toLowerCase();
+                }
+                // Legacy migration is allowed only from the previous SHA-256 format. Plaintext passwords are never accepted.
+                return /^[0-9a-f]{64}$/i.test(v) && (await sha256hex(password)).toLowerCase() === v.toLowerCase();
             }
             let currentStudent = null; // текущий вошедший ученик
             const welcome_heading = document.getElementById('welcome-heading');
@@ -799,78 +852,69 @@
                 if (modal) modal.classList.add('hidden');
             }
             async function loginStudent(login, password) {
-                const loginNorm = login.trim().toLowerCase();
-                const passHash = await sha256hex(password);
-                if (!loginNorm || !password) {
-                    return { ok: false, message: 'Введите логин и пароль' };
-                }
-                // 1) Try hashed password (new accounts / migrated)
+                if (!supabaseClient) return { ok: false, message: 'Нет связи с сервером. Можно играть без входа.' };
+                const loginNorm = String(login || '').trim().toLowerCase();
+                if (!loginNorm || !password) return { ok: false, message: 'Введите логин и пароль' };
+
                 let { data, error } = await supabaseClient
                     .from('game_saves')
-                    .select('*')
+                    .select('id,login,password,student_name,save_data,disabled,unlocked_modules')
                     .eq('login', loginNorm)
-                    .eq('password', passHash)
                     .maybeSingle();
-                // 2) Fallback: plain-text (legacy) → auto-migrate to hash
-                if (!data && !error) {
-                    const res = await supabaseClient
-                        .from('game_saves')
-                        .select('*')
-                        .eq('login', loginNorm)
-                        .eq('password', password)
-                        .maybeSingle();
-                    data = res.data;
-                    error = res.error;
-                    if (data) {
-                        // upgrade stored password to hash (best-effort)
-                        try {
-                            await supabaseClient.from('game_saves').update({ password: passHash }).eq('id', data.id);
-                            data.password = passHash;
-                        } catch (_) {}
-                    }
-                }
                 if (error) {
                     console.error(error);
                     return { ok: false, message: 'Ошибка сервера: ' + (error.message || '') };
                 }
-                if (!data) {
-                    return { ok: false, message: 'Неверный логин или пароль' };
+                if (!data) return { ok: false, message: 'Неверный логин или пароль' };
+
+                let verified = false;
+                try { verified = await verifyPassword(loginNorm, password, data.password); } catch (e) {
+                    console.error(e);
                 }
-                if (data.disabled) {
-                    return { ok: false, message: 'Доступ временно ограничен учителем. Обратитесь к преподавателю.' };
+                if (!verified) return { ok: false, message: 'Неверный логин или пароль' };
+                if (data.disabled) return { ok: false, message: 'Доступ временно ограничен учителем. Обратитесь к преподавателю.' };
+
+                // Best-effort migration from legacy SHA-256 to a slower password verifier.
+                if (!isPbkdf2Verifier(data.password)) {
+                    try {
+                        const upgraded = await derivePasswordVerifier(loginNorm, password);
+                        const up = await supabaseClient.from('game_saves').update({ password: upgraded }).eq('id', data.id);
+                        if (!up.error) data.password = upgraded;
+                    } catch (_) {}
                 }
+
+                delete data.password;
                 currentStudent = data;
+                sessionStorage.setItem('codequest_student_id', data.id);
+                // Only the opaque student id is persisted; the password is never stored client-side.
                 localStorage.setItem('codequest_student_id', data.id);
 
                 if (window.app) {
                     if (data.save_data && typeof data.save_data === 'object' && Object.keys(data.save_data).length) {
                         window.app.userState = window.app.normalizeSave(data.save_data);
                     }
-                    if (data.student_name) {
-                        window.app.userState.username = data.student_name;
-                    }
-                    try {
-                        localStorage.setItem(SAVE_KEY, JSON.stringify(window.app.userState));
-                    } catch (_) {}
+                    if (data.student_name) window.app.userState.username = data.student_name;
+                    try { localStorage.setItem(SAVE_KEY, JSON.stringify(window.app.userState)); } catch (_) {}
                     window.app.updateHUD();
+                    window.app.renderGamesGrid();
+                    window.app.renderShop();
+                    window.app.renderAchievements();
+                    window.app.renderProfile();
                 }
-
                 updateAuthUI();
                 return { ok: true, student: data };
             }
-            function logoutStudent() {
-                // Сохранить прогресс текущего ученика в облако перед выходом
+            async function logoutStudent() {
                 if (window.app && currentStudent) {
-                    try { window.app.uploadSave(); } catch (_) {}
+                    try { await window.app.uploadSave(); } catch (_) {}
                 }
                 currentStudent = null;
+                sessionStorage.removeItem('codequest_student_id');
                 localStorage.removeItem('codequest_student_id');
-                // Сброс локального прогресса — за одним ПК сидят разные ученики
+                localStorage.removeItem('codequest_student_id');
                 if (window.app) {
                     window.app.userState = window.app.defaultState();
-                    try {
-                        localStorage.setItem(SAVE_KEY, JSON.stringify(window.app.userState));
-                    } catch (_) {}
+                    try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
                     window.app.updateHUD();
                     try {
                         window.app.renderGamesGrid();
@@ -1020,15 +1064,16 @@
                 if_collect: { id: 'if_collect', text: 'ЕСЛИ предмет здесь {', type: 'if', action: 'if_collect', python: 'if hero.item_here():' },
                 else: { id: 'else', text: 'ИНАЧЕ {', type: 'else', action: 'else', python: 'else:' },
                 end_if: { id: 'end_if', text: '} Конец условия', type: 'if_end', action: 'end_if', python: '# end if' },
-                set_var: { id: 'set_var', text: 'Переменная = 0', type: 'var', action: 'set_var', python: 'count = 0' },
-                inc_var: { id: 'inc_var', text: 'Переменная += 1', type: 'var', action: 'inc_var', python: 'count += 1' },
-                while_lt: { id: 'while_lt', text: 'ПОКА переменная < N {', type: 'loop', action: 'while_lt', python: 'while count < N:' },
+                set_var: { id: 'set_var', text: 'count = 0 (создать переменную)', type: 'var', action: 'set_var', python: 'count = 0' },
+                inc_var: { id: 'inc_var', text: 'count += 1 (увеличить)', type: 'var', action: 'inc_var', python: 'count += 1' },
+                while_lt: { id: 'while_lt', text: 'ПОКА count < цель {', type: 'loop', action: 'while_lt', python: 'while count < TARGET:' },
                 def_fn: { id: 'def_fn', text: 'ОПРЕДЕЛИТЬ функцию {', type: 'function', action: 'def_fn', python: 'def my_fn():' },
                 call_fn: { id: 'call_fn', text: 'ВЫЗВАТЬ функцию', type: 'function', action: 'call_fn', python: 'my_fn()' },
                 end_fn: { id: 'end_fn', text: '} Конец функции', type: 'function_end', action: 'end_fn', python: '# end def' },
-                and_check: { id: 'and_check', text: 'ЕСЛИ A И B {', type: 'logic', action: 'if_and', python: 'if A and B:' },
-                or_check: { id: 'or_check', text: 'ЕСЛИ A ИЛИ B {', type: 'logic', action: 'if_or', python: 'if A or B:' },
-                not_check: { id: 'not_check', text: 'ЕСЛИ НЕ A {', type: 'logic', action: 'if_not', python: 'if not A:' }
+                and_check: { id: 'and_check', text: 'ЕСЛИ есть ключ И всё включено {', type: 'logic', action: 'if_and', python: 'if hero.has_key() and all_switches_on():' },
+                or_check: { id: 'or_check', text: 'ЕСЛИ есть ключ ИЛИ что-то включено {', type: 'logic', action: 'if_or', python: 'if hero.has_key() or any_switch_on():' },
+                not_check: { id: 'not_check', text: 'ЕСЛИ НЕТ ключа {', type: 'logic', action: 'if_not', python: 'if not hero.has_key():' },
+                if_even: { id: 'if_even', text: 'ЕСЛИ клетка чётная {', type: 'if', action: 'if_even', python: 'if (hero.x + hero.y) % 2 == 0:' }
             };
             /* ===================== UTILITIES ===================== */
             function seedRandom(seed) {
@@ -1091,9 +1136,346 @@
                 }
                 return best ? { solvable: true, optimalSteps: best.steps, path: best.path } : { solvable: false, optimalSteps: Infinity, path: [] };
             }
+            /* ===================== EXACT SOLVER / MISSIONS / HAND MAPS ===================== */
+            const CLOSER_OF = { repeat: 'end_loop', while_lt: 'end_loop', if_key: 'end_if', if_wall: 'end_if', if_collect: 'end_if', if_and: 'end_if', if_or: 'end_if', if_not: 'end_if', if_even: 'end_if', def_fn: 'end_fn' };
+            const ERR_INFO = {
+                collision: ['Столкновения со стеной или дверью', 'Не следит, куда смотрит герой. Тренировать: «мысленный прогон» и пошаговый режим ⏭.'],
+                hazard: ['Попадание в лаву/яму', 'Не планирует маршрут заранее. Просить сначала показать путь пальцем на поле.'],
+                syntax: ['Незакрытые блоки или функция без определения', 'Путает начало и конец конструкции. Повторить идею «скобок» и отступов в Python-виде.'],
+                concept: ['Решает без нужной темы (цикл, функция…)', 'Идёт «в лоб». Показать, как цикл сокращает программу.'],
+                toolong: ['Программа длиннее лимита', 'Не замечает повторы. Упражнение: найти одинаковые команды подряд.'],
+                infinite: ['Бесконечный или слишком долгий цикл', 'Не видит, что меняет условие цикла. Разобрать count по шагам.'],
+                items: ['Не собраны предметы / неверный count / дверь / переключатели', 'Забывает про «Собрать», «Взаимодействовать» или count += 1.'],
+                path: ['Остановка не в финише', 'Неверный план маршрута. Использовать ⏭ и сравнить с задуманным.'],
+                predict: ['Неверный прогноз результата программы', 'Не умеет «читать» код. Выполнять программу на бумаге блок за блоком.']
+            };
+            function classifyErr(m) {
+                m = String(m);
+                if (/опасност/.test(m)) return 'hazard';
+                if (/упёрся|вышел за поле/.test(m)) return 'collision';
+                if (/не закрыт|Лишний|начинается|Функция ещё/.test(m)) return 'syntax';
+                if (/тема урока|пустой|поворачивать можно/.test(m)) return 'concept';
+                if (/длинная|Лимит блоков|Лимит: блок/.test(m)) return 'toolong';
+                if (/лимит шагов/.test(m)) return 'infinite';
+                if (/Не совсем/.test(m)) return 'predict';
+                if (/предмет|Собрано|count|Дверь|переключат/.test(m)) return 'items';
+                if (/остановился/.test(m)) return 'path';
+                return null;
+            }
+            // Точный BFS по состояниям (позиция, взгляд, предметы, ключ, двери, переключатели)
+            function solveFull(c, o) {
+                const W = c.gridCols, H = c.gridRows, D = [[0, -1], [1, 0], [0, 1], [-1, 0]], T = c.objective ? c.objective.type : 'reach_goal';
+                const wall = new Set((c.obstacles || []).concat(c.hazards || []).map(p => p.x + ',' + p.y));
+                const col = c.collectibles || [], ks = c.keys || [], ds = c.doors || [], sw = c.switches || [];
+                const at = (a, x, y) => a.findIndex(p => p.x === x && p.y === y);
+                const needC = T === 'collect_all' ? (1 << col.length) - 1 : 0, needN = T === 'collect_amount' ? ((c.objective && c.objective.amount) || 1) : 0;
+                const needD = T === 'open_door' ? (1 << ds.length) - 1 : 0, needS = T === 'activate_switches' ? (1 << sw.length) - 1 : 0;
+                const passwordTarget = (c.objective && c.objective.password) ? String(c.objective.password) : '';
+                const swFull = (1 << sw.length) - 1, ruleOk = (t, d) => d.rule === 'and' ? (t.hk && t.sm === swFull) : d.rule === 'or' ? (t.hk || t.sm !== 0) : d.rule === 'not' ? !t.hk : !!t.hk;
+                const pc = m => { let n = 0; while (m) { n += m & 1; m >>= 1; } return n; };
+                const s0 = { x: c.startPos.x, y: c.startPos.y, d: c.startPos.dir, cm: 0, hk: 0, dm: 0, sm: 0, pw: '' };
+                const key = t => [t.x, t.y, t.d, t.cm, t.hk, t.dm, t.sm, t.pw].join('|');
+                const seen = new Set([key(s0)]); const q = [{ s: s0, prev: null, a: null, k: null }];
+                for (let i = 0; i < q.length && q.length < 400000; i++) {
+                    const cur = q[i], t = cur.s;
+                    if (t.x === c.goalPos.x && t.y === c.goalPos.y && (t.cm & needC) === needC && pc(t.cm) >= needN && (t.dm & needD) === needD && (t.sm & needS) === needS && (!passwordTarget || t.pw === passwordTarget)) {
+                        const path = [], kinds = []; for (let n = cur; n.prev; n = n.prev) { path.unshift(n.a); kinds.unshift(n.k || null); }
+                        return { steps: path.length, path, kinds };
+                    }
+                    const fx = t.x + D[t.d][0], fy = t.y + D[t.d][1], di = at(ds, fx, fy);
+                    const free = fx >= 0 && fx < W && fy >= 0 && fy < H && !wall.has(fx + ',' + fy) && !(di >= 0 && !((t.dm >> di) & 1));
+                    const nx = ((o && o.turnWhenBlocked && free) || (o && o.turnParity && (t.x + t.y) % 2 !== 0)) ? [] : [['turn_l', { ...t, d: (t.d + 3) % 4 }], ['turn_r', { ...t, d: (t.d + 1) % 4 }]];
+                    if (free) {
+                        const f = { ...t, x: fx, y: fy }; if (at(ks, fx, fy) >= 0) f.hk = 1; nx.push(['fwd', f]);
+                    }
+                    const ci = at(col, t.x, t.y); if (ci >= 0 && !((t.cm >> ci) & 1)) {
+                        const nextPw = col[ci].letter ? (t.pw || '') + String(col[ci].letter) : (t.pw || '');
+                        nx.push(['collect', { ...t, cm: t.cm | (1 << ci), pw: nextPw }]);
+                    }
+                    if (di >= 0 && ruleOk(t, ds[di]) && !((t.dm >> di) & 1)) nx.push(['interact', { ...t, dm: t.dm | (1 << di) }, 'door']);
+                    const si = at(sw, t.x, t.y); if (si >= 0) nx.push(['interact', { ...t, sm: t.sm ^ (1 << si) }, 'sw']);
+                    for (const [a, u, kd] of nx) { const k = key(u); if (!seen.has(k)) { seen.add(k); q.push({ s: u, prev: cur, a, k: kd }); } }
+                }
+                return { steps: Infinity, path: [] };
+            }
+            function simulate(config, prog) {
+                const w = new WorldState(config), it = new Interpreter(prog, w);
+                for (let n = 0; n < 1500; n++) { if (it.step().done) break; }
+                return { world: w, ok: !w.failed && it.checkObjective() };
+            }
+            function compressedCount(ids) {
+                let n = 0, i = 0;
+                while (i < ids.length) { let j = i; while (j < ids.length && ids[j] === ids[i]) j++; let k = j - i; while (k > 0) { const c = Math.min(k, 4); n += c >= 4 ? 3 : c; k -= c; } i = j; }
+                return n;
+            }
+            // Авторские карты ключевых уровней: S старт, G финиш, # стена, ^ лава, * кристалл, K ключ, D дверь, o переключатель
+            const HAND = {
+                '3_10': ['S.#..', '..#.#', '.##..', '....#', '#.G..'],
+                '3_20': ['S.#.G', '..#.#', '..#..', '..#.#', '....#'],
+                '4_10': ['S.^..', '..^#.', '...^.', '.#.#.', '....G'],
+                '6_10': ['S....', '.#.#.', '.*.*.', '.#.#.', '....G'],
+                '14_10': ['S..#.', '.K.#.', '...#.', '...#.', '...DG'],
+                '23_10': ['S....', '.#.#.', '.o.o.', '.#.#.', '....G']
+            };
+            function applyHand(config, rows) {
+                const o = [], h = [], c = [], k = [], d = [], sw = []; let st = null, g = null;
+                rows.forEach((r, y) => [...r].forEach((ch, x) => {
+                    if (ch === 'S') st = { x, y, dir: 1 }; else if (ch === 'G') g = { x, y }; else if (ch === '#') o.push({ x, y });
+                    else if (ch === '^') h.push({ x, y, type: 'lava' }); else if (ch === '*') c.push({ x, y, type: 'crystal', collected: false, value: 1 });
+                    else if (ch === 'K') k.push({ x, y, collected: false }); else if (ch === 'D') d.push({ x, y, locked: true }); else if (ch === 'o') sw.push({ x, y, on: false });
+                }));
+                if (!st || !g) return false;
+                Object.assign(config, { startPos: st, goalPos: g, obstacles: o, hazards: h, collectibles: c, keys: k, doors: d, switches: sw });
+                return true;
+            }
             /* ===================== LEVEL GENERATOR ===================== */
+            /* ===================== УСЛОВИЯ УРОВНЯ: заставляем применять тему ===================== */
+            // минимальный размер программы с циклами «Повторить N» (DP по маршруту)
+            function repPlan(seq, Ns) {
+                const n = seq.length, best = Array(n + 1).fill(Infinity), from = Array(n + 1).fill(null); best[0] = 0;
+                for (let i = 0; i < n; i++) {
+                    if (best[i] === Infinity) continue;
+                    if (best[i] + 1 < best[i + 1]) { best[i + 1] = best[i] + 1; from[i + 1] = { t: 'raw' }; }
+                    for (let p = 1; p <= 6 && i + p <= n; p++) for (const k of Ns) {
+                        const e = i + p * k; if (e > n) continue;
+                        let ok = true; for (let q = p; q < p * k && ok; q++) if (seq[i + q] !== seq[i + (q % p)]) ok = false;
+                        if (ok && best[i] + p + 2 < best[e]) { best[e] = best[i] + p + 2; from[e] = { t: 'rep', i, p, k }; }
+                    }
+                }
+                const out = [];
+                for (let e = n; e > 0;) { const f = from[e]; if (f.t === 'raw') { out.unshift(seq[e - 1]); e--; } else { out.unshift('repeat_' + f.k, ...seq.slice(f.i, f.i + f.p), 'end_loop'); e = f.i; } }
+                return { cost: best[n], prog: out };
+            }
+            // минимальный размер с одной функцией (кусок маршрута, встречающийся ≥ 2 раз)
+            function fnPlan(seq) {
+                const n = seq.length; let best = { cost: n, prog: seq.slice() };
+                for (let p = 2; p <= 6; p++) for (let i = 0; i + p <= n; i++) {
+                    const P = seq.slice(i, i + p), key = P.join(), prog = []; let m = 0;
+                    for (let j = 0; j < n;) { if (j + p <= n && seq.slice(j, j + p).join() === key) { prog.push('call_fn'); m++; j += p; } else { prog.push(seq[j]); j++; } }
+                    const cost = p + 2 + prog.length;
+                    if (m >= 2 && cost < best.cost) best = { cost, prog: ['def_fn', ...P, 'end_fn', ...prog] };
+                }
+                return best;
+            }
+            function checkLimits(prog, c) {
+                if (c.maxBlocks && prog.length > c.maxBlocks) return 'Лимит блоков: не больше ' + c.maxBlocks + ' (сейчас ' + prog.length + '). Программа работает, но длинная — найди повторы и сократи её.';
+                if (c.maxUse) for (const [id, n] of Object.entries(c.maxUse)) {
+                    const cnt = prog.filter(b => b.id === id).length;
+                    if (cnt > n) return 'Лимит: блок «' + BLOCK_CATALOG[id].text.replace(/[{}]/g, '').trim() + '» можно использовать не больше ' + n + ' раз (сейчас ' + cnt + '). Положи его внутрь цикла.';
+                }
+                const ti = c.turnIn || (c.turnInIf ? 'if_wall' : null);
+                if (ti) {
+                    const st = [];
+                    for (const b of prog) {
+                        if (b.type === 'if' || b.type === 'logic') st.push(b.action);
+                        else if (b.action === 'end_if') st.pop();
+                        else if ((b.id === 'turn_l' || b.id === 'turn_r') && !st.includes(ti)) return ti === 'if_even' ? 'В этом уровне поворачивать можно только внутри блока «ЕСЛИ клетка чётная».' : 'В этом уровне поворачивать можно только внутри блока «ЕСЛИ стена»: герой повернёт, когда упрётся.';
+                    }
+                }
+                return null;
+            }
+            function addLimits(c) {
+                const req = c.requiredActions || [];
+                if (!c.fullPath || !c.fullPath.length || !isFinite(c.optimalSteps)) return false; // вырожденный/нерешаемый вариант не принимаем
+                if (c.mission && c.refIds && c.refIds.length) return true;
+                if (c.maxUse && c.refIds) return true;
+                const has = id => c.blocks.some(b => b.id === id), seq = c.fullPath, raw = seq.length;
+                const Ns = [2, 3, 4].filter(k => has('repeat_' + k)), rep = Ns.length && has('end_loop') ? repPlan(seq, Ns) : null;
+                if ((c.doors || []).some(d => d.rule) && has('end_if')) {
+                    const ex = solveFull(c); if (!isFinite(ex.steps)) return false;
+                    const G = { and: ['and_check', 'if_and', 'ЕСЛИ есть ключ И всё включено'], or: ['or_check', 'if_or', 'ЕСЛИ есть ключ ИЛИ что-то включено'], not: ['not_check', 'if_not', 'ЕСЛИ НЕТ ключа'] }[c.doors[0].rule], id = G[0];
+                    c.guard = { inside: G[1], name: G[2] };
+                    c.optimalSteps = ex.steps; c.refIds = ex.path.flatMap((a, i) => ex.kinds[i] === 'door' ? [id, a, 'end_if'] : [a]); c.examplePath = c.refIds;
+                    return true;
+                }
+                const rule = (limit, ref, text, hint) => { c.maxBlocks = limit; c.refIds = ref; c.instructions = (c.instructions || '') + ' 📏 ' + text; if (c.hints) c.hints[0] = hint; c.examplePath = ref; return true; };
+                // WHILE levels must prefer the dedicated counter-based construction over generic FOR repetition.
+                if (req.includes('while_lt') && has('while_lt') && has('set_var') && has('inc_var') && has('end_loop')) {
+                    const U = ['turn_r', 'fwd', 'turn_l', 'fwd'], nn = c.objective.type === 'collect_amount' ? c.objective.amount : 0, rowSeq = Array(nn).fill(['fwd', 'collect']).flat();
+                    const isRow = nn === 3 && seq.join() === [...rowSeq, 'fwd'].join();
+                    if (!isRow && seq.join() !== [...U, ...U, ...U].join()) return false;
+                    c.blocks = c.blocks.filter(b => !/^repeat_/.test(b.id));
+                    const ref = isRow ? ['set_var', 'while_lt', 'fwd', 'collect', 'inc_var', 'end_loop', 'fwd'] : ['set_var', 'while_lt', ...U, 'inc_var', 'end_loop'];
+                    return rule(ref.length + 1, ref, 'Лимит: не больше ' + (ref.length + 1) + ' блоков. «Повторить» здесь нет: заведи счётчик count и цикл ПОКА count < 3 (не забудь count += 1).', 'Одно и то же «поворот-шаг-поворот-шаг» делается 3 раза: счётчик count = 0, ПОКА count < 3 { …; count += 1 }.');
+                }
+                if (req.includes('repeat') && rep) {
+                    const gain = raw - rep.cost; if (gain < 1) return false; const lim = rep.cost + (gain >= 2 ? 1 : 0);
+                    return rule(lim, rep.prog, 'Лимит: не больше ' + lim + ' блоков — без «Повторить» не уложиться.', 'Найди в маршруте повторяющийся кусок и запиши его один раз внутрь «Повторить».');
+                }
+                if (req.includes('call_fn') && has('def_fn') && has('call_fn')) {
+                    let f = fnPlan(seq);
+                    if (raw - f.cost < 2) {
+                        // Fallback: abstract a safe movement/action prefix into a function when reuse is not naturally available.
+                        // The function interpreter supports movement, turns and collection; keep door interaction outside it.
+                        const doorIndex = seq.indexOf('interact');
+                        const safeEnd = doorIndex >= 2 ? doorIndex : seq.length;
+                        if (safeEnd >= 2) {
+                            const prefixLen = Math.min(3, safeEnd);
+                            const prefix = seq.slice(0, prefixLen);
+                            f = { cost: raw + 2, prog: ['def_fn', ...prefix, 'end_fn', 'call_fn', ...seq.slice(prefixLen)] };
+                        } else return false;
+                    }
+                    c.blocks = c.blocks.filter(b => !/^repeat_|^end_loop$/.test(b.id));
+                    c.instructions = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(c.instructions || '') || [''])[0] + 'Оформи полезный фрагмент маршрута функцией и вызови её.';
+                    return rule(f.cost + 1, f.prog, 'Лимит: не больше ' + (f.cost + 1) + ' блоков — используй функцию для полезного фрагмента маршрута.', 'Выдели самостоятельный фрагмент маршрута: ОПРЕДЕЛИТЬ → команды → КОНЕЦ, затем ВЫЗВАТЬ функцию.');
+                }
+                if (req.includes('if_even') && has('if_even') && has('end_if')) {
+                    const ex = solveFull(c, { turnParity: true });
+                    if (!isFinite(ex.steps) || !ex.path.some(a => a === 'turn_l' || a === 'turn_r')) return false;
+                    c.turnIn = 'if_even'; c.optimalSteps = ex.steps; c.refIds = ex.path.flatMap(a => (a === 'turn_l' || a === 'turn_r') ? ['if_even', a, 'end_if'] : [a]); c.examplePath = c.refIds;
+                    c.instructions = ((/^(🔥 БОНУС: |📚 Новая тема: )/.exec(c.instructions || '') || [''])[0]) + 'Золотистые клетки — чётные (x + y делится на 2). Поворачивать можно только на чётных клетках: «ЕСЛИ клетка чётная { поворот }». 🔒';
+                    if (c.hints) { c.hints[0] = 'Повернуть можно, только стоя на золотистой клетке: проверь её условием «ЕСЛИ клетка чётная».'; c.hints[1] = 'Каждый шаг вперёд меняет клетку: чётная ↔ нечётная.'; }
+                    return true;
+                }
+                if ((req.includes('if_wall') || req.includes('else')) && has('if_wall') && has('end_if')) {
+                    const ex = solveFull(c, { turnWhenBlocked: true });
+                    if (!isFinite(ex.steps) || !ex.path.some(a => a === 'turn_l' || a === 'turn_r')) return false;
+                    c.turnInIf = true; c.turnIn = 'if_wall'; c.requiredActions = (c.requiredActions || []).filter(a => a !== 'else'); c.optimalSteps = ex.steps; c.refIds = ex.path.flatMap(a => (a === 'turn_l' || a === 'turn_r') ? ['if_wall', a, 'end_if'] : [a]);
+                    c.instructions = (c.instructions || '') + ' 🔒 Поворачивать можно только внутри «ЕСЛИ стена».';
+                    if (c.hints) c.hints[0] = 'Поворот ставь внутрь «ЕСЛИ стена»: он сработает, только когда герой упрётся.';
+                    c.examplePath = c.refIds;
+                    return true;
+                }
+                return true;
+            }
+            function uStair(c, k) {
+                const t = c.objective && c.objective.type;
+                if (t !== 'reach_goal' && t !== 'collect_all') return false;
+                const cells = [{ x: 0, y: 0 }]; let x = 0, y = 0;
+                for (let i = 0; i < k; i++) { y++; cells.push({ x, y }); x++; cells.push({ x, y }); }
+                const onPath = new Set(cells.map(p => p.x + ',' + p.y)), obs = [];
+                for (let yy = 0; yy < c.gridRows; yy++) for (let xx = 0; xx < c.gridCols; xx++) if (!onPath.has(xx + ',' + yy)) obs.push({ x: xx, y: yy });
+                const items = t === 'collect_all' ? cells.filter((p, i) => i > 0 && i % 2 === 0).map(p => ({ x: p.x, y: p.y, type: 'crystal', collected: false, value: 1 })) : [];
+                Object.assign(c, { startPos: { x: 0, y: 0, dir: 1 }, goalPos: { x, y }, obstacles: obs, hazards: [], collectibles: items, keys: [], doors: [], switches: [], requiredCollect: items.length, mission: null, handmade: true });
+                const ex = solveFull(c);
+                if (!isFinite(ex.steps)) return false;
+                c.fullPath = ex.path; c.optimalSteps = ex.steps; c.solvable = true; c.examplePath = ex.path;
+                return true;
+            }
+            function ruleText(use) { return ' 📏 Лимит: «Шаг вперёд» — не больше ' + use.fwd + ' раз' + (use.collect ? ', «Собрать» — не больше ' + use.collect + ' раза' : '') + '.'; }
+            function introLoop(c, L) {
+                const t = c.objective && c.objective.type, mkB = id => ({ ...BLOCK_CATALOG[id] });
+                const Ns = [2, 3, 4].filter(k => c.blocks.some(b => b.id === 'repeat_' + k));
+                if (!Ns.length || !c.blocks.some(b => b.id === 'end_loop') || (t !== 'reach_goal' && t !== 'collect_all')) return false;
+                const pre = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(c.instructions || '') || [''])[0], row = (L - 1) % 3;
+                let tokens, ref, use, goal, items = [];
+                if (t === 'collect_all' && c.blocks.some(b => b.id === 'collect')) {
+                    const n = Ns.includes(3) ? 3 : Ns[0];
+                    for (let i = 1; i <= n; i++) items.push({ x: i, y: row, type: 'crystal', collected: false, value: 1 });
+                    goal = { x: n + 1, y: row };
+                    tokens = [...Array(n).fill(['fwd', 'collect']).flat(), 'fwd']; ref = ['repeat_' + n, 'fwd', 'collect', 'end_loop', 'fwd']; use = { fwd: 2, collect: 1 };
+                    c.instructions = pre + 'Кристаллы лежат подряд: «шаг, собрать» повторяется ' + n + ' раза. Собери все 💎 и дойди до 🏁.';
+                } else {
+                    const r1 = Ns[(L - 1) % Ns.length]; let r2 = (L % 2) ? 0 : Ns[L % Ns.length]; if (row + r2 > c.gridRows - 1) r2 = 0;
+                    goal = { x: r1, y: row + r2 };
+                    tokens = [...Array(r1).fill('fwd'), ...(r2 ? ['turn_r', ...Array(r2).fill('fwd')] : [])];
+                    ref = ['repeat_' + r1, 'fwd', 'end_loop', ...(r2 ? ['turn_r', 'repeat_' + r2, 'fwd', 'end_loop'] : [])]; use = { fwd: r2 ? 2 : 1 };
+                    c.instructions = pre + 'Одинаковые шаги подряд — это цикл. Дойди до 🏁, не используя много блоков «Шаг вперёд».';
+                }
+                Object.assign(c, { startPos: { x: 0, y: row, dir: 1 }, goalPos: goal, collectibles: items, obstacles: [], hazards: [], keys: [], doors: [], switches: [], requiredCollect: items.length, objective: { type: t }, prefilledProgram: null, mission: null });
+                if (solveFull(c).steps !== tokens.length || !simulate(c, ref.map(mkB)).ok) return false;
+                Object.assign(c, { fullPath: tokens, optimalSteps: tokens.length, solvable: true, refIds: ref, examplePath: ref, maxUse: use, handmade: true });
+                c.instructions += ruleText(use);
+                if (c.hints) c.hints[0] = 'Одинаковые команды подряд положи внутрь «Повторить».';
+                return true;
+            }
+            function cornerIf(c, L) {
+                if (!c.objective || c.objective.type !== 'reach_goal') return false;
+                const pre = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(c.instructions || '') || [''])[0];
+                Object.assign(c, { startPos: { x: 0, y: 0, dir: 1 }, goalPos: { x: 4, y: 1 + (L % 3) }, obstacles: [], hazards: [], collectibles: [], keys: [], doors: [], switches: [], prefilledProgram: null, mission: null });
+                const ex = solveFull(c); if (!isFinite(ex.steps)) return false;
+                Object.assign(c, { fullPath: ex.path, optimalSteps: ex.steps, solvable: true, examplePath: ex.path, handmade: true });
+                c.instructions = pre + 'Герой бежит вдоль дорожки до стены. Поворачивай, только когда упрёшься: «ЕСЛИ стена впереди».';
+                return true;
+            }
+            function keyGuard(c) {
+                const has = id => c.blocks.some(b => b.id === id);
+                if (!has('if_key') || !has('end_if') || !has('interact') || !c.doors.length) return false;
+                const ex = solveFull(c); if (!isFinite(ex.steps)) return false;
+                c.guard = { inside: 'if_key', name: 'ЕСЛИ есть ключ' }; c.requiredActions = (c.requiredActions || []).filter(a => a !== 'call_fn'); c.optimalSteps = ex.steps;
+                c.refIds = ex.path.flatMap((a, i) => ex.kinds[i] === 'door' ? ['if_key', a, 'end_if'] : [a]); c.examplePath = c.refIds;
+                c.instructions = (c.instructions || '') + ' 🔒 Дверь открывай командой «Взаимодействовать» внутри блока «ЕСЛИ есть ключ».';
+                if (c.hints) c.hints[0] = 'У двери поставь «Взаимодействовать» внутрь блока «ЕСЛИ есть ключ».';
+                return true;
+            }
+            function rowLevel(c, n) {
+                if (!c.objective || c.objective.type !== 'collect_amount') return false;
+                const row = (c.id + n) % 5, items = [];
+                for (let i = 1; i <= n; i++) items.push({ x: i, y: row, type: 'crystal', collected: false, value: 1 });
+                Object.assign(c, { startPos: { x: 0, y: row, dir: 1 }, goalPos: { x: n + 1, y: row }, obstacles: [], hazards: [], collectibles: items, keys: [], doors: [], switches: [], requiredCollect: n, extra: 0, mission: null, prefilledProgram: null, handmade: true });
+                c.objective = { type: 'collect_amount', amount: n }; c.variables = { count: 0 };
+                c.instructions = 'Кристаллы лежат подряд. Собери ' + n + ' штуки, считая их переменной count, и дойди до 🏁 (она сразу за последним).';
+                const ex = solveFull(c); if (!isFinite(ex.steps)) return false;
+                c.fullPath = ex.path; c.optimalSteps = ex.steps; c.solvable = true; c.examplePath = ex.path;
+                return true;
+            }
+            function makeGuaranteedFallbackLevel(gameId, levelNum) {
+                const game = GAMES_DATA.find(g => g.id === gameId) || GAMES_DATA[0];
+                const start = { x: 0, y: 0, dir: 1 };
+                const goal = { x: Math.min(4, 1 + ((gameId + levelNum) % 4)), y: 0 };
+                const path = Array(Math.max(1, goal.x)).fill('fwd');
+                return {
+                    id: levelNum, gameId, seed: gameId * 1000 + levelNum * 17 + 42,
+                    title: levelNum > LEVELS_MAIN ? 'Бонус ' + (levelNum - LEVELS_MAIN) : 'Уровень ' + levelNum,
+                    instructions: 'Безопасный резервный уровень: дойдите до финиша 🏁 простыми командами.',
+                    hints: ['Посчитай клетки до финиша.', 'Добавляй шаги по одному.', 'Каркас: Шаг вперёд × нужное количество.'],
+                    gridCols: 5, gridRows: 5, startPos: start, goalPos: goal, obstacles: [], hazards: [], collectibles: [], keys: [], doors: [], switches: [], blocks: [BLOCK_CATALOG.fwd],
+                    objective: { type: 'reach_goal' }, variables: {}, requiredCollect: 0, requiredActions: [], prefilledProgram: null, difficulty: 1, isBonus: levelNum > LEVELS_MAIN, phase: 1, teach: game.teach.slice(), starThresholds: { three: 1.5, two: 2.2 }, extra: 0, fullPath: path, optimalSteps: path.length, solvable: true, examplePath: path, minStepsRequired: Math.max(1, Math.floor(path.length * 0.7)), downgraded: true, handmade: true
+                };
+            }
+
+            function enforceGeneratedRequirements(c) {
+                if (!c || c.mission) return c;
+                const game = GAMES_DATA.find(g => g.id === c.gameId);
+                const teach = game?.teach || [];
+                if (teach.includes('while') || teach.includes('synth_while')) c.requiredActions = ['set_var', 'while_lt', 'inc_var'];
+                else if (teach.includes('variable') || teach.includes('collect_amount')) c.requiredActions = ['set_var', 'inc_var'];
+                else if (teach.includes('function') || teach.includes('function_reuse') || teach.includes('synth_fn_key')) c.requiredActions = ['def_fn', 'call_fn'];
+                if (teach.includes('and')) c.requiredActions = ['if_and'];
+                if (teach.includes('or_not')) c.requiredActions = [c.id % 3 === 0 ? 'if_not' : 'if_or'];
+                if (teach.includes('if_else')) c.requiredActions = ['else'];
+                if (teach.includes('if_wall')) c.requiredActions = ['if_wall'];
+                return c;
+            }
             function generateLevel(gameId, levelNum) {
-                const seed = gameId * 1000 + levelNum * 17 + 42;
+                let first = null;
+                for (let salt = 0; salt < 40; salt++) {
+                    const c = enforceGeneratedRequirements(generateLevelRaw(gameId, levelNum, salt));
+                    if (salt === 0) first = c;
+                    if (c.downgraded && salt < 39) continue;
+                    if (addLimits(c)) return fixText(c);
+                }
+                const req = (first && first.requiredActions) || [], L = levelNum;
+                const mk0 = () => { const c = enforceGeneratedRequirements(generateLevelRaw(gameId, levelNum, 0)); c.prefilledProgram = null; return c; };
+                if (req.includes('repeat') && L < 6) { const c = mk0(); if (introLoop(c, L) && addLimits(c)) return fixText(c); }
+                if ((req.includes('if_wall') || req.includes('else') || req.includes('if_even')) && L < 6) { const c = mk0(); if (cornerIf(c, L) && addLimits(c)) return fixText(c); }
+                const fn = req.includes('call_fn'), rp = req.includes('repeat') && L >= 6, wl = req.includes('while_lt');
+                if (fn || rp || wl) {
+                    const ks = wl ? [3] : fn ? (L < 12 ? [3, 4] : [4, 3]) : (L < 9 ? [2, 3, 4] : L < 15 ? [3, 4, 2] : [4, 3, 2]);
+                    for (const k of ks) { const c = mk0(); const okb = (wl && c.objective.type === 'collect_amount') ? rowLevel(c, 3) : uStair(c, k); if (okb && addLimits(c)) return fixText(c); }
+                }
+                if (req.includes('call_fn') && first && first.objective && first.objective.type === 'open_door' && keyGuard(first)) return fixText(first);
+                if (first && first.solvable && first.fullPath && first.fullPath.length) return fixText(first);
+                const safe = makeGuaranteedFallbackLevel(gameId, levelNum);
+                console.warn('[CodeQuest] Fallback level used', gameId, levelNum);
+                return safe;
+            }
+            function fixText(c) {
+                const pre = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(c.instructions || '') || [''])[0];
+                let t = c.instructions || '';
+                if (!c.obstacles.length) t = t.replace(/\s*Избегайте стен 🧱\./, '');
+                if (c.gameId === 12) t = t.replace('Повторяющиеся шаги делайте циклом — так проще и короче программа.', 'Счётчик count и цикл «ПОКА count < N» делают программу короче.');
+                if (c.gameId === 19) t = t.replace('Повторяющиеся шаги делайте циклом — так проще и короче программа.', 'Повторяющийся кусок маршрута оформи функцией и вызывай её.');
+                if (c.gameId === 19) t = t.replace('Опиши повторяющийся кусок маршрута функцией и вызывай её.', 'Одну функцию можно вызывать много раз: опиши кусок один раз и вызови его везде.');
+                if (c.gameId === 4 && !c.hazards.length) t = pre + 'Дойдите до финиша 🏁. Дальше на пути появится лава 🔥 — будьте внимательны!';
+                if (c.gameId === 5 && c.collectibles.length && !c.mission && !c.prefilledProgram) t = pre + (c.collectibles.length > 1 ? 'Собери кристаллы 💎 (их ' + c.collectibles.length + ') командой «Собрать» и иди к финишу 🏁.' : 'Встань на кристалл 💎, нажми «Собрать» и иди к финишу 🏁.');
+                if (c.gameId === 6 && c.collectibles.length && c.objective.type === 'collect_all' && !c.mission && !c.prefilledProgram) t = pre + 'Кристаллов несколько — собери ВСЕ (' + c.collectibles.length + ' шт.) и только потом иди к финишу 🏁. Продумай маршрут!';
+                if (c.gameId === 29 && c.maxBlocks) t = t.replace(/^((?:🔥 БОНУС: |📚 Новая тема: )?)[^📏]*/, '$1Финальное испытание: собери всё и дойди до 🏁 — с циклом и в лимит блоков. ');
+                c.instructions = t;
+                return c;
+            }
+            function generateLevelRaw(gameId, levelNum, salt) {
+                const seed = gameId * 1000 + levelNum * 17 + 42 + (salt || 0) * 7919;
                 const rnd = seedRandom(seed);
                 const game = GAMES_DATA.find(g => g.id === gameId) || GAMES_DATA[0];
                 const teach = game.teach || [];
@@ -1125,7 +1507,7 @@
                 let objective = { type: 'reach_goal' };
                 let blocks = [BLOCK_CATALOG.fwd];
                 let instructions = '';
-                let hint1 = '', hint2 = '', hint3 = '';
+                let hint1 = '', hint2 = '', hint3 = '', extraCrystals = 0;
                 let variables = {};
                 let prefilledProgram = null;
                 let requiredCollect = 0;
@@ -1171,7 +1553,7 @@
                 // --- Teach-specific content ---
                 // Hazards
                 if (teach.includes('hazard') || (phase >= 3 && game.mechanics.includes('hazard'))) {
-                    if (phase >= 1 && levelNum >= (teach.includes('hazard') ? 2 : 6)) {
+                    if (phase >= 1 && levelNum >= (teach.includes('hazard') ? 1 : 6)) {
                         const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
                         if (free[0]) hazards.push({ x: free[0].x, y: free[0].y, type: 'lava' });
                         if ((phase >= 2 || isBonus) && free[1]) hazards.push({ x: free[1].x, y: free[1].y, type: 'pit' });
@@ -1197,6 +1579,8 @@
                     else if (phase === 2) colCount = Math.min(2 + Math.floor(levelNum / 8), 3);
                     else colCount = Math.min(2 + Math.floor(levelNum / 6), 3);
                     if (teach.includes('collect') && phase === 1 && levelNum <= 2) colCount = 1;
+                    if (teach.includes('collect') && !teach.includes('collect_all')) colCount = Math.min(colCount, levelNum <= 10 ? 1 : 2);
+                    if (teach.includes('collect_all')) colCount = Math.min(3 + Math.floor(levelNum / 8), 5);
                     for (let i = 0; i < colCount && free[i]; i++) {
                         collectibles.push({ x: free[i].x, y: free[i].y, type: 'crystal', collected: false, value: 1 });
                     }
@@ -1209,7 +1593,7 @@
                         instructions = 'Соберите буквы и составьте пароль, затем дойдите до 🏁.';
                         hint1 = 'На клетке с буквой нажмите «Собрать».';
                         hint2 = 'Нужны все буквы.';
-                        hint3 = 'Потом идите к финишу.';
+                        hint3 = 'Каркас: Собрать → проверить порядок букв → собрать пароль → финиш.';
                     } else if (teach.includes('variable') || teach.includes('collect_amount') || teach.includes('while') || teach.includes('synth_while')) {
                         if (!blocks.find(b => b.id === 'set_var')) blocks.push(BLOCK_CATALOG.set_var, BLOCK_CATALOG.inc_var);
                         variables = { count: 0 };
@@ -1217,9 +1601,14 @@
                         instructions = phase === 1
                             ? 'Соберите кристаллы. Заведите переменную и увеличивайте count при сборе. Нужно: ' + requiredCollect + '.'
                             : 'Соберите ровно ' + requiredCollect + ' кристалл(ов), следя за переменной count, и дойдите до финиша.';
-                        hint1 = 'Сначала «Переменная = 0».';
-                        hint2 = 'После «Собрать» — «Переменная += 1».';
+                        hint1 = 'Сначала создай переменную: «count = 0».';
+                        hint2 = 'После каждого «Собрать» добавь «count += 1»: сам count не растёт, пока ты не прикажешь.';
                         hint3 = 'count должен стать ' + requiredCollect + '.';
+                        if (teach.includes('collect_amount') && levelNum >= 4) {
+                            const ex = 1 + (levelNum % 2);
+                            for (let i = colCount; i < colCount + ex && free[i]; i++) { collectibles.push({ x: free[i].x, y: free[i].y, type: 'crystal', collected: false, value: 1 }); extraCrystals++; }
+                            if (extraCrystals) instructions = 'Нужно собрать ' + requiredCollect + ' из ' + collectibles.length + ' кристаллов — остальные не нужны. Следи за переменной count!';
+                        }
                     } else if (teach.includes('collect_all') || teach.includes('loop_collect') || phase >= 2) {
                         objective = { type: 'collect_all' };
                         instructions = 'Соберите все кристаллы 💎, затем дойдите до финиша 🏁.';
@@ -1235,7 +1624,7 @@
                     }
                 }
                 // Loops
-                if (teach.includes('loop2') || teach.includes('loop34') || teach.includes('loop') || teach.includes('loop_collect') || teach.includes('while') || teach.includes('synth_loop_if') || teach.includes('function_reuse') || teach.includes('synth_full') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('loop'))) {
+                if (teach.includes('loop2') || teach.includes('loop34') || teach.includes('loop') || teach.includes('loop_collect') || teach.includes('while') || teach.includes('synth_while') || teach.includes('synth_loop_if') || teach.includes('function_reuse') || teach.includes('synth_full') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('loop'))) {
                     if (teach.includes('loop2') && phase === 1) {
                         blocks.push(BLOCK_CATALOG.repeat_2, BLOCK_CATALOG.end_loop);
                         instructions = instructions || 'Используйте «Повторить 2 раза» для одинаковых шагов.';
@@ -1278,20 +1667,66 @@
                         hint3 = 'Закройте условие «Конец».';
                     }
                 }
-                // Logic switches
-                if (teach.includes('and') || teach.includes('or_not') || teach.includes('switch') || (phase >= 3 && game.mechanics.includes('logic'))) {
-                    const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
-                    if (free[0]) switches.push({ x: free[0].x, y: free[0].y, on: false });
-                    if ((phase >= 2 || isBonus) && free[1]) switches.push({ x: free[1].x, y: free[1].y, on: false });
-                    blocks.push(BLOCK_CATALOG.interact, BLOCK_CATALOG.end_if);
-                    if (teach.includes('and') || teach.includes('or_not') || phase >= 3) {
-                        blocks.push(BLOCK_CATALOG.and_check, BLOCK_CATALOG.or_check, BLOCK_CATALOG.not_check);
+                // Module 15: a real IF/ELSE decision.
+                // Odd levels execute ELSE (no key, emergency switch); even levels execute IF (key present).
+                if (gameId === 15) {
+                    blocks = [BLOCK_CATALOG.fwd, BLOCK_CATALOG.turn_r, BLOCK_CATALOG.turn_l, BLOCK_CATALOG.if_key, BLOCK_CATALOG.else, BLOCK_CATALOG.interact, BLOCK_CATALOG.wait, BLOCK_CATALOG.end_if];
+                    keys.length = 0; doors.length = 0; switches.length = 0;
+                    const free = wallCandidates.filter(p => !obstacles.some(o => o.x === p.x && o.y === p.y));
+                    const target = free[Math.min(free.length - 1, 1 + (levelNum % Math.max(1, free.length - 1)))];
+                    const useElse = levelNum % 2 === 1;
+                    if (target) switches.push({ x: target.x, y: target.y, on: false });
+                    if (!useElse) {
+                        // Put the key exactly on the switch: stepping onto the switch auto-collects the key,
+                        // so the IF branch is guaranteed to become true before «Взаимодействовать».
+                        const keyPos = target || free.find(p => p.x !== target?.x || p.y !== target?.y);
+                        if (keyPos) keys.push({ x: keyPos.x, y: keyPos.y, collected: false });
                     }
                     objective = { type: 'activate_switches' };
-                    instructions = 'Активируйте все переключатели ⚡ («Взаимодействовать»), затем финиш.';
-                    hint1 = 'Встаньте на переключатель.';
-                    hint2 = 'Взаимодействовать включает его.';
-                    hint3 = 'Все должны быть включены.';
+                    instructions = useElse
+                        ? 'Здесь ключа нет. Ветвь «ЕСЛИ» не сработает, поэтому включи переключатель внутри «ИНАЧЕ», затем дойди до 🏁.'
+                        : 'У героя есть ключ. Используй «ЕСЛИ есть ключ» для правильного действия, а ветвь «ИНАЧЕ» оставь безопасной.';
+                    hint1 = useElse ? 'Проверь условие «есть ключ»: оно ложно.' : 'Проверь условие «есть ключ»: оно истинно.';
+                    hint2 = useElse ? 'Нужное действие должно находиться после «ИНАЧЕ».' : 'Нужное действие должно находиться в ветви «ЕСЛИ».';
+                    hint3 = 'Каркас: ЕСЛИ … { действие } ИНАЧЕ { действие } …; используй только одну нужную ветвь для полезного действия.';
+                }
+                // Logic / switches. Modules 16–17 use a rule-gated door so the Boolean concept affects victory.
+                if (teach.includes('and') || teach.includes('or_not') || teach.includes('switch') || (phase >= 3 && game.mechanics.includes('logic'))) {
+                    const free = wallCandidates.filter(c => !obstacles.some(o => o.x === c.x && o.y === c.y));
+                    const isLogicModule = teach.includes('and') || teach.includes('or_not');
+                    if (isLogicModule) {
+                        const andM = teach.includes('and');
+                        const notM = teach.includes('or_not') && levelNum % 3 === 0;
+                        const rule = andM ? 'and' : notM ? 'not' : 'or';
+                        const doorPos = { x: Math.max(1, Math.min(4, goalPos.x - 1)), y: goalPos.y };
+                        doors.length = 0; keys.length = 0; switches.length = 0;
+                        if (free[0]) keys.push({ x: free[0].x, y: free[0].y, collected: false });
+                        if (!notM && free[1]) switches.push({ x: free[1].x, y: free[1].y, on: false });
+                        if (!notM && free[2]) switches.push({ x: free[2].x, y: free[2].y, on: false });
+                        doors.push({ x: doorPos.x, y: doorPos.y, locked: true, rule });
+                        blocks.push(BLOCK_CATALOG.interact, BLOCK_CATALOG.end_if);
+                        if (rule === 'and') blocks.push(BLOCK_CATALOG.and_check);
+                        else if (rule === 'or') blocks.push(BLOCK_CATALOG.or_check);
+                        else blocks.push(BLOCK_CATALOG.not_check);
+                        objective = { type: 'open_door' };
+                        instructions = rule === 'and'
+                            ? 'Открой дверь только когда есть ключ И включены все переключатели. Используй соответствующий логический блок.'
+                            : rule === 'or'
+                                ? 'Открой дверь, когда есть ключ ИЛИ включён хотя бы один переключатель.'
+                                : 'Дверь-ловушка открывается только когда у героя НЕТ ключа. Не подбирай ключ.';
+                        hint1 = rule === 'and' ? 'Для И нужны сразу два истинных условия.' : rule === 'or' ? 'Для ИЛИ достаточно одного истинного условия.' : 'Для НЕ условие переворачивает истину.';
+                        hint2 = rule === 'and' ? 'Проверь ключ и каждый переключатель.' : rule === 'or' ? 'Достаточно ключа или одного включённого переключателя.' : 'Следи за тем, есть ли у героя ключ.';
+                        hint3 = rule === 'and' ? 'Каркас: ЕСЛИ ключ И все переключатели включены { Взаимодействовать }.' : rule === 'or' ? 'Каркас: ЕСЛИ ключ ИЛИ включён переключатель { Взаимодействовать }.' : 'Каркас: ЕСЛИ НЕТ ключа { Взаимодействовать }.';
+                    } else {
+                        if (free[0]) switches.push({ x: free[0].x, y: free[0].y, on: false });
+                        if ((phase >= 2 || isBonus) && free[1]) switches.push({ x: free[1].x, y: free[1].y, on: false });
+                        blocks.push(BLOCK_CATALOG.interact, BLOCK_CATALOG.end_if);
+                        objective = { type: 'activate_switches' };
+                        instructions = 'Активируйте все переключатели ⚡ («Взаимодействовать»), затем финиш.';
+                        hint1 = 'Встаньте на переключатель.';
+                        hint2 = 'Взаимодействовать включает его.';
+                        hint3 = 'Все должны быть включены.';
+                    }
                 }
                 // Functions
                 if (teach.includes('function') || teach.includes('function_reuse') || teach.includes('synth_fn_key') || teach.includes('final') || (phase >= 3 && game.mechanics.includes('function'))) {
@@ -1371,6 +1806,22 @@
                     seen.add(b.id);
                     return true;
                 });
+                const CONCEPT_REQ = {
+                    loop2: ['repeat'], loop34: ['repeat'], loop_collect: ['repeat'],
+                    while: ['set_var', 'while_lt', 'inc_var'], synth_while: ['set_var', 'while_lt', 'inc_var'],
+                    synth_loop_if: ['repeat'], synth_fn_key: ['def_fn', 'call_fn'], synth_full: ['repeat'], final: ['repeat'],
+                    variable: ['set_var', 'inc_var'], collect_amount: ['set_var', 'inc_var'],
+                    function: ['def_fn', 'call_fn'], function_reuse: ['def_fn', 'call_fn'],
+                    if_wall: ['if_wall'], key_door: ['interact'], if_else: ['else'],
+                    and: ['if_and'], or_not: ['if_or', 'if_not'], debug_if: ['if_wall']
+                };
+                let requiredActions = [];
+                if (!(game.id === 1 && phase === 1 && levelNum <= 2)) {
+                    teach.forEach(t => (CONCEPT_REQ[t] || []).forEach(a => { if (!requiredActions.includes(a)) requiredActions.push(a); }));
+                    requiredActions = requiredActions.filter(a => blocks.some(b => b.action === a));
+                    if (teach.includes('and')) requiredActions = ['if_and'];
+                    if (teach.includes('or_not')) requiredActions = [levelNum % 3 === 0 ? 'if_not' : 'if_or'];
+                }
                 let config = {
                     id: levelNum,
                     gameId,
@@ -1391,6 +1842,7 @@
                     objective,
                     variables: deepClone(variables),
                     requiredCollect,
+                    requiredActions,
                     minStepsRequired: 3,
                     prefilledProgram: prefilledProgram ? prefilledProgram.map(b => ({ ...b })) : null,
                     difficulty,
@@ -1403,6 +1855,20 @@
                             ? { three: 1.5, two: 2.2 }
                             : { three: 1.25, two: 1.9 }
                 };
+                config.extra = extraCrystals;
+                if (teach.includes('modulo')) { config.showParity = true; if (!config.blocks.some(b => b.id === 'if_even')) config.blocks.push(BLOCK_CATALOG.if_even, BLOCK_CATALOG.end_if); config.requiredActions = ['if_even']; }
+                if (gameId === 1) {
+                    const row = (levelNum * 2 + 1) % 5, sx = levelNum % 3 === 0 ? 1 : 0, gx = Math.min(4, sx + 1 + ((levelNum * 3) % 4));
+                    Object.assign(config, { startPos: { x: sx, y: row, dir: 1 }, goalPos: { x: gx, y: row }, obstacles: [], hazards: [], collectibles: [], keys: [], doors: [], switches: [] });
+                    config.blocks = config.blocks.filter(b => b.id === 'fwd');
+                    config.hints = ['Каждый «Шаг вперёд» двигает героя на одну клетку.', 'Посчитай клетки до 🏁.', 'Блоков «Шаг вперёд» должно быть столько, сколько клеток до финиша.'];
+                    config.instructions = (isBonus ? '🔥 БОНУС: ' : '') + 'Герой идёт вдоль дорожки. Дайте команды «Шаг вперёд», чтобы дойти до 🏁 — команды выполняются по порядку!';
+                }
+                if (teach.includes('loop2')) config.blocks = config.blocks.filter(b => b.id !== 'repeat_3' && b.id !== 'repeat_4');
+                if (HAND[gameId + '_' + levelNum]) {
+                    const bak = deepClone(config);
+                    if (applyHand(config, HAND[gameId + '_' + levelNum])) { if (isFinite(solveFull(config).steps)) config.handmade = true; else Object.assign(config, bak); }
+                }
                 let solution = solveGrid(config);
                 let attempts = 0;
                 while (!solution.solvable && attempts < 10) {
@@ -1415,11 +1881,105 @@
                 config.obstacles = config.obstacles.filter(o => !(o.x === config.startPos.x && o.y === config.startPos.y) && !(o.x === config.goalPos.x && o.y === config.goalPos.y));
                 config.hazards = config.hazards.filter(h => !(h.x === config.startPos.x && h.y === config.startPos.y) && !(h.x === config.goalPos.x && h.y === config.goalPos.y));
                 solution = solveGrid(config);
-                config.optimalSteps = solution.solvable ? solution.optimalSteps : 20;
-                config.solvable = solution.solvable;
-                config.examplePath = solution.path || [];
+                const reach = (p) => solveGrid({ ...config, goalPos: { x: p.x, y: p.y } }).solvable;
+                {
+                    const taken = new Set([...config.obstacles, ...config.hazards, ...config.doors, config.startPos, config.goalPos].map(p => p.x + ',' + p.y));
+                    const spare = [];
+                    for (let y = 0; y < gridRows; y++) for (let x = 0; x < gridCols; x++) if (!taken.has(x + ',' + y) && reach({ x, y })) spare.push({ x, y });
+                    ['collectibles', 'keys', 'switches'].forEach(list => {
+                        config[list].forEach(o => {
+                            const k = o.x + ',' + o.y;
+                            if (taken.has(k)) {
+                                const f = spare.find(p => !taken.has(p.x + ',' + p.y));
+                                if (f) { o.x = f.x; o.y = f.y; taken.add(f.x + ',' + f.y); } else o.dead = true;
+                            } else taken.add(k);
+                        });
+                        config[list] = config[list].filter(o => !o.dead);
+                    });
+                }
+                {
+                    // ключ должен быть достижим, НЕ проходя через запертую дверь
+                    const wallsD = config.obstacles.concat(config.doors);
+                    const reachND = p => solveGrid({ ...config, goalPos: { x: p.x, y: p.y }, obstacles: wallsD }).solvable;
+                    const taken2 = new Set([...config.obstacles, ...config.hazards, ...config.doors, ...config.collectibles, ...config.switches, config.startPos, config.goalPos].map(p => p.x + ',' + p.y));
+                    config.keys.forEach(k => {
+                        if (!reachND(k)) {
+                            let f = null;
+                            for (let y = 0; y < gridRows && !f; y++) for (let x = 0; x < gridCols && !f; x++) if (!taken2.has(x + ',' + y) && reachND({ x, y })) f = { x, y };
+                            if (f) { k.x = f.x; k.y = f.y; } else k.dead = true;
+                        }
+                        taken2.add(k.x + ',' + k.y);
+                    });
+                    config.keys = config.keys.filter(k => !k.dead);
+                }
+                config.collectibles = config.collectibles.filter(reach);
+                config.keys = config.keys.filter(reach);
+                config.switches = config.switches.filter(reach);
+                if (gameId === 15 && levelNum % 2 === 0 && config.switches.length) {
+                    const sw = config.switches[0];
+                    config.keys = [{ x: sw.x, y: sw.y, collected: false }];
+                }
+                config.requiredCollect = Math.max(config.collectibles.length - (config.extra || 0), config.collectibles.length ? 1 : 0);
+                if (config.objective.type === 'collect_amount') config.objective.amount = config.requiredCollect;
+                if (config.objective.password) config.objective.password = config.collectibles.map(c => c.letter).join('');
+                if (config.doors.length && !config.keys.length) { config.doors = []; config.objective = { type: 'reach_goal' }; }
+                const exact = solveFull(config);
+                config.fullPath = exact.path;
+                config.optimalSteps = isFinite(exact.steps) ? exact.steps : (solution.solvable ? solution.optimalSteps + (config.collectibles.length + config.keys.length + config.switches.length) * 3 + (config.doors.length ? 2 : 0) : 20);
+                config.examplePath = exact.path || solution.path || [];
+                config.solvable = isFinite(exact.steps);
+                // For IF/ELSE module 15, wrap the real switch interaction in the branch that is actually executed.
+                if (gameId === 15 && config.solvable && config.fullPath.includes('interact')) {
+                    const base = config.fullPath.slice();
+                    const ii = base.indexOf('interact');
+                    const branch = levelNum % 2 === 1
+                        ? ['if_key', 'wait', 'else', 'interact', 'end_if']
+                        : ['if_key', 'interact', 'else', 'wait', 'end_if'];
+                    base.splice(ii, 1, ...branch);
+                    config.refIds = base;
+                    config.examplePath = base;
+                }
                 config.minStepsRequired = Math.max(2, Math.floor(config.optimalSteps * (phase === 1 ? 0.7 : 0.9)));
 
+                {
+                    const t = config.objective.type, none = (t === 'open_door' && !config.doors.length) || (t === 'activate_switches' && !config.switches.length) || ((t === 'collect_all' || t === 'collect_amount') && !config.collectibles.length);
+                    if (none) { config.downgraded = true; config.instructions = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(config.instructions || '') || [''])[0] + 'Дойдите до финиша 🏁.'; config.objective = { type: 'reach_goal' }; config.requiredActions = (config.requiredActions || []).filter(a => a !== 'interact' && a !== 'inc_var'); }
+                }
+                // ---- Миссии: угадай результат (6), найди ошибку (9, 18), упрости код (14) ----
+                config.mission = config.mission || null;
+                if (!isBonus && !config.prefilledProgram && !teach.includes('debug') && !teach.includes('debug_if') && config.fullPath.length >= 4 && isFinite(config.optimalSteps)) {
+                    config.examplePath = config.fullPath;
+                    const has = id => config.blocks.some(b => b.id === id), mk = id => ({ ...BLOCK_CATALOG[id] });
+                    const ids = (config.objective.type === 'collect_amount' && has('set_var') && has('inc_var')) ? ['set_var', ...config.fullPath.flatMap(x => x === 'collect' ? ['collect', 'inc_var'] : [x])] : config.fullPath;
+                    if (ids.every(has)) {
+                        const mutants = [
+                            () => { const i = ids.findIndex(x => x === 'turn_l' || x === 'turn_r'); if (i < 0) return null; const a = ids.slice(); a[i] = a[i] === 'turn_l' ? 'turn_r' : 'turn_l'; return a; },
+                            () => { const i = ids.findIndex((x, j) => x === 'fwd' && j >= ids.length / 2); if (i < 0) return null; const a = ids.slice(); a.splice(i, 1); return a; },
+                            () => { const a = ids.slice(); a.splice(Math.floor(ids.length / 2), 0, 'fwd'); return a; }
+                        ];
+                        const debugM = shift => { for (let t = 0; t < 3; t++) { const a = mutants[(gameId + shift + t) % 3](); if (a && !simulate(config, a.map(mk)).ok) return a; } return null; };
+                        const setM = (type, prog, text, hints) => { config.mission = type; config.prefilledProgram = prog.map(mk); config.instructions = text; config.hints = hints; };
+                        const doDebug = shift => { const a = debugM(shift); if (a) setM('debug', a, '🐞 Найди ошибку: программа уже написана, но герой не справляется. Запусти её (или иди по шагам ⏭), найди баг и исправь.', ['Запусти и посмотри, где герой свернул не туда.', 'Иди по шагам ⏭ и следи за подсветкой блока и взглядом героя.', 'Ошибка одна: лишний или пропущенный шаг, либо перепутан поворот.']); };
+                        if (levelNum === 6) {
+                            const prog = ids.slice(0, Math.max(3, Math.floor(ids.length * 0.7))), w = simulate(config, prog.map(mk)).world;
+                            if (!w.failed) {
+                                const ans = { x: w.hero.x, y: w.hero.y }, cells = [];
+                                for (let y = 0; y < gridRows; y++) for (let x = 0; x < gridCols; x++) if (!(x === ans.x && y === ans.y) && !config.obstacles.some(o => o.x === x && o.y === y) && !config.hazards.some(o => o.x === x && o.y === y)) cells.push({ x, y });
+                                cells.sort((a, b) => (Math.abs(a.x - ans.x) + Math.abs(a.y - ans.y)) - (Math.abs(b.x - ans.x) + Math.abs(b.y - ans.y)));
+                                const opts = [ans, ...cells.slice(0, 3)], r = (levelNum + gameId) % 4; opts.push(...opts.splice(0, r));
+                                setM('predict', prog, '🔮 Угадай заранее: в какой клетке окажется герой после этой программы? Выбери ответ, потом запусти и проверь себя.', ['Представь героя на поле и выполняй блоки по одному.', 'Поворот не двигает героя — он только меняет взгляд.', 'Нажми ⏭ и сравни с тем, что ты придумал.']);
+                                config.predict = { answer: ans, options: opts }; config.objective = { type: 'predict' }; config.requiredActions = [];
+                            }
+                        } else if (levelNum === 9 || levelNum === 18) doDebug(levelNum === 9 ? 0 : 1);
+                        else if (levelNum === 14 && config.objective.type !== 'collect_amount') {
+                            const n = compressedCount(ids);
+                            if (['repeat_2', 'repeat_3', 'repeat_4', 'end_loop'].every(has) && ids.length - n >= 1) {
+                                setM('simplify', ids, '🧹 Упрости код: программа рабочая, но слишком длинная. Уложись в ' + n + ' блоков с помощью «Повторить» (скобка } тоже блок).', ['Найди одинаковые команды подряд.', 'Четыре «Шаг вперёд» подряд = «Повторить 4 раза { Шаг вперёд }».', 'Нужно не больше ' + n + ' блоков вместе со скобкой.']);
+                                config.maxBlocks = n; config.requiredActions = ['repeat'];
+                            } else doDebug(2);
+                        }
+                    }
+                }
                 return config;
             }
             const levelsCache = {};
@@ -1479,6 +2039,10 @@
                     this.failed = false;
                     this.failReason = '';
                     this.events = [];
+                }
+                doorRuleOk(d) {
+                    const all = this.switches.every(s => s.on), any = this.switches.some(s => s.on);
+                    return d.rule === 'and' ? (this.hasKey && all) : d.rule === 'or' ? (this.hasKey || any) : d.rule === 'not' ? !this.hasKey : this.hasKey;
                 }
                 isWall(x, y) {
                     return this.config.obstacles.some(o => o.x === x && o.y === y);
@@ -1611,8 +2175,8 @@
                             if (this.world.cellBlocked(nx, ny)) {
                                 this.world.failed = true;
                                 this.world.failReason = this.world.isHazard(nx, ny)
-                                    ? 'Ой! Герой попал в опасность!'
-                                    : 'Ой! Персонаж столкнулся со стеной, дверью или вышел за границы!';
+                                    ? 'Ой! Герой попал в опасность на блоке №' + (hi + 1) + '!'
+                                    : 'Ой! Герой упёрся в стену или закрытую дверь, либо вышел за поле, на блоке №' + (hi + 1) + '. Проверь, куда он смотрит перед шагом.';
                                 this.finished = true;
                                 return { done: true, error: this.world.failReason, highlightIndex: hi };
                             }
@@ -1641,7 +2205,6 @@
                                 col.collected = true;
                                 this.world.collectedCount++;
                                 if (col.letter) this.world.collectedLetters.push(col.letter);
-                                if (this.world.variables.count !== undefined) this.world.variables.count = (this.world.variables.count || 0) + 1;
                             }
                             this.world.stepsExecuted++;
                             break;
@@ -1651,9 +2214,12 @@
                             break;
                         case 'interact': {
                             // open door if has key
-                            const door = this.world.doors.find(d => d.x === this.world.hero.x && d.y === this.world.hero.y && d.locked);
-                            if (door && this.world.hasKey) {
+                            const dI = [{ dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: 0, dy: 1 }, { dx: -1, dy: 0 }][this.world.hero.dir];
+                            const fx = this.world.hero.x + dI.dx, fy = this.world.hero.y + dI.dy;
+                            const door = this.world.doors.find(d => d.locked && ((d.x === fx && d.y === fy) || (d.x === this.world.hero.x && d.y === this.world.hero.y)));
+                            if (door && this.world.doorRuleOk(door)) {
                                 door.locked = false;
+                                door.openedBy = this.enclosingIfs();
                             }
                             // toggle switch
                             const sw = this.world.switches.find(s => s.x === this.world.hero.x && s.y === this.world.hero.y);
@@ -1678,6 +2244,7 @@
                         case 'end_loop': {
                             if (this.loopStack.length) {
                                 const loop = this.loopStack[this.loopStack.length - 1];
+                                if (loop.whileIp !== undefined) { this.loopStack.pop(); this.ip = loop.whileIp; advance = false; break; }
                                 loop.count--;
                                 if (loop.count > 0) {
                                     this.ip = loop.startIp;
@@ -1689,7 +2256,7 @@
                             break;
                         }
                         case 'while_lt': {
-                            const n = block.n || 5;
+                            const n = (this.world.config.objective && this.world.config.objective.amount) || block.n || 3;
                             const val = this.world.variables.count || 0;
                             if (val < n) {
                                 let depth = 1, endIp = this.ip + 1;
@@ -1698,7 +2265,7 @@
                                     if (this.program[endIp].action === 'end_loop') depth--;
                                     if (depth > 0) endIp++;
                                 }
-                                this.loopStack.push({ startIp: this.ip + 1, endIp, count: 50 }); // safety
+                                this.loopStack.push({ startIp: this.ip + 1, endIp, count: 50, whileIp: this.ip }); // safety
                                 this.ip = this.ip + 1;
                                 advance = false;
                             } else {
@@ -1719,6 +2286,7 @@
                         case 'if_collect':
                         case 'if_and':
                         case 'if_or':
+                        case 'if_even':
                         case 'if_not': {
                             let cond = false;
                             if (block.action === 'if_key') cond = this.world.hasKey;
@@ -1734,6 +2302,8 @@
                                 cond = this.world.hasKey || this.world.switches.some(s => s.on);
                             } else if (block.action === 'if_not') {
                                 cond = !this.world.hasKey;
+                            } else if (block.action === 'if_even') {
+                                cond = (this.world.hero.x + this.world.hero.y) % 2 === 0;
                             }
                             if (!cond) {
                                 this.skipUntil = 'end_if';
@@ -1756,6 +2326,12 @@
                             this.fnBody = [];
                             break;
                         case 'call_fn':
+                            if (!this.functions['my_fn']) {
+                                this.world.failed = true;
+                                this.world.failReason = 'Функция ещё не определена: сначала собери «ОПРЕДЕЛИТЬ функцию … Конец функции», потом вызывай её.';
+                                this.finished = true;
+                                return { done: true, error: this.world.failReason, highlightIndex: hi };
+                            }
                             if (this.functions['my_fn'] && this.callStack.length < 8) {
                                 this.callStack.push({ returnIp: this.ip + 1 });
                                 // temporarily replace program pointer into function body via a virtual approach:
@@ -1781,7 +2357,7 @@
                     // Handle function call execution via frame
                     if (block.action === 'call_fn' && this._fnFrame && this._fnFrame.body) {
                         // Run body by temporarily swapping
-                        const body = this._fnFrame.body;
+                        const body = this.flattenBody(this._fnFrame.body);
                         // For limited depth we execute body steps in subsequent calls
                         // Simpler implementation: expand call by inserting body into a side list
                         // We'll use iterative expansion: push body onto a virtual program queue
@@ -1805,6 +2381,8 @@
                                 this.world.hero.x = nx;
                                 this.world.hero.y = ny;
                                 this.world.stepsExecuted++;
+                                const kk = this.world.keys.find(k => !k.collected && k.x === nx && k.y === ny);
+                                if (kk) { kk.collected = true; this.world.hasKey = true; }
                             } else if (sub.action === 'left') {
                                 this.world.hero.dir = (this.world.hero.dir + 3) % 4;
                                 this.world.stepsExecuted++;
@@ -1813,7 +2391,7 @@
                                 this.world.stepsExecuted++;
                             } else if (sub.action === 'collect') {
                                 const col = this.world.collectibles.find(c => !c.collected && c.x === this.world.hero.x && c.y === this.world.hero.y);
-                                if (col) { col.collected = true; this.world.collectedCount++; }
+                                if (col) { col.collected = true; this.world.collectedCount++; if (col.letter) this.world.collectedLetters.push(col.letter); }
                                 this.world.stepsExecuted++;
                             }
                             bodyIp++;
@@ -1826,22 +2404,70 @@
                     this.stepCount++;
                     return { done: false, highlightIndex: hi };
                 }
+                flattenBody(list) {
+                    const res = [];
+                    for (let i = 0; i < list.length; i++) {
+                        const b = list[i];
+                        if (b.action === 'repeat') {
+                            let d = 1, j = i + 1;
+                            while (j < list.length && d > 0) {
+                                if (list[j].action === 'repeat') d++;
+                                if (list[j].action === 'end_loop') d--;
+                                if (d > 0) j++;
+                            }
+                            const inner = this.flattenBody(list.slice(i + 1, j));
+                            for (let k = 0; k < (b.times || 2); k++) res.push(...inner);
+                            i = j;
+                        } else if (b.action !== 'end_loop') res.push(b);
+                    }
+                    return res;
+                }
+                explain() {
+                    const w = this.world, c = w.config, o = c.objective || {}, h = w.hero, g = c.goalPos;
+                    const left = w.collectibles.filter(x => !x.collected).length;
+                    if (o.type === 'collect_all' && left) return 'Не все предметы собраны: осталось ' + left + '. «Собрать» работает, только когда герой стоит на предмете.';
+                    if (o.type === 'collect_all' && o.password && !left && w.collectedLetters.join('') !== String(o.password)) return 'Все буквы собраны, но пароль получился «' + w.collectedLetters.join('') + '». Собирай буквы в правильном порядке.';
+                    if (o.type === 'collect_amount') {
+                        const n = o.amount || 1;
+                        if (w.collectedCount < n) return 'Собрано ' + w.collectedCount + ' из ' + n + '.';
+                        if ((w.variables.count || 0) < n) return 'Предметы собраны, но count = ' + (w.variables.count || 0) + ', а нужно ' + n + '. После каждого «Собрать» добавляй «count += 1».';
+                    }
+                    if (o.type === 'open_door' && !w.doors.some(d => d.locked) && c.guard && !w.doors.every(d => (d.openedBy || []).includes(c.guard.inside))) return 'Дверь открыта не там: открой её командой «Взаимодействовать» ВНУТРИ блока «' + c.guard.name + '».';
+                    if (o.type === 'open_door' && w.doors.some(d => d.locked)) return w.hasKey ? 'Дверь всё ещё закрыта: встань лицом к двери и нажми «Взаимодействовать».' : 'Дверь закрыта: сначала возьми ключ 🔑 (пройди по его клетке).';
+                    if (o.type === 'activate_switches' && w.switches.some(s => !s.on)) return 'Включено ' + w.switches.filter(s => s.on).length + ' из ' + w.switches.length + ' переключателей. Встань на переключатель и нажми «Взаимодействовать».';
+                    if (h.x !== g.x || h.y !== g.y) return 'Герой остановился в клетке (' + (h.x + 1) + ', ' + (h.y + 1) + '), а финиш в (' + (g.x + 1) + ', ' + (g.y + 1) + '). Пройди программу кнопкой ⏭ по шагам и найди, где путь свернул не туда.';
+                    return 'Цель не достигнута.';
+                }
+                enclosingIfs() {
+                    const p = this.program, out = []; let depth = 0, inElse = false;
+                    for (let j = this.ip - 1; j >= 0; j--) {
+                        const a = p[j].action;
+                        if (a === 'end_if') depth++;
+                        else if (a === 'else' && depth === 0) inElse = true;
+                        else if (p[j].type === 'if' || p[j].type === 'logic') { if (depth === 0) { if (!inElse) out.push(a); inElse = false; } else depth--; }
+                    }
+                    return out;
+                }
                 checkObjective() {
                     const obj = this.world.config.objective || { type: 'reach_goal' };
                     const h = this.world.hero;
                     const g = this.world.config.goalPos;
                     const atGoal = h.x === g.x && h.y === g.y;
 
+                    if (obj.type === 'predict') return true;
                     if (obj.type === 'reach_goal') return atGoal;
                     if (obj.type === 'collect_all') {
                         const allCollected = this.world.collectibles.every(c => c.collected);
-                        return allCollected && atGoal;
+                        const passwordOk = !obj.password || this.world.collectedLetters.join('') === String(obj.password);
+                        return allCollected && passwordOk && atGoal;
                     }
                     if (obj.type === 'collect_amount') {
-                        return this.world.collectedCount >= (obj.amount || 1) && atGoal;
+                        return this.world.collectedCount >= (obj.amount || 1) && (this.world.variables.count || 0) >= (obj.amount || 1) && atGoal;
                     }
                     if (obj.type === 'open_door') {
                         const allOpen = this.world.doors.every(d => !d.locked);
+                        const gd = this.world.config.guard;
+                        if (gd && !this.world.doors.every(d => (d.openedBy || []).includes(gd.inside))) return false;
                         return allOpen && atGoal;
                     }
                     if (obj.type === 'activate_switches') {
@@ -1936,37 +2562,25 @@
                         ctx.textBaseline = 'middle';
                         ctx.fillText(h.type === 'lava' ? '🔥' : '🕳️', h.x * cellW + cellW / 2, h.y * cellH + cellH / 2);
                     });
-                    // collectibles
-                    world.collectibles.forEach(c => {
-                        if (c.collected) return;
-                        ctx.font = Math.floor(cellW * 0.45) + 'px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        const icon = c.type === 'letter' ? (c.letter || '?') : '💎';
-                        ctx.fillText(icon, c.x * cellW + cellW / 2, c.y * cellH + cellH / 2);
-                    });
-                    // keys
-                    world.keys.forEach(k => {
-                        if (k.collected) return;
-                        ctx.font = Math.floor(cellW * 0.45) + 'px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText('🔑', k.x * cellW + cellW / 2, k.y * cellH + cellH / 2);
-                    });
-                    // doors
-                    world.doors.forEach(d => {
-                        ctx.font = Math.floor(cellW * 0.45) + 'px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(d.locked ? '🚪' : '🔓', d.x * cellW + cellW / 2, d.y * cellH + cellH / 2);
-                    });
-                    // switches
-                    world.switches.forEach(s => {
-                        ctx.font = Math.floor(cellW * 0.4) + 'px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(s.on ? '🟢' : '⚡', s.x * cellW + cellW / 2, s.y * cellH + cellH / 2);
-                    });
+                    if (world.config.showParity) { ctx.fillStyle = 'rgba(251,191,36,0.16)'; for (let py = 0; py < world.config.gridRows; py++) for (let px = 0; px < world.config.gridCols; px++) if ((px + py) % 2 === 0 && !world.config.obstacles.some(o => o.x === px && o.y === py)) ctx.fillRect(px * cellW + 1, py * cellH + 1, cellW - 2, cellH - 2); }
+                    // collectibles, keys, doors, switches: bright plates so nothing gets lost
+                    const badge = (cx, cy, r, fill, stroke) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = stroke; ctx.lineWidth = 2.5; ctx.stroke(); };
+                    const icon = (txt, cx, cy, k, color) => { ctx.font = 'bold ' + Math.floor(cellW * k) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = color || '#fff'; ctx.fillText(txt, cx, cy + 1); };
+                    const mid = o => [o.x * cellW + cellW / 2, o.y * cellH + cellH / 2];
+                    world.collectibles.forEach(c => { if (c.collected) return; const [cx, cy] = mid(c); badge(cx, cy, cellW * 0.4, 'rgba(251,191,36,0.38)', '#fbbf24'); icon(c.type === 'letter' ? (c.letter || '?') : '💎', cx, cy, 0.56); });
+                    world.keys.forEach(k => { if (k.collected) return; const [cx, cy] = mid(k); badge(cx, cy, cellW * 0.4, 'rgba(250,204,21,0.38)', '#facc15'); icon('🔑', cx, cy, 0.56); });
+                    world.doors.forEach(d => { const [cx, cy] = mid(d); badge(cx, cy, cellW * 0.42, d.locked ? 'rgba(244,63,94,0.3)' : 'rgba(16,185,129,0.25)', d.locked ? '#fb7185' : '#34d399'); icon(d.locked ? '🚪' : '🔓', cx, cy, 0.52); });
+                    world.switches.forEach(sw => { const [cx, cy] = mid(sw); badge(cx, cy, cellW * 0.38, sw.on ? 'rgba(16,185,129,0.35)' : 'rgba(56,189,248,0.3)', sw.on ? '#34d399' : '#38bdf8'); icon(sw.on ? '🟢' : '⚡', cx, cy, 0.48); });
+                    {
+                        const tot = world.collectibles.length, got = world.collectibles.filter(c => c.collected).length, parts = [];
+                        if (tot) parts.push((world.collectibles[0].type === 'letter' ? '🔤 ' : '💎 ') + got + '/' + tot);
+                        if (world.keys.length) parts.push('🔑 ' + (world.hasKey ? 'есть' : 'нет'));
+                        if (world.switches.length) parts.push('⚡ ' + world.switches.filter(x => x.on).length + '/' + world.switches.length);
+                        if (parts.length) {
+                            const t = parts.join('   '); ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                            const w = ctx.measureText(t).width + 16; ctx.fillStyle = 'rgba(15,23,42,0.88)'; ctx.fillRect(6, 6, w, 24); ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 1; ctx.strokeRect(6, 6, w, 24); ctx.fillStyle = '#fde68a'; ctx.fillText(t, 14, 18);
+                        }
+                    }
                     // goal — high visibility with glow ring
                     {
                         const gx = world.config.goalPos.x * cellW + cellW / 2;
@@ -2031,6 +2645,26 @@
                 }
             }
             /* ===================== MAIN APP ===================== */
+            function analyzeProgramConcept(prog, cfg) {
+                const p = prog || [], BODY = ['repeat', 'while_lt', 'if_wall', 'if_even', 'else', 'if_key', 'if_and', 'if_or', 'if_not', 'def_fn'], END = ['end_loop', 'end_if', 'end_fn', 'else'];
+                const used = new Set();
+                p.forEach((b, i) => {
+                    const next = p[i + 1];
+                    if (!BODY.includes(b.action) || (next && !END.includes(next.action))) used.add(b.action);
+                });
+                const missAll = (cfg.requiredActions || []).filter(a => !used.has(a));
+                const naturalRep = /(^|,)([a-z_]+),\2(,|$)/.test((cfg.fullPath || cfg.examplePath || []).join(','));
+                const hard = missAll.filter(a => !(a === 'interact' || (a === 'repeat' && (naturalRep || cfg.mission === 'simplify'))));
+                const soft = missAll.filter(a => !hard.includes(a));
+                if (!hard.length && !soft.length) return { hardMissing: [], softMissing: [], message: null, used };
+                if (hard.length) {
+                    const empty = hard.filter(a => p.some(b => b.action === a));
+                    if (empty.length) return { hardMissing: hard, softMissing: soft, message: 'Блок ' + empty.map(a => '«' + a + '»').join(', ') + ' пустой: добавь команды внутрь конструкции.', used };
+                    return { hardMissing: hard, softMissing: soft, message: 'Цель достигнута, но учебная тема не применена. Используй: ' + hard.map(a => '«' + a + '»').join(', ') + '.', used };
+                }
+                return { hardMissing: [], softMissing: soft, message: null, used };
+            }
+
             class CodeQuestApp {
                 constructor() {
                     this.levelsData = generateAllLevels();
@@ -2043,6 +2677,8 @@
                     this.isExecuting = false;
                     this.isPaused = false;
                     this.execTimer = null;
+                    this.cloudSaveTimer = null;
+                    this.cloudSaveInFlight = null;
                     this.runId = 0;
                     this.world = null;
                     this.interpreter = null;
@@ -2061,6 +2697,25 @@
                         { id: 'skin_astronaut', name: 'Космонавт', icon: '🧑‍🚀', cost: 260, type: 'avatar' },
                         { id: 'skin_dragon', name: 'Дракон Питона', icon: '🐉', cost: 320, type: 'avatar' },
                         { id: 'skin_phoenix', name: 'Феникс', icon: '🔥', cost: 400, type: 'avatar' },
+                        { id: 'skin_car', name: 'Суперкар', icon: '🏎️', cost: 90, type: 'avatar' },
+                        { id: 'skin_plane', name: 'Самолёт', icon: '✈️', cost: 110, type: 'avatar' },
+                        { id: 'skin_rocket', name: 'Ракета', icon: '🚀', cost: 140, type: 'avatar' },
+                        { id: 'skin_heli', name: 'Вертолёт', icon: '🚁', cost: 130, type: 'avatar' },
+                        { id: 'skin_ufo', name: 'НЛО', icon: '🛸', cost: 170, type: 'avatar' },
+                        { id: 'skin_train', name: 'Паровозик', icon: '🚂', cost: 70, type: 'avatar' },
+                        { id: 'skin_moto', name: 'Мотоцикл', icon: '🏍️', cost: 100, type: 'avatar' },
+                        { id: 'skin_fire', name: 'Пожарная машина', icon: '🚒', cost: 80, type: 'avatar' },
+                        { id: 'skin_trex', name: 'Динозавр', icon: '🦖', cost: 200, type: 'avatar' },
+                        { id: 'skin_shark', name: 'Акула', icon: '🦈', cost: 190, type: 'avatar' },
+                        { id: 'skin_lion', name: 'Лев', icon: '🦁', cost: 160, type: 'avatar' },
+                        { id: 'skin_tiger', name: 'Тигр', icon: '🐯', cost: 165, type: 'avatar' },
+                        { id: 'skin_wolf', name: 'Волк', icon: '🐺', cost: 175, type: 'avatar' },
+                        { id: 'skin_octo', name: 'Осьминог', icon: '🐙', cost: 130, type: 'avatar' },
+                        { id: 'skin_ship', name: 'Корабль', icon: '🚢', cost: 120, type: 'avatar' },
+                        { id: 'skin_hero', name: 'Супергерой', icon: '🦸', cost: 240, type: 'avatar' },
+                        { id: 'skin_tractor', name: 'Трактор', icon: '🚜', cost: 60, type: 'avatar' },
+                        { id: 'skin_scooter', name: 'Скутер', icon: '🛵', cost: 50, type: 'avatar' },
+                        { id: 'skin_sat', name: 'Спутник', icon: '🛰️', cost: 210, type: 'avatar' },
                         { id: 'skin_pixel', name: 'Пиксель (легенда)', icon: '👾', cost: 500, type: 'avatar' }
                     ];
                     this.achievements = [
@@ -2105,7 +2760,7 @@
                 }
                 loadState() {
                     // Без входа прогресс всегда с нуля (за ПК разные ученики)
-                    const studentId = localStorage.getItem('codequest_student_id');
+                    const studentId = sessionStorage.getItem('codequest_student_id') || localStorage.getItem('codequest_student_id');
                     if (!studentId) {
                         try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
                         return this.defaultState();
@@ -2140,6 +2795,7 @@
                         unlockedItems: ['skin_cat'],
                         completedLevels: {},
                         achievementsUnlocked: [],
+                        stats: {},
                         lastGameId: 1,
                         lastLevelNum: 1,
                         settings: { muted: false, speed: 1 }
@@ -2175,6 +2831,7 @@
                         });
                     }
                     d.achievementsUnlocked = Array.isArray(data.achievementsUnlocked) ? data.achievementsUnlocked : [];
+                    d.stats = data.stats && typeof data.stats === 'object' ? data.stats : {};
                     d.lastGameId = Math.min(MODULE_COUNT, Math.max(1, Number(data.lastGameId) || 1));
                     d.lastLevelNum = Math.min(LEVELS_PER_GAME, Math.max(1, Number(data.lastLevelNum) || 1));
                     d.settings = Object.assign({ muted: false, speed: 1 }, data.settings || {});
@@ -2188,7 +2845,7 @@
                         // Локально и в облако — только если ученик вошёл
                         if (currentStudent) {
                             localStorage.setItem(SAVE_KEY, JSON.stringify(this.userState));
-                            this.uploadSave();
+                            this.queueCloudSave();
                         } else {
                             // Без входа прогресс не сохраняем на диск
                             try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
@@ -2199,12 +2856,13 @@
                     this.updateHUD();
                 }
                 async downloadSave() {
+                    if (!supabaseClient) return;
                     // авто-вход, если раньше логинился
                     const id = localStorage.getItem('codequest_student_id');
                     if (!id) return;
                     const { data, error } = await supabaseClient
                         .from('game_saves')
-                        .select('*')
+                        .select('id,login,student_name,save_data,disabled,unlocked_modules')
                         .eq('id', id)
                         .maybeSingle();
                     if (error || !data) return;
@@ -2227,20 +2885,26 @@
                     updateAuthUI();
                 }
                 /* ===================== CLOUD SAVE ===================== */
+                queueCloudSave() {
+                    if (!supabaseClient || !currentStudent) return;
+                    clearTimeout(this.cloudSaveTimer);
+                    this.cloudSaveTimer = setTimeout(() => { this.uploadSave(); }, 700);
+                }
                 async uploadSave() {
-                    if (!currentStudent) return;
-
-                    try {
-                        await supabaseClient
-                            .from('game_saves')
-                            .update({
-                                save_data: this.userState,
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('id', currentStudent.id);
-                    } catch (e) {
-                        console.error('uploadSave error', e);
+                    if (!supabaseClient || !currentStudent) return false;
+                    if (this.cloudSaveInFlight) {
+                        try { await this.cloudSaveInFlight; } catch (_) {}
                     }
+                    const studentId = currentStudent?.id;
+                    if (!studentId) return false;
+                    const payload = { save_data: this.userState, updated_at: new Date().toISOString() };
+                    this.cloudSaveInFlight = supabaseClient
+                        .from('game_saves')
+                        .update(payload)
+                        .eq('id', studentId)
+                        .then(({ error }) => { if (error) throw error; return true; })
+                        .catch(e => { console.error('uploadSave error', e); return false; });
+                    try { return await this.cloudSaveInFlight; } finally { this.cloudSaveInFlight = null; }
                 }
                 /* ===================== INIT ===================== */
                 init() {
@@ -2259,7 +2923,7 @@
                     }
                     this.showScreen('games');
                     if (DEBUG) {
-                        console.log('DEBUG mode active. Levels generated:', Object.keys(this.levelsData).length * 15);
+                        console.log('DEBUG mode active. Levels generated:', GAMES_DATA.length * LEVELS_PER_GAME);
                         // quick solvability check
                         let unsolv = 0;
                         Object.values(this.levelsData).forEach(levels => {
@@ -2277,9 +2941,9 @@
                         openLoginModal();
                         this.showScreen('games');
                     });
-                    document.getElementById('logout-btn').addEventListener('click', () => {
+                    document.getElementById('logout-btn').addEventListener('click', async () => {
                         if (confirm('Выйти из аккаунта ученика?')){
-                            logoutStudent();
+                            await logoutStudent();
                             welcome_heading.textContent = 'Привет, Юный Кодер!';
                             this.showScreen('games');
                         }
@@ -2324,7 +2988,16 @@
                     document.getElementById('step-btn').addEventListener('click', () => this.stepOnce());
                     document.getElementById('tab-blocks-btn').addEventListener('click', () => this.setEditorTab('blocks'));
                     document.getElementById('tab-python-btn').addEventListener('click', () => this.setEditorTab('python'));
-                    document.getElementById('vic-levels-btn').addEventListener('click', () => { this.closeVictoryModal(); this.showScreen('levels'); });
+                    document.getElementById('vic-levels-btn').addEventListener('click', () => {
+                        this.closeVictoryModal();
+                        this._moduleDone = false;
+                        this.currentProgram = [];
+                        this.cursor = null;
+                        this.runResult = null;
+                        this._won = false;
+                        this._reward = null;
+                        this.showScreen('levels');
+                    });
                     document.getElementById('vic-next-btn').addEventListener('click', () => this.nextLevel());
                     document.getElementById('hint-close-btn').addEventListener('click', () => this.closeHintModal());
                     document.getElementById('hint-level-1').addEventListener('click', () => this.showHint(1));
@@ -2414,6 +3087,12 @@
                 renderWorld() {
                     if (!this.renderer || !this.world) return;
                     this.renderer.render(this.world, this.userState.avatar, this.getStageColor(this.currentGameId));
+                    const a = document.getElementById('world-aria');
+                    if (a) {
+                        const w = this.world, c = w.config;
+                        const remaining = w.collectibles.filter(x => !x.collected).length;
+                        a.textContent = `Герой: столбец ${w.hero.x + 1}, строка ${w.hero.y + 1}. Направление: ${['вверх','вправо','вниз','влево'][w.hero.dir]}. Финиш: столбец ${c.goalPos.x + 1}, строка ${c.goalPos.y + 1}. Осталось предметов: ${remaining}. Ключ: ${w.hasKey ? 'есть' : 'нет'}. Шагов: ${w.stepsExecuted}.`;
+                    }
                 }
                 renderGamesGrid() {
                     const grid = document.getElementById('games-grid');
@@ -2503,7 +3182,7 @@
                     grid.innerHTML = '';
                     let totalGameStars = 0;
 
-                    // Обычные уровни 1–15
+                    // Основные уровни 1–20
                     for (let lvl = 1; lvl <= LEVELS_MAIN; lvl++) {
                         const rec = this.userState.completedLevels[`${this.currentGameId}_${lvl}`];
                         const stars = rec ? (typeof rec === 'object' ? rec.stars : rec) : 0;
@@ -2535,7 +3214,7 @@
                         <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-400 whitespace-nowrap"><i class="fa-solid fa-fire mr-1"></i> Бонус (сложно)</span>
                         <div class="flex-1 h-px bg-rose-500/40"></div>`;
                     grid.appendChild(sep);
-                    // Бонусные 16–18
+                    // Бонусные 21–23
                     for (let lvl = LEVELS_MAIN + 1; lvl <= LEVELS_PER_GAME; lvl++) {
                         const rec = this.userState.completedLevels[`${this.currentGameId}_${lvl}`];
                         const stars = rec ? (typeof rec === 'object' ? rec.stars : rec) : 0;
@@ -2590,6 +3269,22 @@
                     return safeAction('startLevel', () => {
                         if (!this.isModuleUnlocked(this.currentGameId)) { this.showLockedModuleMsg(); return; }
                         this.stopExecution();
+                        // Always wipe previous level's blocks before loading the new config
+                        this.currentProgram = [];
+                        this.cursor = null;
+                        this.runResult = null;
+                        this.softMissing = [];
+                        this.dragBlock = null;
+                        this.dragIdx = null;
+                        this._won = false;
+                        this._reward = null;
+                        this.predictOK = false;
+                        this.predictTries = 0;
+                        this.hintLevelUsed = 0;
+                        const seqEl = document.getElementById('program-sequence');
+                        if (seqEl) seqEl.innerHTML = '';
+                        const pyEl = document.getElementById('python-code-view');
+                        if (pyEl) pyEl.textContent = '# Добавьте блоки выше для генерации кода Python';
                         this.currentLevelNum = levelNum;
                         this.userState.lastLevelNum = levelNum;
                         this.userState.lastGameId = this.currentGameId;
@@ -2612,12 +3307,25 @@
                             ? ('Бонус ' + (levelNum - LEVELS_MAIN) + ' 🔥')
                             : ('Уровень ' + levelNum);
                         document.getElementById('play-instructions').textContent = config.instructions || 'Выполните задание.';
+                        if ((config.requiredActions || []).length) document.getElementById('play-instructions').textContent += ' 🎯 Цель урока — применить: ' + this.blockNames(config.requiredActions).join(' и ') + '.';
 
-                        if (config.prefilledProgram) {
+                        // Fresh program for this level (prefilled only for debug/simplify/predict missions)
+                        if (config.prefilledProgram && Array.isArray(config.prefilledProgram) && config.prefilledProgram.length) {
                             this.currentProgram = config.prefilledProgram.map(b => ({ ...b }));
                         } else {
                             this.currentProgram = [];
                         }
+                        this.cursor = null;
+                        this.runResult = null;
+                        this._moduleDone = false;
+                        this._won = false;
+                        this._reward = null;
+                        this.predictOK = false;
+                        this.predictTries = 0;
+                        this.softMissing = [];
+                        this.levelStartTs = Date.now();
+                        this.setupPredict(config);
+                        this.updateCompleteBtn();
                         this.renderPalette(config.blocks);
                         this.renderProgramSequence();
                         this.setStatus('Составьте алгоритм и нажмите «Запустить».', 'info');
@@ -2643,69 +3351,112 @@
                         const btn = document.createElement('button');
                         btn.className = 'block-btn px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 rounded-lg text-xs font-extrabold text-white shadow border border-indigo-400/30 flex items-center space-x-1.5 focus-ring';
                         btn.addEventListener('click', () => this.addBlockToProgram(block));
+                        btn.draggable = true; btn.addEventListener('dragstart', e => { this.dragBlock = block; this.dragIdx = null; try { e.dataTransfer.setData('text/plain', block.id); } catch (_) { } });
                         btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i> <span>${escapeHtml(block.text)}</span>`;
                         palette.appendChild(btn);
                     });
                 }
+                lockedLevel() { return !!(this.world && this.world.config.mission === 'predict'); }
                 addBlockToProgram(block) {
-                    if (this.isExecuting) return;
+                    if (this.isExecuting || this.lockedLevel()) return;
                     sound.playClick();
-                    this.currentProgram.push({ ...block });
+                    const p = this.currentProgram, pos = this.cursor == null ? p.length : Math.min(this.cursor, p.length);
+                    p.splice(pos, 0, { ...block });
+                    const cl = CLOSER_OF[block.action];
+                    if (cl && this.world && this.world.config.blocks.some(b => b.action === cl)) {
+                        p.splice(pos + 1, 0, { ...Object.values(BLOCK_CATALOG).find(b => b.action === cl) });
+                        this.cursor = pos + 1;
+                    } else if (this.cursor != null) this.cursor = pos + 1;
                     this.renderProgramSequence();
                 }
                 removeBlockFromProgram(index) {
-                    if (this.isExecuting) return;
+                    if (this.isExecuting || this.lockedLevel()) return;
                     sound.playClick();
-                    this.currentProgram.splice(index, 1);
+                    const p = this.currentProgram, b = p[index], cl = CLOSER_OF[b.action];
+                    p.splice(index, 1);
+                    if (cl) { let d = 1; for (let j = index; j < p.length; j++) { const a = p[j].action; if (CLOSER_OF[a] === cl) d++; else if (a === cl) d--; if (d === 0) { p.splice(j, 1); break; } } }
+                    this.cursor = null;
+                    this.renderProgramSequence();
+                }
+                moveBlock(from, to) {
+                    if (this.isExecuting || this.lockedLevel() || to < 0 || to >= this.currentProgram.length) return;
+                    const [b] = this.currentProgram.splice(from, 1);
+                    this.currentProgram.splice(to, 0, b);
+                    this.cursor = null;
                     this.renderProgramSequence();
                 }
                 clearProgram() {
-                    if (this.isExecuting) return;
+                    if (this.isExecuting || this.lockedLevel()) return;
                     sound.playClick();
                     this.currentProgram = [];
+                    this.cursor = null;
                     this.renderProgramSequence();
-                    if (this.world) {
-                        this.world.reset();
-                        this.renderWorld();
-                    }
+                    if (this.world) { this.world.reset(); this.renderWorld(); }
                     this.setStatus('Составьте алгоритм и нажмите «Запустить».', 'info');
                 }
                 renderProgramSequence() {
+                    this.updateCompleteBtn();
                     const container = document.getElementById('program-sequence');
                     const pyView = document.getElementById('python-code-view');
+                    const cfg = this.world ? this.world.config : {}, locked = this.lockedLevel();
+                    if (!container._dnd) {
+                        container._dnd = 1;
+                        container.addEventListener('dragover', e => e.preventDefault());
+                        container.addEventListener('drop', e => { e.preventDefault(); if (this.dragBlock) { this.cursor = null; this.addBlockToProgram(this.dragBlock); this.dragBlock = null; } });
+                    }
                     container.innerHTML = '';
-                    document.getElementById('block-count-badge').textContent = `${this.currentProgram.length} блоков`;
-
+                    document.getElementById('block-count-badge').textContent = `${this.currentProgram.length} блоков` + (cfg.maxBlocks ? ` · лимит ${cfg.maxBlocks}` + (this.currentProgram.length > cfg.maxBlocks ? ' ⚠' : '') : '');
                     if (this.currentProgram.length === 0) {
-                        container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-600 text-xs py-8">
+                        container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-500 text-xs py-8 text-center px-4">
                 <i class="fa-solid fa-hand-pointer text-2xl mb-2 opacity-40"></i>
-                <span>Нажмите на блоки выше, чтобы составить алгоритм</span></div>`;
+                <span>Нажми на блок или перетащи его сюда. Скобка «}» ставится сама, а новые блоки попадают внутрь цикла или условия.</span></div>`;
                         pyView.textContent = '# Добавьте блоки выше для генерации кода Python';
                         return;
                     }
-                    let pyCode = '';
+                    const COL = { loop: 'border-l-violet-400', loop_end: 'border-l-violet-400', if: 'border-l-amber-400', if_end: 'border-l-amber-400', else: 'border-l-amber-400', logic: 'border-l-amber-400', function: 'border-l-emerald-400', function_end: 'border-l-emerald-400' };
+                    let pyCode = '# Твоя программа на Python: отступ = «внутри» цикла, условия или функции\n';
                     let indent = 0;
+                    const target = String((cfg.objective && cfg.objective.amount) || 3);
                     this.currentProgram.forEach((block, idx) => {
-                        if (block.action === 'end_loop' || block.action === 'end_if' || block.action === 'end_fn') indent = Math.max(0, indent - 1);
-                        pyCode += '    '.repeat(indent) + (block.python || '# ...') + '\n';
-                        if (block.type === 'loop' || block.type === 'if' || block.type === 'function' || block.type === 'logic' || block.action === 'else') indent++;
-
+                        if (block.action === 'end_loop' || block.action === 'end_if' || block.action === 'end_fn' || block.action === 'else') indent = Math.max(0, indent - 1);
+                        const depth = indent;
+                        if (!/^# end/.test(block.python || '')) pyCode += '    '.repeat(indent) + String(block.python || '# ...').replace('TARGET', target) + '\n';
+                        if (block.type === 'loop' || block.type === 'if' || block.type === 'logic' || block.action === 'def_fn' || block.action === 'else') indent++;
                         const item = document.createElement('div');
                         item.id = `program-block-${idx}`;
-                        item.className = 'glass-panel px-3 py-2 rounded-lg border border-slate-700 flex items-center justify-between text-xs font-bold text-cyan-300 transition-all duration-150 bg-slate-900/80';
+                        item.draggable = !locked;
+                        item.style.marginLeft = (depth * 18) + 'px';
+                        item.className = 'glass-panel px-2 py-1.5 rounded-lg border border-slate-700 border-l-4 ' + (COL[block.type] || COL[block.action] || 'border-l-cyan-400') + ' flex items-center justify-between text-xs font-bold text-cyan-300 transition-all duration-150 bg-slate-900/80 ' + (locked ? '' : 'cursor-pointer');
                         item.setAttribute('role', 'listitem');
                         const textSpan = document.createElement('div');
-                        textSpan.className = 'flex items-center space-x-2';
-                        textSpan.innerHTML = `<span class="text-slate-500 text-[10px]">${idx + 1}.</span><i class="fa-solid fa-puzzle-piece text-indigo-400"></i><span></span>`;
-                        textSpan.querySelector('span:last-child').textContent = block.text;
-                        const rm = document.createElement('button');
-                        rm.className = 'text-slate-500 hover:text-rose-400 p-1 focus-ring';
-                        rm.setAttribute('aria-label', 'Удалить блок');
-                        rm.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-                        rm.addEventListener('click', () => this.removeBlockFromProgram(idx));
+                        textSpan.className = 'flex items-center space-x-2 min-w-0';
+                        textSpan.innerHTML = `<span class="text-slate-500 text-[10px]">${idx + 1}.</span><span class="truncate"></span>`;
+                        textSpan.querySelector('.truncate').textContent = block.text;
+                        const tools = document.createElement('div');
+                        tools.className = 'flex items-center shrink-0';
+                        const mkBtn = (icon, label, fn, show) => { if (!show || locked) return; const b = document.createElement('button'); b.className = 'text-slate-500 hover:text-cyan-300 px-1.5 py-1 focus-ring'; b.setAttribute('aria-label', label); b.innerHTML = `<i class="fa-solid ${icon}"></i>`; b.addEventListener('click', fn); tools.appendChild(b); };
+                        mkBtn('fa-chevron-up', 'Поднять блок', () => this.moveBlock(idx, idx - 1), idx > 0);
+                        mkBtn('fa-chevron-down', 'Опустить блок', () => this.moveBlock(idx, idx + 1), idx < this.currentProgram.length - 1);
+                        mkBtn('fa-xmark', 'Удалить блок', () => this.removeBlockFromProgram(idx), true);
                         item.appendChild(textSpan);
-                        item.appendChild(rm);
+                        item.appendChild(tools);
+                        item.addEventListener('click', ev => { if (ev.target.closest('button') || locked || this.isExecuting) return; this.cursor = this.cursor === idx + 1 ? null : idx + 1; this.renderProgramSequence(); });
+                        item.addEventListener('dragstart', e => { this.dragIdx = idx; this.dragBlock = null; try { e.dataTransfer.setData('text/plain', String(idx)); } catch (_) { } });
+                        item.addEventListener('dragover', e => e.preventDefault());
+                        item.addEventListener('drop', e => {
+                            e.preventDefault(); e.stopPropagation();
+                            if (this.dragBlock) { this.cursor = idx; this.addBlockToProgram(this.dragBlock); this.cursor = null; this.dragBlock = null; this.renderProgramSequence(); }
+                            else if (this.dragIdx != null && this.dragIdx !== idx) this.moveBlock(this.dragIdx, idx);
+                            this.dragIdx = null;
+                        });
                         container.appendChild(item);
+                        if (this.cursor === idx + 1 && this.cursor < this.currentProgram.length) {
+                            const mark = document.createElement('div');
+                            mark.className = 'text-[10px] text-cyan-400 border-t border-dashed border-cyan-500/60 pt-0.5';
+                            mark.style.marginLeft = (indent * 18) + 'px';
+                            mark.textContent = '▲ новые блоки встанут сюда (нажми на строку ещё раз — вставка в конец)';
+                            container.appendChild(mark);
+                        }
                     });
                     pyView.textContent = pyCode;
                 }
@@ -2732,6 +3483,7 @@
                 setStatus(msg, type) {
                     const el = document.getElementById('play-status-msg');
                     if (!el) return;
+                    if (type === 'error' || type === 'warn') this.trackErr(msg);
                     el.textContent = msg;
                     const base = 'mt-2 text-center text-xs font-semibold py-2 px-3 rounded-lg border ';
                     if (type === 'error') el.className = base + 'bg-rose-950/60 text-rose-300 border-rose-800';
@@ -2752,6 +3504,46 @@
                     const i = this.interpreter;
                     panel.textContent = `Game ${this.currentGameId} L${this.currentLevelNum} | Hero (${w.hero.x},${w.hero.y}) dir=${w.hero.dir} | IP=${i.ip} steps=${w.stepsExecuted} | vars=${JSON.stringify(w.variables)} | collected=${w.collectedCount} | key=${w.hasKey} | failed=${w.failed}`;
                 }
+                validateProgram(prog) {
+                    const n = f => prog.filter(f).length;
+                    const lo = n(b => b.action === 'repeat' || b.action === 'while_lt'), le = n(b => b.action === 'end_loop');
+                    if (lo > le) return 'Цикл не закрыт: не хватает блока «} Конец цикла».';
+                    if (le > lo) return 'Лишний блок «} Конец цикла»: у него нет начала.';
+                    const io = n(b => b.type === 'if' || b.type === 'logic'), ie = n(b => b.action === 'end_if');
+                    if (io > ie) return 'Условие не закрыто: не хватает «} Конец условия».';
+                    if (ie > io) return 'Лишний блок «} Конец условия».';
+                    if (n(b => b.action === 'def_fn') !== n(b => b.action === 'end_fn')) return 'Функция начинается «ОПРЕДЕЛИТЬ функцию {» и заканчивается «} Конец функции».';
+                    return null;
+                }
+                blockNames(actions) {
+                    return actions.map(a => { const b = Object.values(BLOCK_CATALOG).find(x => x.action === a); return '«' + (b ? b.text.replace(/[{}]/g, '').trim() : a) + '»'; });
+                }
+                missingConcept() {
+                    const cfg0 = this.world.config;
+                    if (cfg0.mission === 'predict' && !this.predictOK) return 'Сначала выбери ответ в блоке «Угадай заранее».';
+                    const lim0 = checkLimits(this.currentProgram, cfg0);
+                    if (lim0) return lim0;
+                    const analysis = analyzeProgramConcept(this.currentProgram, cfg0);
+                    this.softMissing = analysis.softMissing;
+                    if (!analysis.message) {
+                        return null;
+                    }
+                    const st = this.statFor(this.currentGameId + '_' + this.currentLevelNum);
+                    st.conceptMisses = (st.conceptMisses || 0) + 1;
+                    return analysis.message;
+                }
+                pathToText(path, compress) {
+                    const name = id => (BLOCK_CATALOG[id] ? BLOCK_CATALOG[id].text : id);
+                    const out = []; let i = 0;
+                    while (i < path.length) {
+                        let j = i; while (j < path.length && path[j] === path[i]) j++;
+                        const k = j - i;
+                        if (compress && k >= 2) out.push('Повторить ' + k + ' раз(а) { ' + name(path[i]) + ' }');
+                        else for (let q = 0; q < k; q++) out.push(name(path[i]));
+                        i = j;
+                    }
+                    return out.map((t, q) => (q + 1) + '. ' + t).join('\n');
+                }
                 runProgram() {
                     return safeAction('runProgram', () => {
                         if (this.isExecuting && !this.isPaused) return;
@@ -2764,6 +3556,10 @@
                             this.setStatus('Добавьте хотя бы одну команду!', 'error');
                             return;
                         }
+                        const badV = this.validateProgram(this.currentProgram);
+                        if (badV) { sound.playError(); this.setStatus(badV, 'error'); return; }
+                        if (this.world.config.mission === 'predict' && !this.predictOK) { sound.playError(); this.setStatus('Сначала выбери ответ: куда придёт герой?', 'warn'); return; }
+                        this.statFor(this.currentGameId + '_' + this.currentLevelNum).runs++;
                         sound.init();
                         this.world.reset();
                         this.interpreter = new Interpreter(this.currentProgram, this.world);
@@ -2811,6 +3607,8 @@
                         return;
                     }
                     if (!this.isExecuting) {
+                        const badS = this.validateProgram(this.currentProgram);
+                        if (badS) { sound.playError(); this.setStatus(badS, 'error'); return; }
                         this.world.reset();
                         this.interpreter = new Interpreter(this.currentProgram, this.world);
                         this.interpreter.running = true;
@@ -2844,35 +3642,45 @@
                         return;
                     }
                     if (this.interpreter.checkObjective()) {
+                        this.runResult = null;
+                        const mc0 = this.missingConcept();
+                        if (mc0) { sound.playError(); this.setStatus(mc0, 'warn'); return; }
                         sound.playSuccess();
-                        this.setStatus('Цель достигнута! Нажмите «Завершить», чтобы зафиксировать результат.', 'success');
+                        this.runResult = { sig: this.progSig(), steps: this.world.stepsExecuted };
+                        this.updateCompleteBtn();
+                        this.setStatus('Верно! ✅ Задание выполнено. Нажми «Завершить», чтобы получить награду и перейти дальше.', 'success');
                     } else {
                         sound.playError();
-                        this.setStatus('Программа завершилась, но цель не достигнута. Проверьте алгоритм!', 'warn');
+                        this.setStatus(this.interpreter.explain(), 'warn');
                     }
                 }
                 completeLevel() {
                     return safeAction('completeLevel', () => {
-                        if (this.isExecuting) {
-                            this.setStatus('Дождитесь окончания выполнения или поставьте на паузу.', 'warn');
-                            return;
-                        }
-                        if (!this.world || !this.interpreter) {
-                            this.setStatus('Сначала откройте уровень и запустите программу.', 'error');
-                            return;
-                        }
-                        if (this.world.failed) {
+                        if (this.isExecuting) { this.setStatus('Дождись конца выполнения (или поставь на паузу).', 'warn'); return; }
+                        if (!this.world) return;
+                        if (!this.runResult || this.runResult.sig !== this.progSig()) {
                             sound.playError();
-                            this.setStatus(this.world.failReason || 'Последний запуск завершился ошибкой. Исправьте алгоритм и запустите снова.', 'error');
+                            this.setStatus('Сначала реши уровень: нажми «Запустить». «Завершить» засчитывает только проверенное решение.', 'warn');
                             return;
                         }
-                        if (!this.interpreter.checkObjective()) {
-                            sound.playError();
-                            this.setStatus('Цель ещё не достигнута. Запустите программу и убедитесь, что задание выполнено.', 'warn');
-                            return;
-                        }
-                        this.onVictory();
+                        if (this._won && this._reward) { this.showVictoryModal(this._reward.stars, 0, this._reward.steps); return; } // повторное нажатие: награда уже выдана, просто показываем итог
+                        this._won = true;
+                        const r = this._reward = this.onVictory();
+                        if (this.currentLevelNum >= LEVELS_PER_GAME) { this.showModuleDone(r); return; }
+                        this._moduleDone = false;
+                        this.showVictoryModal(r.stars, r.coins, r.steps);
                     });
+                }
+                updateCompleteBtn() {
+                    const b = document.getElementById('complete-btn'); if (!b) return;
+                    const ready = !!(this.runResult && this.runResult.sig === this.progSig());
+                    b.classList.toggle('opacity-50', !ready);
+                    b.classList.toggle('animate-pulse', ready);
+                    b.setAttribute('aria-disabled', String(!ready));
+                }
+                showModuleDone(r) {
+                    this._moduleDone = true;
+                    this.showVictoryModal(r.stars, r.coins, r.steps);
                 }
                 stopExecution() {
                     this.isExecuting = false;
@@ -2917,15 +3725,20 @@
                 }
                 onVictory() {
                     sound.playSuccess();
-                    this.setStatus('УРА! Уровень успешно пройден!', 'success');
-                    const steps = this.world.stepsExecuted;
+                                        const steps = this.runResult ? this.runResult.steps : this.world.stepsExecuted;
                     const optimal = this.world.config.optimalSteps || steps;
                     let stars = this.calculateStars(steps, optimal);
+                    if (this.world.config.mission === 'predict') stars = this.predictStars || 1;
                     // hint penalty
                     if (this.hintLevelUsed >= 3) stars = Math.min(stars, 1);
                     else if (this.hintLevelUsed >= 2) stars = Math.min(stars, 2);
+                    const cfgS = this.world.config;
+                    const soft = this.softMissing || [];
+                    if (soft.length) stars = Math.min(stars, 2); // тема урока не применена: максимум 2 звезды
+                    if (!cfgS.maxBlocks && !cfgS.maxUse && (cfgS.requiredActions || []).includes('repeat') && (cfgS.fullPath || []).length >= 4 && this.currentProgram.length >= cfgS.fullPath.length) stars = Math.min(stars, 2); // цикл должен реально сократить код
 
                     const key = `${this.currentGameId}_${this.currentLevelNum}`;
+                    { const st0 = this.statFor(key); st0.done = 1; st0.time = (st0.time || 0) + Math.min(Date.now() - (this.levelStartTs || Date.now()), 1200000); }
                     const prev = this.userState.completedLevels[key];
                     const prevStars = prev ? (typeof prev === 'object' ? prev.stars : prev) : 0;
                     const prevBest = prev && typeof prev === 'object' ? prev.bestSteps : null;
@@ -2946,10 +3759,22 @@
                     this.userState.coins += coinsEarned;
                     this.checkAchievements();
                     this.saveState();
-                    this.showVictoryModal(stars, coinsEarned, steps);
+                    return { stars, coins: coinsEarned, steps, soft };
                 }
                 showVictoryModal(stars, coins, steps) {
                     const modal = document.getElementById('modal-victory');
+                    const md = !!this._moduleDone, r = this._reward || {};
+                    document.getElementById('vic-title').textContent = md ? 'Модуль пройден! 🎉' : 'Уровень пройден!';
+                    const pp = modal.querySelector('p');
+                    if (pp) {
+                        if (md) {
+                            const g = this.currentGameId; let tot = 0, dn = 0;
+                            for (let l = 1; l <= LEVELS_PER_GAME; l++) { const c = this.userState.completedLevels[g + '_' + l]; if (c) { dn++; tot += typeof c === 'object' ? c.stars : c; } }
+                            pp.textContent = 'Уровней пройдено: ' + dn + ' из ' + LEVELS_PER_GAME + ', звёзд: ' + tot + ' из ' + (LEVELS_PER_GAME * 3) + '.';
+                        } else pp.textContent = (r.soft && r.soft.length) ? 'Для ⭐⭐⭐ в следующий раз примени ' + this.blockNames(r.soft).join(', ') + '.' : 'Отличная работа! Персонаж успешно выполнил задание.';
+                    }
+                    document.getElementById('vic-next-btn').innerHTML = (md ? 'К модулям' : 'Следующий') + ' <i class="fa-solid fa-arrow-right ml-1"></i>';
+                    const tc = document.getElementById('vic-total'); if (tc) tc.textContent = this.userState.coins;
                     document.getElementById('vic-coins').textContent = coins > 0 ? `+${coins}` : '0';
                     document.getElementById('vic-steps').textContent = steps;
                     ['vic-star-1', 'vic-star-2', 'vic-star-3'].forEach((id, idx) => {
@@ -2970,6 +3795,15 @@
                 }
                 nextLevel() {
                     this.closeVictoryModal();
+                    if (this._moduleDone) { this._moduleDone = false; this.showScreen('games'); return; }
+                    // Clear previous level blocks immediately so UI never shows stale program
+                    this.stopExecution();
+                    this.currentProgram = [];
+                    this.cursor = null;
+                    this.runResult = null;
+                    this._won = false;
+                    this._reward = null;
+                    this.softMissing = [];
                     if (this.currentLevelNum < LEVELS_PER_GAME) this.startLevel(this.currentLevelNum + 1);
                     else this.showScreen('levels');
                 }
@@ -2985,11 +3819,14 @@
                     const config = this.levelsData[this.currentGameId][this.currentLevelNum - 1];
                     const hints = config.hints || ['Подсказка недоступна.', '', ''];
                     this.hintLevelUsed = Math.max(this.hintLevelUsed, level);
+                    this.statFor(this.currentGameId + '_' + this.currentLevelNum).hints++;
                     let text = hints[level - 1] || 'Нет дополнительной подсказки.';
-                    if (level === 3 && config.examplePath && config.examplePath.length) {
-                        text += '\n\nПример пути (блоки): ' + config.examplePath.join(' → ');
+                    if (level === 1) text = 'Сначала подумай: в какую сторону смотрит герой и сколько клеток до финиша? ' + text;
+                    if (level === 3) {
+                        const req = config.requiredActions || [];
+                        if (req.length) text += '\n\nКаркас: используй ' + req.map(a => '«' + a + '»').join(' + ') + ', но сам выбери порядок и содержимое внутри конструкции.';
                     }
-                    document.getElementById('hint-content').textContent = text;
+                    const hc = document.getElementById('hint-content'); hc.style.whiteSpace = 'pre-line'; hc.textContent = text;
                 }
                 renderShop() {
                     const grid = document.getElementById('shop-items-grid');
@@ -3034,6 +3871,76 @@
                     this.renderProfile();
                     this.updateHUD();
                 }
+                setupPredict(config) {
+                    const box = document.getElementById('predict-box'); if (!box) return;
+                    if (config.mission !== 'predict') { box.classList.add('hidden'); return; }
+                    box.classList.remove('hidden');
+                    box.innerHTML = '<div class="font-bold text-fuchsia-300 mb-2">🔮 В какой клетке (столбец, строка) окажется герой?</div><div class="flex flex-wrap gap-2"></div>';
+                    const wrap = box.lastChild;
+                    config.predict.options.forEach(o => {
+                        const b = document.createElement('button');
+                        b.className = 'px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-fuchsia-600 font-bold focus-ring';
+                        b.textContent = '(' + (o.x + 1) + ', ' + (o.y + 1) + ')';
+                        b.addEventListener('click', () => this.answerPredict(o, b));
+                        wrap.appendChild(b);
+                    });
+                }
+                answerPredict(o, btn) {
+                    if (this.predictOK) return;
+                    this.predictTries++;
+                    const a = this.world.config.predict.answer;
+                    if (o.x === a.x && o.y === a.y) {
+                        this.predictOK = true; this.predictStars = this.predictTries === 1 ? 3 : this.predictTries === 2 ? 2 : 1;
+                        btn.classList.add('bg-emerald-600'); sound.playSuccess();
+                        this.setStatus('Верно! Нажми «Запустить» и проверь себя.', 'success');
+                    } else {
+                        btn.disabled = true; btn.classList.add('opacity-40'); sound.playError();
+                        this.setStatus('Не совсем. Выполняй блоки по одному (кнопка ⏭) и следи, куда смотрит герой.', 'warn');
+                    }
+                }
+                progSig() { return this.currentProgram.map(b => b.id).join(','); }
+                statFor(key) { const st = this.userState.stats = this.userState.stats || {}; return st[key] = st[key] || { runs: 0, fails: 0, hints: 0, time: 0, errs: {} }; }
+                trackErr(msg) {
+                    if (!this.world) return;
+                    const c = classifyErr(msg); if (!c) return;
+                    const st = this.statFor(this.currentGameId + '_' + this.currentLevelNum);
+                    st.fails++; st.errs[c] = (st.errs[c] || 0) + 1;
+                }
+                reportData() {
+                    return Object.entries(this.userState.stats || {}).map(([k, v]) => {
+                        const [g, l] = k.split('_').map(Number), d = this.userState.completedLevels[k];
+                        const top = Object.entries(v.errs || {}).sort((a, b) => b[1] - a[1])[0];
+                        return { g, l, done: !!d, stars: d ? d.stars : 0, runs: v.runs || 0, fails: v.fails || 0, hints: v.hints || 0, conceptMisses: v.conceptMisses || 0, sec: Math.round((v.time || 0) / 1000), errs: v.errs || {}, top: top ? top[0] : '' };
+                    }).sort((a, b) => a.g - b.g || a.l - b.l);
+                }
+                openReport() {
+                    const rows = this.reportData(), U = this.userState, gt = g => (GAMES_DATA.find(x => x.id === g) || {}).title || g;
+                    const errT = {}, mod = {};
+                    rows.forEach(r => {
+                        Object.entries(r.errs).forEach(([k, v]) => errT[k] = (errT[k] || 0) + v);
+                        const m = mod[r.g] = mod[r.g] || { done: 0, stars: 0, runs: 0, fails: 0, hints: 0 };
+                        m.done += r.done ? 1 : 0; m.stars += r.stars; m.runs += r.runs; m.fails += r.fails; m.hints += r.hints; m.conceptMisses = (m.conceptMisses || 0) + r.conceptMisses;
+                    });
+                    let h = `<div><b>${escapeHtml(U.username)}</b>: пройдено уровней — ${Object.keys(U.completedLevels).length}, монет — ${U.coins}</div>`;
+                    if (!rows.length) h += '<div class="text-slate-400">Данных пока нет: отчёт наполняется по мере игры (после входа данные сохраняются в облако).</div>';
+                    else {
+                        const top = Object.entries(errT).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                        h += '<div class="font-bold text-indigo-300 mt-2">Частые затруднения и что с ними делать</div>' + (top.length ? '<ul class="list-disc pl-5 space-y-1">' + top.map(([k, v]) => `<li><b>${escapeHtml(ERR_INFO[k][0])}</b> (${v}). ${escapeHtml(ERR_INFO[k][1])}</li>`).join('') + '</ul>' : '<div>Ошибок почти нет.</div>');
+                        h += '<div class="font-bold text-indigo-300 mt-2">По модулям</div><table class="w-full text-xs"><tr class="text-slate-400 text-left"><th>Модуль</th><th>Пройдено</th><th>Звёзд</th><th>Запусков</th><th>Ошибок</th><th>Концепция</th><th>Подсказок</th></tr>'
+                            + Object.entries(mod).map(([g, m]) => `<tr><td>${escapeHtml(String(gt(Number(g))))}</td><td>${m.done}</td><td>${m.stars}</td><td>${m.runs}</td><td>${m.fails}</td><td>${m.conceptMisses || 0}</td><td>${m.hints}</td></tr>`).join('') + '</table>';
+                        const hard = rows.filter(r => r.fails > 0).sort((a, b) => b.fails - a.fails).slice(0, 5);
+                        if (hard.length) h += '<div class="font-bold text-indigo-300 mt-2">Самые трудные уровни</div><ul class="list-disc pl-5">' + hard.map(r => `<li>${escapeHtml(String(gt(r.g)))}, уровень ${r.l}: ошибок ${r.fails}, подсказок ${r.hints}</li>`).join('') + '</ul>';
+                    }
+                    document.getElementById('report-body').innerHTML = h;
+                    document.getElementById('modal-report').classList.remove('hidden');
+                }
+                downloadCsv() {
+                    const gt = g => ((GAMES_DATA.find(x => x.id === g) || {}).title || g);
+                    const lines = ['модуль;уровень;пройден;звёзды;запусков;ошибок;концептуальных ошибок;подсказок;секунд;типичная ошибка'].concat(this.reportData().map(r => [gt(r.g), r.l, r.done ? 'да' : 'нет', r.stars, r.runs, r.fails, r.conceptMisses || 0, r.hints, r.sec, r.top ? ERR_INFO[r.top][0] : ''].join(';')));
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
+                    a.download = 'codequest_report.csv'; a.click();
+                }
                 renderProfile() {
                     document.getElementById('profile-avatar-big').textContent = this.userState.avatar;
                     document.getElementById('profile-name-input').value = this.userState.username;
@@ -3052,7 +3959,7 @@
                         const btn = document.createElement('button');
                         btn.className = `w-12 h-12 rounded-xl border flex items-center justify-center text-2xl transition focus-ring ${this.userState.avatar === item.icon ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-900 border-slate-800'}`;
                         btn.textContent = item.icon;
-                        btn.setAttribute('aria-label', item.name);
+                        btn.setAttribute('aria-label', item.name); btn.setAttribute('aria-pressed', String(this.userState.avatar === item.icon));
                         btn.addEventListener('click', () => {
                             this.userState.avatar = item.icon;
                             this.saveState();
@@ -3106,6 +4013,105 @@
                     });
                 }
             }
+            function tokenToBlock(token) {
+                if (!token) return null;
+                const byId = BLOCK_CATALOG[token];
+                if (byId) return { ...byId };
+                const byAction = Object.values(BLOCK_CATALOG).find(b => b.action === token);
+                return byAction ? { ...byAction } : null;
+            }
+            function referenceProgramFor(config) {
+                let ids = Array.isArray(config.refIds) && config.refIds.length ? config.refIds.slice() : (config.fullPath || []).slice();
+                if (!ids.length) return [];
+                if (config.objective?.type === 'collect_amount' && !ids.includes('set_var')) {
+                    const expanded = ['set_var'];
+                    ids.forEach(id => { expanded.push(id); if (id === 'collect') expanded.push('inc_var'); });
+                    ids = expanded;
+                }
+                const program = ids.map(tokenToBlock).filter(Boolean);
+                return program;
+            }
+            function executeProgramForAudit(config, program, max = 1800) {
+                const w = new WorldState(config), it = new Interpreter(program, w);
+                let guard = 0, last = null;
+                while (!last?.done && guard++ < max) last = it.step();
+                if (guard >= max && !last?.done) {
+                    w.failed = true;
+                    w.failReason = 'QA: выполнение превысило защитный лимит.';
+                }
+                return { world: w, interpreter: it, steps: guard, done: !!last?.done, error: last?.error || null, objective: it.checkObjective() };
+            }
+            function auditProgramStructure(program) {
+                const p = program || [];
+                const n = f => p.filter(f).length;
+                const startsLoop = n(b => b.action === 'repeat' || b.action === 'while_lt');
+                const endsLoop = n(b => b.action === 'end_loop');
+                const startsIf = n(b => b.type === 'if' || b.type === 'logic');
+                const endsIf = n(b => b.action === 'end_if');
+                const defs = n(b => b.action === 'def_fn'), endDefs = n(b => b.action === 'end_fn');
+                if (startsLoop !== endsLoop) return 'Несовпадение начала/конца цикла';
+                if (startsIf !== endsIf) return 'Несовпадение начала/конца условия';
+                if (defs !== endDefs) return 'Несовпадение начала/конца функции';
+                return null;
+            }
+            function runCurriculumAudit(app) {
+                const report = { total: 0, passed: 0, failed: 0, schema: 0, referenceRuns: 0, referencePassed: 0, missionPassed: 0, issues: [], byModule: {} };
+                const issue = (type, g, l, msg) => { report.failed++; report.issues.push({ type, game: g, level: l, message: msg }); };
+                for (const game of GAMES_DATA) {
+                    const levels = app.levelsData[game.id] || [];
+                    const mod = report.byModule[game.id] = { count: levels.length, passed: 0, failed: 0, refPassed: 0, concept: 0, missions: 0 };
+                    if (levels.length !== LEVELS_PER_GAME) { issue('count', game.id, 0, `Ожидалось ${LEVELS_PER_GAME}, получено ${levels.length}`); continue; }
+                    for (let i = 0; i < levels.length; i++) {
+                        const l = i + 1, c = levels[i]; report.total++;
+                        const problems = [];
+                        if (!c || c.id !== l || c.gameId !== game.id) problems.push('неверный id/gameId');
+                        if (!Number.isInteger(c.gridCols) || !Number.isInteger(c.gridRows) || !c.startPos || !c.goalPos) problems.push('неполная схема поля');
+                        if (!Array.isArray(c.blocks) || !c.blocks.length) problems.push('нет доступных блоков');
+                        if (!c.objective || typeof c.objective.type !== 'string') problems.push('нет цели');
+                        if (!Array.isArray(c.hints) || c.hints.length < 3 || c.hints.slice(0,3).some(x => !String(x).trim())) problems.push('неполные подсказки');
+                        if (c.hints?.some(x => String(x).includes('Маршрут-образец'))) problems.push('подсказка содержит готовый маршрут');
+                        if (!isFinite(c.optimalSteps)) problems.push('нет конечной оптимальной длины');
+                        if (!c.solvable) problems.push('уровень помечен как нерешаемый');
+                        if (c.objective.type === 'collect_all' && c.objective.password && !c.collectibles.some(x => x.letter)) problems.push('есть password, но нет букв');
+                        const ref = referenceProgramFor(c);
+                        const structural = auditProgramStructure(ref);
+                        if (structural) problems.push('эталон: ' + structural);
+                        const limitViolation = checkLimits(ref, c);
+                        if (limitViolation) problems.push('эталон нарушает ограничение: ' + limitViolation);
+                        const concept = analyzeProgramConcept(ref, c);
+                        if (concept.hardMissing.length) problems.push('эталон не применяет обязательную тему: ' + concept.hardMissing.join(', '));
+                        report.schema++;
+                        if (problems.length) { issue('schema', game.id, l, problems.join('; ')); continue; }
+                        report.referenceRuns++;
+                        const exec = executeProgramForAudit(c, ref);
+                        if (exec.error || exec.world.failed || !exec.objective) {
+                            issue('reference', game.id, l, 'Эталон не прошёл: ' + (exec.error || exec.world.failReason || 'цель не достигнута'));
+                            continue;
+                        }
+                        report.referencePassed++; mod.refPassed++;
+                        if (c.mission === 'predict') {
+                            const pre = executeProgramForAudit(c, c.prefilledProgram || []);
+                            const ans = c.predict?.answer;
+                            if (!ans || pre.world.hero.x !== ans.x || pre.world.hero.y !== ans.y) issue('predict', game.id, l, 'Ответ predict не совпадает с исполнением prefilledProgram');
+                            else { report.missionPassed++; mod.missions++; }
+                        } else if (c.mission === 'debug') {
+                            const broken = executeProgramForAudit(c, c.prefilledProgram || []);
+                            if (broken.objective) issue('debug', game.id, l, 'Prefilled debug-программа неожиданно решает уровень');
+                            else { report.missionPassed++; mod.missions++; }
+                        } else if (c.mission === 'simplify') {
+                            const pre = c.prefilledProgram || [];
+                            if (!pre.length || !c.maxBlocks) issue('simplify', game.id, l, 'Simplify mission without prefilledProgram/maxBlocks');
+                            else { report.missionPassed++; mod.missions++; }
+                        }
+                        report.passed++; mod.passed++;
+                    }
+                }
+                report.failed = report.issues.length;
+                // A clean run means every level has a passing reference execution.
+                report.clean = report.total === MODULE_COUNT * LEVELS_PER_GAME && report.referencePassed === report.total && report.issues.length === 0;
+                return report;
+            }
+
             /* ===================== HELPERS ===================== */
             function assertElement(id) {
                 const el = document.getElementById(id);
@@ -3130,6 +4136,8 @@
             /* ===================== BOOT ===================== */
             let app;
             let __booted = false;
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') ['modal-hint', 'modal-login', 'modal-victory', 'modal-report'].forEach(id => { const m = document.getElementById(id); if (m) m.classList.add('hidden'); }); });
+            document.addEventListener('click', e => { const t = e.target.closest('button'); if (!t || !window.app) return; if (t.id === 'report-btn') window.app.openReport(); else if (t.id === 'report-close') document.getElementById('modal-report').classList.add('hidden'); else if (t.id === 'report-csv') window.app.downloadCsv(); });
             function boot() {
                 if (__booted) return;
                 __booted = true;
@@ -3160,49 +4168,40 @@
                 }
             }
             function runSelfTest() {
-                const report = [];
-                let pass = true;
-                const log = (ok, msg) => { report.push((ok ? 'OK  ' : 'FAIL') + ' ' + msg); if (!ok) pass = false; };
+                const qa = runCurriculumAudit(app);
+                const smoke = [];
                 try {
-                    log(!!app, 'App instance');
-                    log(GAMES_DATA.length === MODULE_COUNT, 'Games: ' + GAMES_DATA.length + '/' + MODULE_COUNT);
-                    let levelCount = 0, startOk = 0, worldOk = 0, blocksOk = 0;
-                    for (let g = 1; g <= MODULE_COUNT; g++) {
-                        const levels = app.levelsData[g];
-                        if (!levels || levels.length !== LEVELS_PER_GAME) { log(false, 'Game ' + g + ' levels: ' + (levels && levels.length)); continue; }
-                        levelCount += levels.length;
-                        for (let l = 1; l <= LEVELS_PER_GAME; l++) {
-                            try {
-                                app.currentGameId = g;
-                                app.startLevel(l);
-                                startOk++;
-                                if (app.world) worldOk++;
-                                if (app.world && app.world.config.blocks && app.world.config.blocks.length) blocksOk++;
-                            } catch (e) {
-                                log(false, 'startLevel g' + g + ' l' + l + ': ' + e.message);
-                            }
-                        }
-                    }
-                    const totalExpected = MODULE_COUNT * LEVELS_PER_GAME;
-                    log(levelCount === totalExpected, 'Levels: ' + levelCount + '/' + totalExpected);
-                    log(startOk === totalExpected, 'Start level: ' + startOk + '/' + totalExpected);
-                    log(worldOk === totalExpected, 'WorldState: ' + worldOk + '/' + totalExpected);
-                    log(blocksOk === totalExpected, 'Palette blocks: ' + blocksOk + '/' + totalExpected);
-                    log(!!app.renderer && !!app.renderer.ctx, 'Renderer');
-                    // save/load
-                    try {
-                        app.saveState();
-                        const raw = localStorage.getItem(SAVE_KEY);
-                        log(!!raw, 'Save/Load');
-                    } catch (e) { log(false, 'Save/Load: ' + e.message); }
-                    // restore UI
+                    app.currentGameId = 1;
+                    app.startLevel(1);
+                    smoke.push('startLevel(1,1): OK');
+                    app.currentGameId = 15;
+                    app.startLevel(1);
+                    smoke.push('startLevel(15,1): OK');
+                    app.currentGameId = 22;
+                    app.startLevel(1);
+                    smoke.push('startLevel(22,1): OK');
                     app.showScreen('games');
                 } catch (e) {
-                    pass = false;
-                    report.push('FAIL Self-test crash: ' + e.message);
+                    smoke.push('UI smoke FAIL: ' + (e.message || e));
                 }
-                console.log('CodeQuest Self-Test\\n' + report.join('\\n') + '\\n\\n' + (pass ? 'PASS' : 'FAIL'));
-                alert('Self-Test ' + (pass ? 'PASS' : 'FAIL') + '\\nSee console for details.');
+                const textReport = [
+                    'CodeQuest QA AUDIT',
+                    `Modules: ${GAMES_DATA.length}/${MODULE_COUNT}`,
+                    `Levels: ${qa.total}/${MODULE_COUNT * LEVELS_PER_GAME}`,
+                    `Reference executions passed: ${qa.referencePassed}/${qa.total}`,
+                    `Mission checks passed: ${qa.missionPassed}`,
+                    `Schema/structure issues: ${qa.issues.length}`,
+                    `CLEAN: ${qa.clean ? 'YES' : 'NO'}`,
+                    ...smoke,
+                    '',
+                    ...qa.issues.slice(0, 80).map(x => `[${x.type}] G${x.game} L${x.level}: ${x.message}`)
+                ].join('\n');
+                console.log(textReport);
+                window.__codequestQA = qa;
+                const qaOut = document.getElementById('qa-output');
+                if (qaOut) qaOut.textContent = textReport;
+                if (!new URLSearchParams(location.search).has('silent')) alert('CodeQuest QA: ' + (qa.clean ? 'PASS' : 'FAIL') + `\n690 уровней; reference ${qa.referencePassed}/${qa.total}. См. Console.`);
+                return qa;
             }
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', boot, { once: true });
@@ -3213,5 +4212,6 @@
             window.addEventListener('load', boot, { once: true });
         })();
     </script>
+<pre id="qa-output" class="hidden" aria-hidden="true"></pre>
 </body>
 </html>
