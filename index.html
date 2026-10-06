@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="version" content="11.3">
+    <meta name="version" content="11.6">
     <title>CodeQuest: Школьная Академия Программирования</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="favicon.png">
@@ -317,8 +317,38 @@
                 min-height: 32px;
             }
         }
+
+        /* ========== BLOCK COLOR SEMANTICS (v11.4.1) ==========
+           Align with Scratch/Blockly-like conventions for school use:
+           - Motion/move  = Blue (Scratch Motion)
+           - Control IF   = Gold/Amber (Scratch Control / conditions)
+           - Control LOOP = Orange (control family, distinct from IF)
+           - Operators    = Green (Scratch Operators: and/or/not)
+           - Variables    = Orange-rose (Scratch Variables are orange; we use rose to separate from loops)
+           - Functions    = Purple (Scratch My Blocks)
+           - Actions      = Neutral slate
+        */
+        .blk-move { background: linear-gradient(135deg,#0c4a6e,#0284c7) !important; border-color: #38bdf8 !important; color:#e0f2fe !important; }
+        .blk-if { background: linear-gradient(135deg,#a16207,#eab308) !important; border-color: #fde047 !important; color:#422006 !important; }
+        .blk-else { background: linear-gradient(135deg,#ca8a04,#facc15) !important; border-color: #fef08a !important; color:#422006 !important; }
+        .blk-repeat { background: linear-gradient(135deg,#9a3412,#ea580c) !important; border-color: #fb923c !important; color:#fff7ed !important; }
+        .blk-while { background: linear-gradient(135deg,#7c2d12,#c2410c) !important; border-color: #f97316 !important; color:#ffedd5 !important; }
+        .blk-and { background: linear-gradient(135deg,#14532d,#16a34a) !important; border-color: #4ade80 !important; color:#dcfce7 !important; }
+        .blk-or { background: linear-gradient(135deg,#166534,#22c55e) !important; border-color: #86efac !important; color:#f0fdf4 !important; }
+        .blk-not { background: linear-gradient(135deg,#365314,#65a30d) !important; border-color: #a3e635 !important; color:#f7fee7 !important; }
+        .blk-setvar { background: linear-gradient(135deg,#9f1239,#e11d48) !important; border-color: #fb7185 !important; color:#fff1f2 !important; }
+        .blk-incvar { background: linear-gradient(135deg,#be123c,#f43f5e) !important; border-color: #fda4af !important; color:#fff1f2 !important; }
+        .blk-def { background: linear-gradient(135deg,#5b21b6,#7c3aed) !important; border-color: #a78bfa !important; color:#f5f3ff !important; }
+        .blk-call { background: linear-gradient(135deg,#6d28d9,#8b5cf6) !important; border-color: #c4b5fd !important; color:#f5f3ff !important; }
+        .blk-action { background: linear-gradient(135deg,#334155,#475569) !important; border-color: #94a3b8 !important; color:#e2e8f0 !important; }
+        .program-block { border-left-width: 4px !important; }
+        #sr-narration { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0; }
+        .parity-cell-even { box-shadow: inset 0 0 0 2px rgba(251,191,36,0.55); }
+        .modulo-hud { font-family:'Fira Code',monospace; font-size:11px; color:#fbbf24; }
+
     </style>
 </head>
+<div id="sr-narration" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
 <body class="h-screen flex flex-col overflow-hidden bg-slate-950 text-slate-100">
     <header
         class="h-14 sm:h-16 glass-panel border-b border-slate-800 flex items-center justify-between px-2 sm:px-4 md:px-6 z-20 shrink-0 gap-1"
@@ -332,7 +362,7 @@
             <div class="min-w-0">
                 <h1
                     class="font-extrabold text-base sm:text-lg md:text-xl tracking-wide bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent truncate">
-                    CodeQuest v11.3</h1>
+                    CodeQuest v11.6</h1>
                 <p class="text-xs text-slate-400 hidden md:block">Школьная Академия Программирования</p>
             </div>
         </div>
@@ -659,6 +689,14 @@
                 <div>Шагов: <span id="vic-steps" class="text-cyan-400">0</span></div>
                 <div>Всего: <span id="vic-total" class="text-amber-300">0</span> 🪙</div>
             </div>
+
+            <div id="vic-reflection" class="hidden text-left bg-indigo-950/40 border border-indigo-500/30 rounded-xl p-3 space-y-2 mt-2">
+                <div class="text-[10px] uppercase font-extrabold tracking-wider text-indigo-300">Подумай секунду 💭</div>
+                <div id="vic-reflection-q" class="text-sm text-slate-200"></div>
+                <div id="vic-reflection-opts" class="flex flex-wrap gap-2"></div>
+                <div id="vic-reflection-feedback" class="text-xs text-emerald-300 hidden"></div>
+            </div>
+
             <div class="flex gap-3">
                 <button id="vic-levels-btn"
                     class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-sm transition focus-ring">К
@@ -1162,7 +1200,363 @@
                 if (/остановился/.test(m)) return 'path';
                 return null;
             }
-            // Точный BFS по состояниям (позиция, взгляд, предметы, ключ, двери, переключатели)
+
+            /* ===================== v11.4 SYSTEMS ===================== */
+            const BLOCK_COLOR_CLASS = {
+                if_key: 'blk-if', if_wall: 'blk-if', if_collect: 'blk-if', if_even: 'blk-if',
+                else: 'blk-else',
+                if_and: 'blk-and', and_check: 'blk-and',
+                if_or: 'blk-or', or_check: 'blk-or',
+                if_not: 'blk-not', not_check: 'blk-not',
+                repeat: 'blk-repeat', repeat_2: 'blk-repeat', repeat_3: 'blk-repeat', repeat_4: 'blk-repeat', end_loop: 'blk-repeat',
+                while_lt: 'blk-while',
+                def_fn: 'blk-def', end_fn: 'blk-def',
+                call_fn: 'blk-call',
+                set_var: 'blk-setvar',
+                inc_var: 'blk-incvar',
+                fwd: 'blk-move', back: 'blk-move', turn_r: 'blk-move', turn_l: 'blk-move',
+                collect: 'blk-action', wait: 'blk-action', interact: 'blk-action', end_if: 'blk-if'
+            };
+            function getBlockColorClass(block) {
+                if (!block) return 'blk-action';
+                return BLOCK_COLOR_CLASS[block.id] || BLOCK_COLOR_CLASS[block.action] || (block.type === 'move' || block.type === 'turn' ? 'blk-move' : block.type === 'loop' ? 'blk-repeat' : block.type === 'if' || block.type === 'logic' ? 'blk-if' : block.type === 'function' ? 'blk-def' : block.type === 'var' ? 'blk-setvar' : 'blk-action');
+            }
+            const INSTRUCTION_TEMPLATES = {
+                reach_goal: [
+                    'Доведи героя до 🏁. Команды выполняются сверху вниз — по порядку.',
+                    'Финиш ждёт! Составь последовательность шагов и поворотов.',
+                    'Найди путь к клетке с флагом 🏁.',
+                    'Герой стартует здесь. Твоя задача — довести его до финиша.',
+                    'Планируй маршрут заранее: куда смотрит герой и сколько клеток впереди.',
+                    'Один неверный поворот — и придётся начать сначала. Будь внимателен!',
+                    'Используй только доступные блоки. Цель — клетка 🏁.',
+                    'Короткий путь лучше длинного: меньше шагов — больше звёзд.',
+                    'Подумай, в какую сторону смотрит герой в начале.',
+                    'Сначала шагай, потом поворачивай — или наоборот? Решай сам.'
+                ],
+                collect: [
+                    'Встань на кристалл 💎 и нажми «Собрать», затем иди к 🏁.',
+                    'Подбери все блестящие кристаллы командой «Собрать».',
+                    'Кристаллы не подберутся сами — нужна команда «Собрать» на клетке.',
+                    'Сначала сбор, потом финиш. Не забудь про «Собрать»!',
+                    'На клетке с 💎 выполни «Собрать».',
+                    'Собери сокровища и дойди до флага.',
+                    'Каждый кристалл требует отдельной команды «Собрать».',
+                    'Не пропусти ни одного 💎 на пути к 🏁.',
+                    'Маршрут + сбор: два дела в одной программе.',
+                    'Герой видит кристалл, но берёт его только по команде.'
+                ],
+                collect_all: [
+                    'Собери ВСЕ кристаллы 💎, и только потом иди к 🏁.',
+                    'Финиш откроется, когда на поле не останется ни одного 💎.',
+                    'Посчитай кристаллы глазами — все должны быть собраны.',
+                    'Порядок сбора важен: спланируй маршрут так, чтобы не бегать дважды.',
+                    'Все 💎 → затем 🏁. Иначе победы не будет.',
+                    'Миссия «Собери всё»: ни одного кристалла не оставляй.',
+                    'Кристаллы разбросаны — продумай полный обход.',
+                    'Сбор всех предметов — обязательное условие победы.',
+                    'Проверь: после программы на поле не должно остаться 💎.',
+                    'Сначала урожай, потом финишная прямая.'
+                ],
+                loop: [
+                    'Одинаковые команды подряд — идеальный случай для цикла «Повторить».',
+                    'Сократи программу: вынеси повтор в блок «Повторить N раз».',
+                    'Без цикла программа будет слишком длинной — используй повтор.',
+                    'Найди повторяющийся кусок и оберни его циклом.',
+                    'Цикл экономит блоки и делает код чище.',
+                    'Повтори действие нужное число раз одним блоком.',
+                    'Внутри цикла можно ставить и шаги, и сбор.',
+                    'Лимит блоков заставляет использовать цикл — это и есть урок.',
+                    '«Повторить 3 раза { шаг }» короче, чем три отдельных шага.',
+                    'Смотри на маршрут: где видны одинаковые серии команд?'
+                ],
+                while: [
+                    'Заведи счётчик count = 0 и цикл «ПОКА count < цель».',
+                    'Пока не набрал нужное число — продолжай цикл и увеличивай count.',
+                    'WHILE связан с переменной: не забудь count += 1 внутри.',
+                    'Цикл «пока» остановится сам, когда условие станет ложным.',
+                    'Сначала count = 0, потом ПОКА, внутри действие и +1.',
+                    'Переменная считает прогресс — цикл смотрит на неё.',
+                    'Без увеличения count цикл будет бесконечным.',
+                    'Цель — собрать ровно N и остановиться.',
+                    'WHILE удобен, когда заранее неизвестно точное число шагов.',
+                    'Счётчик + условие = умный повтор.'
+                ],
+                if_wall: [
+                    'Поворачивай только когда впереди стена: «ЕСЛИ стена впереди».',
+                    'Условие помогает реагировать на препятствие.',
+                    'Герой сам «почувствует» стену — поставь поворот внутрь IF.',
+                    'IF стена → повернуть. Иначе — можно идти дальше.',
+                    'Не угадывай заранее: пусть условие решит за тебя.',
+                    'Блок «ЕСЛИ стена» сработает только у препятствия.',
+                    'Условный поворот — ключ к этому уровню.',
+                    'Стена впереди? Тогда поверни. Это и есть ветвление.',
+                    'Логика «если — то» помогает обходить лабиринт.',
+                    'Поворот без IF здесь запрещён — учимся условиям.'
+                ],
+                function: [
+                    'Оформи полезный кусок маршрута как функцию и вызови её.',
+                    'ОПРЕДЕЛИТЬ → команды → КОНЕЦ, затем ВЫЗВАТЬ.',
+                    'Одна функция — несколько вызовов. Меньше копипасты.',
+                    'Функция — как своя новая команда.',
+                    'Выдели повторяющийся фрагмент в def и вызывай.',
+                    'Сначала опиши функцию, потом используй call.',
+                    'Функции учат думать блоками переиспользуемого кода.',
+                    'Вызов функции выполняет всё, что внутри определения.',
+                    'Хорошая функция делает одну понятную вещь.',
+                    'После определения функция доступна по имени-вызову.'
+                ],
+                variable: [
+                    'Создай переменную count = 0 и увеличивай её при сборе.',
+                    'Переменная помнит, сколько уже собрано.',
+                    'count += 1 после каждого успешного «Собрать».',
+                    'Без переменной сложно проверить нужное количество.',
+                    'Имя count — счётчик. Заведи его в начале программы.',
+                    'Переменная — ячейка памяти для числа.',
+                    'Сначала обнули, потом считай.',
+                    'Победа зависит от значения count.',
+                    'Смотри на переменную в уме, пока программа бежит.',
+                    'count растёт только когда ты явно пишешь +1.'
+                ],
+                string: [
+                    'Собери буквы в правильном порядке — получится пароль.',
+                    'Каждая буква на клетке добавляется к строке при «Собрать».',
+                    'Порядок важен: «КОТ» и «ТОК» — разные строки.',
+                    'Сравни итоговую строку с загаданным паролем.',
+                    'Длина строки = число собранных букв.',
+                    'Ищи нужные символы на поле и собирай по порядку.',
+                    'Пароль собирается слева направо по маршруту.',
+                    'Неверная буква испортит слово — планируй путь.',
+                    'Строка растёт при каждом сборе буквы.',
+                    'Финиш примет только точную строку-пароль.'
+                ],
+                modulo: [
+                    'Чётная клетка: (x + y) делится на 2 без остатка.',
+                    'Поворачивать можно только на золотистых (чётных) клетках.',
+                    'Остаток от деления на 2 равен 0 → чёт, 1 → нечет.',
+                    'Каждый шаг меняет чётность клетки.',
+                    'ЕСЛИ клетка чётная { поворот } — единственный разрешённый способ.',
+                    'Визуально чётные клетки подсвечены — используй это.',
+                    'x + y чётное? Тогда можно повернуть.',
+                    'Modulo (%) — ключ к правилу «ходи по чётным».',
+                    'Нечётная клетка: поворот запрещён условием уровня.',
+                    'Проверь вычисление: столбец + строка, потом % 2.'
+                ],
+                debug: [
+                    'В программе уже есть ошибка — найди и исправь её.',
+                    'Лишний блок, неверный порядок или пустой цикл? Ищи!',
+                    'Запусти по шагам ⏭ и поймай момент сбоя.',
+                    'Сравни задуманный маршрут с тем, что делает герой.',
+                    'Ошибка может быть в условии, цикле или порядке команд.',
+                    'Удали лишнее, добавь пропущенное, поправь порядок.',
+                    'Отладка — половина работы программиста.',
+                    'Не переписывай всё: точечно исправь баг.',
+                    'Prefilled-программа почти правильная — осталось чуть-чуть.',
+                    'Читай код как детектив: где логика ломается?'
+                ]
+            };
+            function pickInstruction(category, seed) {
+                const list = INSTRUCTION_TEMPLATES[category] || INSTRUCTION_TEMPLATES.reach_goal;
+                const rnd = seedRandom(seed || 1);
+                return list[Math.floor(rnd() * list.length)];
+            }
+            const REFLECTION_BANK = {
+                loop: [
+                    { q: 'Зачем здесь нужен цикл «Повторить»?', opts: ['Чтобы сократить одинаковые команды', 'Чтобы герой прыгал через все стены', 'Чтобы сменить цвет всего игрового поля'], ok: 0 },
+                    { q: 'Что будет, если убрать цикл и написать шаги вручную?', opts: ['Программа станет длиннее', 'Герой начнёт бежать в два раза быстрее', 'На поле внезапно появятся новые стены'], ok: 0 }
+                ],
+                while: [
+                    { q: 'Когда цикл ПОКА останавливается?', opts: ['Когда условие становится ложным', 'После ровно десяти шагов по полю', 'Когда игрок нажимает кнопку паузы'], ok: 0 },
+                    { q: 'Зачем внутри WHILE делать count += 1?', opts: ['Чтобы условие стало ложным', 'Чтобы герой сразу собрал все монеты', 'Это просто красивое украшение кода'], ok: 0 }
+                ],
+                if: [
+                    { q: 'Что делает блок «ЕСЛИ»?', opts: ['Выполняет команды при истине', 'Всегда повторяет все действия подряд', 'Рисует новую стену на игровом поле'], ok: 0 },
+                    { q: 'Почему поворот стоит внутри «ЕСЛИ стена»?', opts: ['Поворот только у препятствия', 'Чтобы герой бежал заметно быстрее всех', 'Чтобы программа выглядела очень красиво'], ok: 0 }
+                ],
+                function: [
+                    { q: 'Зачем определять функцию?', opts: ['Переиспользовать кусок кода', 'Чтобы сразу увеличить скорость героя', 'Чтобы бесплатно сменить свой аватар'], ok: 0 },
+                    { q: 'Что происходит при «ВЫЗВАТЬ функцию»?', opts: ['Идут команды из определения', 'Полностью удаляется вся программа', 'Герой телепортируется обратно на старт'], ok: 0 }
+                ],
+                variable: [
+                    { q: 'Что хранит переменная count?', opts: ['Число собранных предметов', 'Имя текущего героя на всём поле', 'Точный цвет клетки под ногами'], ok: 0 },
+                    { q: 'Когда нужно делать count += 1?', opts: ['После успешного сбора', 'Только в самом начале всей программы', 'Только когда герой дошёл до финиша'], ok: 0 }
+                ],
+                string: [
+                    { q: 'Почему порядок сбора букв важен?', opts: ['От него зависит пароль', 'Порядок букв на поле совсем не важен', 'Буквы сами встают в нужное слово'], ok: 0 },
+                    { q: 'Что такое длина строки в этом уровне?', opts: ['Число собранных букв', 'Общее число шагов героя по полю', 'Размер всего игрового поля в клетках'], ok: 0 }
+                ],
+                modulo: [
+                    { q: 'Как понять, что клетка чётная?', opts: ['(x + y) % 2 == 0', 'На ней всегда лежит яркий кристалл', 'Она ближе всего расположена к финишу'], ok: 0 },
+                    { q: 'Что меняет шаг вперёд с чётностью?', opts: ['Чётная ↔ нечётная', 'Чётность клетки вообще не меняется', 'Меняется только цвет кожи героя'], ok: 0 }
+                ],
+                default: [
+                    { q: 'Что помогло тебе пройти уровень?', opts: ['План шагов заранее', 'Случайные нажатия всех кнопок подряд', 'Полное отключение звука в настройках'], ok: 0 },
+                    { q: 'Что стоит проверить перед «Запустить»?', opts: ['Порядок команд и цель', 'Только цвет всех кнопок на экране', 'Ничего заранее проверять не нужно'], ok: 0 }
+                ]
+            };
+            function reflectionTopicFor(cfg) {
+                const teach = (cfg && cfg.teach) || [];
+                const req = (cfg && cfg.requiredActions) || [];
+                if (teach.includes('modulo') || req.includes('if_even')) return 'modulo';
+                if (teach.includes('string') || (cfg.objective && cfg.objective.password)) return 'string';
+                if (teach.includes('while') || req.includes('while_lt')) return 'while';
+                if (teach.includes('function') || teach.includes('function_reuse') || req.includes('call_fn')) return 'function';
+                if (teach.includes('variable') || teach.includes('collect_amount') || req.includes('set_var')) return 'variable';
+                if (teach.includes('loop2') || teach.includes('loop34') || teach.includes('loop_collect') || req.includes('repeat')) return 'loop';
+                if (teach.includes('if_wall') || teach.includes('if_else') || teach.includes('and') || teach.includes('or_not') || req.includes('if_wall') || req.includes('else')) return 'if';
+                if (teach.includes('debug') || teach.includes('debug_if') || (cfg.mission === 'debug')) return 'default';
+                return 'default';
+            }
+            const DEBUG_BUG_TYPES = ['wrong_order', 'extra_block', 'missing_block', 'bad_loop', 'bad_function', 'bad_condition'];
+            function makeDebugBug(refIds, bugType, rnd) {
+                const ids = refIds.slice();
+                if (!ids.length) return ids;
+                if (bugType === 'wrong_order' && ids.length >= 2) {
+                    const i = Math.floor(rnd() * (ids.length - 1));
+                    [ids[i], ids[i + 1]] = [ids[i + 1], ids[i]];
+                } else if (bugType === 'extra_block') {
+                    ids.splice(Math.floor(rnd() * (ids.length + 1)), 0, 'wait');
+                } else if (bugType === 'missing_block' && ids.length > 2) {
+                    ids.splice(Math.floor(rnd() * ids.length), 1);
+                } else if (bugType === 'bad_loop') {
+                    const ri = ids.findIndex(x => String(x).startsWith('repeat_'));
+                    if (ri >= 0) ids[ri] = ids[ri] === 'repeat_2' ? 'repeat_4' : 'repeat_2';
+                    else ids.unshift('repeat_2', 'fwd', 'end_loop');
+                } else if (bugType === 'bad_function') {
+                    if (ids.includes('call_fn') && !ids.includes('def_fn')) ids.unshift('def_fn', 'fwd', 'end_fn');
+                    else if (ids.includes('def_fn')) {
+                        const ci = ids.indexOf('call_fn');
+                        if (ci >= 0) ids.splice(ci, 1);
+                    }
+                } else if (bugType === 'bad_condition') {
+                    const ii = ids.findIndex(x => String(x).startsWith('if_'));
+                    if (ii >= 0) ids[ii] = ids[ii] === 'if_wall' ? 'if_key' : 'if_wall';
+                    else ids.splice(1, 0, 'if_wall', 'turn_r', 'end_if');
+                }
+                return ids;
+            }
+            function narrate(msg) {
+                const el = document.getElementById('sr-narration');
+                if (el) { el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 20); }
+            }
+            function trapFocus(modal) {
+                if (!modal) return () => {};
+                const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                const list = Array.from(focusable).filter(el => !el.disabled && el.offsetParent !== null);
+                if (!list.length) return () => {};
+                const first = list[0], last = list[list.length - 1];
+                function onKey(e) {
+                    if (e.key !== 'Tab') return;
+                    if (e.shiftKey) {
+                        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+                    } else {
+                        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+                    }
+                }
+                modal.addEventListener('keydown', onKey);
+                return () => modal.removeEventListener('keydown', onKey);
+            }
+            /* Curriculum Coverage Audit */
+            function runCurriculumCoverageAudit(app) {
+                const coverage = {};
+                const allTeach = new Set();
+                GAMES_DATA.forEach(g => (g.teach || []).forEach(t => allTeach.add(t)));
+                allTeach.forEach(t => coverage[t] = { modules: [], levels: 0, withRequired: 0, withLimits: 0 });
+                GAMES_DATA.forEach(g => {
+                    (g.teach || []).forEach(t => {
+                        if (!coverage[t].modules.includes(g.id)) coverage[t].modules.push(g.id);
+                    });
+                    const levels = (app.levelsData || {})[g.id] || [];
+                    levels.forEach(c => {
+                        (g.teach || []).forEach(t => {
+                            coverage[t].levels++;
+                            if ((c.requiredActions || []).length) coverage[t].withRequired++;
+                            if (c.maxBlocks || c.maxUse || c.turnIn || c.guard) coverage[t].withLimits++;
+                        });
+                    });
+                });
+                return { concepts: Object.keys(coverage).length, coverage, totalLevels: MODULE_COUNT * LEVELS_PER_GAME };
+            }
+            /* Diversity Audit */
+            function runDiversityAudit(app) {
+                const pathKeys = {}, gridKeys = {}, difficulties = [];
+                let total = 0, uniquePaths = 0, uniqueGrids = 0;
+                Object.values(app.levelsData || {}).forEach(levels => {
+                    levels.forEach(c => {
+                        total++;
+                        const pk = (c.fullPath || c.examplePath || []).join(',');
+                        const gk = JSON.stringify({ o: c.obstacles, h: c.hazards, s: c.startPos, g: c.goalPos, col: (c.collectibles || []).map(x => [x.x, x.y]) });
+                        if (!pathKeys[pk]) { pathKeys[pk] = 0; uniquePaths++; }
+                        pathKeys[pk]++;
+                        if (!gridKeys[gk]) { gridKeys[gk] = 0; uniqueGrids++; }
+                        gridKeys[gk]++;
+                        difficulties.push(c.difficulty || 1);
+                    });
+                });
+                const pathDupes = Object.values(pathKeys).filter(n => n > 1).length;
+                const gridDupes = Object.values(gridKeys).filter(n => n > 1).length;
+                const avgDiff = difficulties.reduce((a, b) => a + b, 0) / (difficulties.length || 1);
+                const similarityScore = total ? Math.round(100 * (1 - uniquePaths / total)) : 0;
+                return { total, uniquePaths, uniqueGrids, pathDupes, gridDupes, similarityScore, avgDifficulty: Math.round(avgDiff * 100) / 100, maxPathRepeat: Math.max(0, ...Object.values(pathKeys)) };
+            }
+            /* Unit Tests */
+            function runUnitTests() {
+                const results = [];
+                const assert = (name, cond) => results.push({ name, ok: !!cond });
+                assert('BLOCK_CATALOG has fwd', !!BLOCK_CATALOG.fwd);
+                assert('getBlockColorClass if_wall', getBlockColorClass(BLOCK_CATALOG.if_wall) === 'blk-if');
+                assert('getBlockColorClass repeat_2', getBlockColorClass(BLOCK_CATALOG.repeat_2) === 'blk-repeat');
+                assert('getBlockColorClass set_var', getBlockColorClass(BLOCK_CATALOG.set_var) === 'blk-setvar');
+                assert('INSTRUCTION_TEMPLATES.loop >= 10', (INSTRUCTION_TEMPLATES.loop || []).length >= 10);
+                assert('INSTRUCTION_TEMPLATES.string >= 10', (INSTRUCTION_TEMPLATES.string || []).length >= 10);
+                assert('INSTRUCTION_TEMPLATES.modulo >= 10', (INSTRUCTION_TEMPLATES.modulo || []).length >= 10);
+                assert('INSTRUCTION_TEMPLATES.debug >= 10', (INSTRUCTION_TEMPLATES.debug || []).length >= 10);
+                assert('REFLECTION_BANK.loop exists', (REFLECTION_BANK.loop || []).length >= 1);
+                assert('makeDebugBug wrong_order changes', (() => { const a = ['fwd', 'turn_r', 'fwd']; const b = makeDebugBug(a, 'wrong_order', seedRandom(7)); return b.join() !== a.join() || a.length < 2; })());
+                assert('classifyErr collision', classifyErr('упёрся в стену') === 'collision');
+                assert('reflectionTopicFor modulo', reflectionTopicFor({ teach: ['modulo'] }) === 'modulo');
+                assert('CLOSER_OF repeat', CLOSER_OF.repeat === 'end_loop');
+                const passed = results.filter(r => r.ok).length;
+                return { total: results.length, passed, failed: results.length - passed, results };
+            }
+            /* Browser E2E Self-Test */
+            async function runE2ESelfTest(app) {
+                const log = [];
+                const ok = (m) => log.push('OK: ' + m);
+                const fail = (m) => log.push('FAIL: ' + m);
+                try {
+                    app.currentGameId = 1;
+                    app.startLevel(1);
+                    if (!app.world) { fail('world not created'); return { ok: false, log }; }
+                    ok('startLevel(1,1)');
+                    const cfg = app.world.config;
+                    const ref = referenceProgramFor(cfg);
+                    if (!ref.length) { fail('empty reference'); return { ok: false, log }; }
+                    app.currentProgram = ref.map(b => ({ ...b }));
+                    app.renderProgramSequence();
+                    ok('program assembled (' + ref.length + ' blocks)');
+                    app.world.reset();
+                    app.interpreter = new Interpreter(app.currentProgram, app.world);
+                    app.interpreter.running = true;
+                    let guard = 0, last = null;
+                    while (!last?.done && guard++ < 500) last = app.interpreter.step();
+                    if (last?.error || app.world.failed) { fail('execution error: ' + (last?.error || app.world.failReason)); return { ok: false, log }; }
+                    if (!app.interpreter.checkObjective()) { fail('objective not met'); return { ok: false, log }; }
+                    ok('execution + objective');
+                    app.runResult = { sig: app.progSig(), steps: app.world.stepsExecuted };
+                    const reward = app.onVictory();
+                    if (!reward || reward.stars < 1) { fail('no reward'); return { ok: false, log }; }
+                    ok('reward stars=' + reward.stars + ' coins=' + reward.coins);
+                    app.showScreen('games');
+                    ok('back to games');
+                    return { ok: true, log };
+                } catch (e) {
+                    fail(String(e.message || e));
+                    return { ok: false, log };
+                }
+            }
+
+                        // Точный BFS по состояниям (позиция, взгляд, предметы, ключ, двери, переключатели)
             function solveFull(c, o) {
                 const W = c.gridCols, H = c.gridRows, D = [[0, -1], [1, 0], [0, 1], [-1, 0]], T = c.objective ? c.objective.type : 'reach_goal';
                 const wall = new Set((c.obstacles || []).concat(c.hazards || []).map(p => p.x + ',' + p.y));
@@ -1471,6 +1865,32 @@
                 if (c.gameId === 5 && c.collectibles.length && !c.mission && !c.prefilledProgram) t = pre + (c.collectibles.length > 1 ? 'Собери кристаллы 💎 (их ' + c.collectibles.length + ') командой «Собрать» и иди к финишу 🏁.' : 'Встань на кристалл 💎, нажми «Собрать» и иди к финишу 🏁.');
                 if (c.gameId === 6 && c.collectibles.length && c.objective.type === 'collect_all' && !c.mission && !c.prefilledProgram) t = pre + 'Кристаллов несколько — собери ВСЕ (' + c.collectibles.length + ' шт.) и только потом иди к финишу 🏁. Продумай маршрут!';
                 if (c.gameId === 29 && c.maxBlocks) t = t.replace(/^((?:🔥 БОНУС: |📚 Новая тема: )?)[^📏]*/, '$1Финальное испытание: собери всё и дойди до 🏁 — с циклом и в лимит блоков. ');
+                // v11.4 diversified templates
+                if (!c.mission && !c.handmade) {
+                    let cat = 'reach_goal';
+                    const teach = c.teach || [];
+                    if (c.objective && c.objective.password) cat = 'string';
+                    else if (teach.includes('modulo') || c.turnIn === 'if_even') cat = 'modulo';
+                    else if (teach.includes('while') || (c.requiredActions || []).includes('while_lt')) cat = 'while';
+                    else if (teach.includes('function') || (c.requiredActions || []).includes('call_fn')) cat = 'function';
+                    else if (teach.includes('variable') || (c.requiredActions || []).includes('set_var')) cat = 'variable';
+                    else if (teach.includes('loop2') || teach.includes('loop34') || (c.requiredActions || []).includes('repeat')) cat = 'loop';
+                    else if (teach.includes('if_wall') || (c.requiredActions || []).includes('if_wall')) cat = 'if_wall';
+                    else if (c.objective && c.objective.type === 'collect_all') cat = 'collect_all';
+                    else if (c.collectibles && c.collectibles.length) cat = 'collect';
+                    const varied = pickInstruction(cat, (c.gameId || 1) * 1000 + (c.id || 1) * 17);
+                    if (varied && !/📏|🔒|Лимит/.test(t)) {
+                        const limitPart = (t.match(/📏[\s\S]*$/) || t.match(/🔒[\s\S]*$/) || [''])[0];
+                        t = pre + varied + (limitPart ? ' ' + limitPart : '');
+                    }
+                }
+                if (c.objective && c.objective.password) {
+                    t += ' 🔤 Порядок букв важен. Длина пароля: ' + String(c.objective.password).length + '.';
+                }
+                if (c.turnIn === 'if_even' || (c.teach || []).includes('modulo')) {
+                    t += ' ➗ Чётность: (столбец + строка) % 2 === 0 — золотистая клетка.';
+                    c.showParity = true;
+                }
                 c.instructions = t;
                 return c;
             }
@@ -1952,14 +2372,22 @@
                     const has = id => config.blocks.some(b => b.id === id), mk = id => ({ ...BLOCK_CATALOG[id] });
                     const ids = (config.objective.type === 'collect_amount' && has('set_var') && has('inc_var')) ? ['set_var', ...config.fullPath.flatMap(x => x === 'collect' ? ['collect', 'inc_var'] : [x])] : config.fullPath;
                     if (ids.every(has)) {
-                        const mutants = [
-                            () => { const i = ids.findIndex(x => x === 'turn_l' || x === 'turn_r'); if (i < 0) return null; const a = ids.slice(); a[i] = a[i] === 'turn_l' ? 'turn_r' : 'turn_l'; return a; },
-                            () => { const i = ids.findIndex((x, j) => x === 'fwd' && j >= ids.length / 2); if (i < 0) return null; const a = ids.slice(); a.splice(i, 1); return a; },
-                            () => { const a = ids.slice(); a.splice(Math.floor(ids.length / 2), 0, 'fwd'); return a; }
-                        ];
-                        const debugM = shift => { for (let t = 0; t < 3; t++) { const a = mutants[(gameId + shift + t) % 3](); if (a && !simulate(config, a.map(mk)).ok) return a; } return null; };
                         const setM = (type, prog, text, hints) => { config.mission = type; config.prefilledProgram = prog.map(mk); config.instructions = text; config.hints = hints; };
-                        const doDebug = shift => { const a = debugM(shift); if (a) setM('debug', a, '🐞 Найди ошибку: программа уже написана, но герой не справляется. Запусти её (или иди по шагам ⏭), найди баг и исправь.', ['Запусти и посмотри, где герой свернул не туда.', 'Иди по шагам ⏭ и следи за подсветкой блока и взглядом героя.', 'Ошибка одна: лишний или пропущенный шаг, либо перепутан поворот.']); };
+                        const doDebug = shift => {
+                            const rnd = seedRandom(gameId * 97 + levelNum * 13 + shift + 3);
+                            const types = DEBUG_BUG_TYPES;
+                            for (let t = 0; t < types.length; t++) {
+                                const bug = types[(gameId + levelNum + shift + t) % types.length];
+                                const a = makeDebugBug(ids, bug, rnd);
+                                if (a && a.length && !simulate(config, a.map(mk)).ok) {
+                                    const labels = { wrong_order: 'неверный порядок команд', extra_block: 'лишний блок', missing_block: 'пропущенный блок', bad_loop: 'неправильный цикл', bad_function: 'ошибка в функции', bad_condition: 'неправильное условие' };
+                                    setM('debug', a, '🐞 Найди ошибку (' + (labels[bug] || 'баг') + '): программа уже написана, но герой не справляется. Запусти или иди по шагам ⏭, найди и исправь.', ['Запусти и посмотри, где герой свернул не туда.', 'Иди по шагам ⏭ и следи за подсветкой блока.', 'Тип бага: ' + (labels[bug] || 'логика') + '. Исправь точечно.']);
+                                    config.debugBugType = bug;
+                                    return true;
+                                }
+                            }
+                            return false;
+                        };
                         if (levelNum === 6) {
                             const prog = ids.slice(0, Math.max(3, Math.floor(ids.length * 0.7))), w = simulate(config, prog.map(mk)).world;
                             if (!w.failed) {
@@ -1970,7 +2398,7 @@
                                 setM('predict', prog, '🔮 Угадай заранее: в какой клетке окажется герой после этой программы? Выбери ответ, потом запусти и проверь себя.', ['Представь героя на поле и выполняй блоки по одному.', 'Поворот не двигает героя — он только меняет взгляд.', 'Нажми ⏭ и сравни с тем, что ты придумал.']);
                                 config.predict = { answer: ans, options: opts }; config.objective = { type: 'predict' }; config.requiredActions = [];
                             }
-                        } else if (levelNum === 9 || levelNum === 18) doDebug(levelNum === 9 ? 0 : 1);
+                        } else if (levelNum === 9 || levelNum === 12 || levelNum === 15 || levelNum === 18 || teach.includes('debug') || teach.includes('debug_if')) doDebug(levelNum);
                         else if (levelNum === 14 && config.objective.type !== 'collect_amount') {
                             const n = compressedCount(ids);
                             if (['repeat_2', 'repeat_3', 'repeat_4', 'end_loop'].every(has) && ids.length - n >= 1) {
@@ -2685,51 +3113,68 @@
                     this.renderer = null;
                     this.hintLevelUsed = 0;
                     this.shopItems = [
+                        /* Стартовый — бесплатно */
                         { id: 'skin_cat', name: 'Кибер-Кот', icon: '🐱', cost: 0, type: 'avatar' },
-                        { id: 'skin_robot', name: 'Робот-Кодер', icon: '🤖', cost: 40, type: 'avatar' },
-                        { id: 'skin_fox', name: 'Хитрая Лиса', icon: '🦊', cost: 60, type: 'avatar' },
-                        { id: 'skin_owl', name: 'Мудрая Сова', icon: '🦉', cost: 80, type: 'avatar' },
-                        { id: 'skin_alien', name: 'Инопланетянин', icon: '👾', cost: 100, type: 'avatar' },
-                        { id: 'skin_panda', name: 'Панда-Прогер', icon: '🐼', cost: 120, type: 'avatar' },
-                        { id: 'skin_unicorn', name: 'Единорог', icon: '🦄', cost: 150, type: 'avatar' },
-                        { id: 'skin_ninja', name: 'Кибер-Ниндзя', icon: '🥷', cost: 180, type: 'avatar' },
-                        { id: 'skin_wizard', name: 'Маг Кода', icon: '🧙', cost: 220, type: 'avatar' },
-                        { id: 'skin_astronaut', name: 'Космонавт', icon: '🧑‍🚀', cost: 260, type: 'avatar' },
-                        { id: 'skin_dragon', name: 'Дракон Питона', icon: '🐉', cost: 320, type: 'avatar' },
-                        { id: 'skin_phoenix', name: 'Феникс', icon: '🔥', cost: 400, type: 'avatar' },
-                        { id: 'skin_car', name: 'Суперкар', icon: '🏎️', cost: 90, type: 'avatar' },
-                        { id: 'skin_plane', name: 'Самолёт', icon: '✈️', cost: 110, type: 'avatar' },
-                        { id: 'skin_rocket', name: 'Ракета', icon: '🚀', cost: 140, type: 'avatar' },
-                        { id: 'skin_heli', name: 'Вертолёт', icon: '🚁', cost: 130, type: 'avatar' },
-                        { id: 'skin_ufo', name: 'НЛО', icon: '🛸', cost: 170, type: 'avatar' },
-                        { id: 'skin_train', name: 'Паровозик', icon: '🚂', cost: 70, type: 'avatar' },
-                        { id: 'skin_moto', name: 'Мотоцикл', icon: '🏍️', cost: 100, type: 'avatar' },
-                        { id: 'skin_fire', name: 'Пожарная машина', icon: '🚒', cost: 80, type: 'avatar' },
-                        { id: 'skin_trex', name: 'Динозавр', icon: '🦖', cost: 200, type: 'avatar' },
-                        { id: 'skin_shark', name: 'Акула', icon: '🦈', cost: 190, type: 'avatar' },
-                        { id: 'skin_lion', name: 'Лев', icon: '🦁', cost: 160, type: 'avatar' },
-                        { id: 'skin_tiger', name: 'Тигр', icon: '🐯', cost: 165, type: 'avatar' },
-                        { id: 'skin_wolf', name: 'Волк', icon: '🐺', cost: 175, type: 'avatar' },
-                        { id: 'skin_octo', name: 'Осьминог', icon: '🐙', cost: 130, type: 'avatar' },
-                        { id: 'skin_ship', name: 'Корабль', icon: '🚢', cost: 120, type: 'avatar' },
-                        { id: 'skin_hero', name: 'Супергерой', icon: '🦸', cost: 240, type: 'avatar' },
-                        { id: 'skin_tractor', name: 'Трактор', icon: '🚜', cost: 60, type: 'avatar' },
-                        { id: 'skin_scooter', name: 'Скутер', icon: '🛵', cost: 50, type: 'avatar' },
-                        { id: 'skin_sat', name: 'Спутник', icon: '🛰️', cost: 210, type: 'avatar' },
-                        { id: 'skin_pixel', name: 'Пиксель (легенда)', icon: '👾', cost: 500, type: 'avatar' }
+                        /* Ранний тир */
+                        { id: 'skin_scooter', name: 'Скутер', icon: '🛵', cost: 80, type: 'avatar' },
+                        { id: 'skin_tractor', name: 'Трактор', icon: '🚜', cost: 100, type: 'avatar' },
+                        { id: 'skin_train', name: 'Паровозик', icon: '🚂', cost: 120, type: 'avatar' },
+                        { id: 'skin_fire', name: 'Пожарная машина', icon: '🚒', cost: 140, type: 'avatar' },
+                        { id: 'skin_robot', name: 'Робот-Кодер', icon: '🤖', cost: 160, type: 'avatar' },
+                        { id: 'skin_fox', name: 'Хитрая Лиса', icon: '🦊', cost: 180, type: 'avatar' },
+                        /* Средний тир */
+                        { id: 'skin_owl', name: 'Мудрая Сова', icon: '🦉', cost: 220, type: 'avatar' },
+                        { id: 'skin_moto', name: 'Мотоцикл', icon: '🏍️', cost: 250, type: 'avatar' },
+                        { id: 'skin_car', name: 'Суперкар', icon: '🏎️', cost: 280, type: 'avatar' },
+                        { id: 'skin_plane', name: 'Самолёт', icon: '✈️', cost: 320, type: 'avatar' },
+                        { id: 'skin_ship', name: 'Корабль', icon: '🚢', cost: 350, type: 'avatar' },
+                        { id: 'skin_octo', name: 'Осьминог', icon: '🐙', cost: 380, type: 'avatar' },
+                        { id: 'skin_heli', name: 'Вертолёт', icon: '🚁', cost: 420, type: 'avatar' },
+                        { id: 'skin_alien', name: 'Инопланетянин', icon: '👾', cost: 450, type: 'avatar' },
+                        /* Высокий тир */
+                        { id: 'skin_panda', name: 'Панда-Прогер', icon: '🐼', cost: 520, type: 'avatar' },
+                        { id: 'skin_rocket', name: 'Ракета', icon: '🚀', cost: 560, type: 'avatar' },
+                        { id: 'skin_lion', name: 'Лев', icon: '🦁', cost: 600, type: 'avatar' },
+                        { id: 'skin_tiger', name: 'Тигр', icon: '🐯', cost: 640, type: 'avatar' },
+                        { id: 'skin_ufo', name: 'НЛО', icon: '🛸', cost: 700, type: 'avatar' },
+                        { id: 'skin_wolf', name: 'Волк', icon: '🐺', cost: 750, type: 'avatar' },
+                        { id: 'skin_shark', name: 'Акула', icon: '🦈', cost: 800, type: 'avatar' },
+                        { id: 'skin_unicorn', name: 'Единорог', icon: '🦄', cost: 880, type: 'avatar' },
+                        { id: 'skin_trex', name: 'Динозавр', icon: '🦖', cost: 950, type: 'avatar' },
+                        { id: 'skin_sat', name: 'Спутник', icon: '🛰️', cost: 1050, type: 'avatar' },
+                        { id: 'skin_ninja', name: 'Кибер-Ниндзя', icon: '🥷', cost: 1150, type: 'avatar' },
+                        { id: 'skin_hero', name: 'Супергерой', icon: '🦸', cost: 1300, type: 'avatar' },
+                        { id: 'skin_wizard', name: 'Маг Кода', icon: '🧙', cost: 1500, type: 'avatar' },
+                        { id: 'skin_astronaut', name: 'Космонавт', icon: '🧑‍🚀', cost: 1700, type: 'avatar' },
+                        /* Легендарный тир — топ-3, сильно дороже (статус и конкуренция) */
+                        { id: 'skin_dragon', name: 'Дракон Питона', icon: '🐉', cost: 2800, type: 'avatar' },
+                        { id: 'skin_phoenix', name: 'Феникс', icon: '🔥', cost: 4200, type: 'avatar' },
+                        { id: 'skin_pixel', name: 'Пиксель (легенда)', icon: '👾', cost: 6000, type: 'avatar' }
                     ];
                     this.achievements = [
-                        { id: 'first_win', name: 'Первый Шаг', desc: 'Пройдите самый первый уровень', icon: '🐣', check: s => Object.keys(s.completedLevels).length >= 1 },
+                        { id: 'first_win', name: 'Новичок CodeQuest', desc: 'Пройдите самый первый уровень', icon: '🐣', check: s => Object.keys(s.completedLevels).length >= 1 },
+                        { id: 'levels_5', name: 'Юный Искатель', desc: 'Пройдите 5 уровней', icon: '🧭', check: s => Object.keys(s.completedLevels).length >= 5 },
+                        { id: 'levels_10', name: 'Джуниор CodeQuest', desc: 'Пройдите 10 уровней', icon: '🔟', check: s => Object.keys(s.completedLevels).length >= 10 },
+                        { id: 'levels_25', name: 'Мидл-Исследователь', desc: 'Пройдите 25 уровней', icon: '🗺️', check: s => Object.keys(s.completedLevels).length >= 25 },
+                        { id: 'levels_50', name: 'Сеньор Тропинок', desc: 'Пройдите 50 уровней', icon: '🏅', check: s => Object.keys(s.completedLevels).length >= 50 },
+                        { id: 'levels_100', name: 'Архитектор Маршрутов', desc: 'Пройдите 100 уровней', icon: '🏛️', check: s => Object.keys(s.completedLevels).length >= 100 },
+                        { id: 'levels_200', name: 'Легенда Лабиринтов', desc: 'Пройдите 200 уровней', icon: '🐉', check: s => Object.keys(s.completedLevels).length >= 200 },
                         { id: 'stars_15', name: 'Звёздный Кодер', desc: 'Соберите 15 звёзд', icon: '⭐', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 15 },
-                        { id: 'stars_100', name: 'Созвездие', desc: 'Соберите 100 звёзд', icon: '✨', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 100 },
-                        { id: 'coins_100', name: 'Богач', desc: 'Заработайте 100 монет', icon: '💰', check: s => s.coins >= 100 },
-                        { id: 'coins_500', name: 'Казначей', desc: 'Накопите 500 монет', icon: '🏦', check: s => s.coins >= 500 },
-                        { id: 'levels_10', name: 'Десятка', desc: 'Пройдите 10 уровней', icon: '🔟', check: s => Object.keys(s.completedLevels).length >= 10 },
-                        { id: 'levels_50', name: 'Полтинник', desc: 'Пройдите 50 уровней', icon: '🏅', check: s => Object.keys(s.completedLevels).length >= 50 },
+                        { id: 'stars_50', name: 'Созвездие Ученика', desc: 'Соберите 50 звёзд', icon: '✨', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 50 },
+                        { id: 'stars_100', name: 'Галактика CodeQuest', desc: 'Соберите 100 звёзд', icon: '🌌', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 100 },
+                        { id: 'stars_300', name: 'Повелитель Созвездий', desc: 'Соберите 300 звёзд', icon: '🌠', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) >= 300 },
                         { id: 'perfect_3', name: 'Перфекционист', desc: 'Получите 3 звезды на любом уровне', icon: '🌟', check: s => Object.values(s.completedLevels).some(v => ((typeof v === 'object' ? v.stars : v) || 0) >= 3) },
-                        { id: 'collector', name: 'Коллекционер', desc: 'Откройте 5 аватаров', icon: '🎭', check: s => (s.unlockedItems || []).length >= 5 },
+                        { id: 'perfect_10', name: 'Мастер Тройки', desc: 'Получите 3 звезды на 10 уровнях', icon: '💎', check: s => Object.values(s.completedLevels).filter(v => ((typeof v === 'object' ? v.stars : v) || 0) >= 3).length >= 10 },
+                        { id: 'coins_100', name: 'Копилка Кодера', desc: 'Заработайте 100 монет', icon: '💰', check: s => s.coins >= 100 },
+                        { id: 'coins_500', name: 'Казначей Пикселя', desc: 'Накопите 500 монет', icon: '🏦', check: s => s.coins >= 500 },
+                        { id: 'coins_1500', name: 'Золотой Барон', desc: 'Накопите 1500 монет', icon: '👑', check: s => s.coins >= 1500 },
+                        { id: 'coins_3000', name: 'Император Монет', desc: 'Накопите 3000 монет', icon: '🏆', check: s => s.coins >= 3000 },
+                        { id: 'collector_5', name: 'Коллекционер Образов', desc: 'Откройте 5 аватаров', icon: '🎭', check: s => (s.unlockedItems || []).length >= 5 },
+                        { id: 'collector_10', name: 'Обладатель 10 Аватаров', desc: 'Откройте 10 разных аватаров', icon: '🖼️', check: s => (s.unlockedItems || []).length >= 10 },
+                        { id: 'collector_20', name: 'Гардероб Героя', desc: 'Откройте 20 аватаров', icon: '👗', check: s => (s.unlockedItems || []).length >= 20 },
+                        { id: 'shop_first', name: 'Первая Покупка', desc: 'Купите любой аватар в магазине', icon: '🛒', check: s => (s.unlockedItems || []).filter(x => x !== 'skin_cat').length >= 1 },
                         {
-                            id: 'game_master', name: 'Мастер Модуля', desc: 'Пройдите все 20 основных уровней одного модуля', icon: '👑', check: s => {
+                            id: 'game_master', name: 'Мастер Модуля', desc: 'Пройдите все 20 основных уровней одного модуля', icon: '🎓', check: s => {
                                 for (let g = 1; g <= MODULE_COUNT; g++) {
                                     let ok = true;
                                     for (let l = 1; l <= LEVELS_MAIN; l++) {
@@ -2741,7 +3186,20 @@
                             }
                         },
                         {
-                            id: 'stage_complete', name: 'Этап пройден', desc: 'Полностью пройдите любой учебный этап (все модули стадии)', icon: '🗺️', check: s => {
+                            id: 'module_hunter_3', name: 'Охотник за Модулями', desc: 'Полностью пройдите 3 разных модуля (по 20 уровней)', icon: '🎯', check: s => {
+                                let n = 0;
+                                for (let g = 1; g <= MODULE_COUNT; g++) {
+                                    let ok = true;
+                                    for (let l = 1; l <= LEVELS_MAIN; l++) {
+                                        if (!s.completedLevels[`${g}_${l}`]) { ok = false; break; }
+                                    }
+                                    if (ok) n++;
+                                }
+                                return n >= 3;
+                            }
+                        },
+                        {
+                            id: 'stage_complete', name: 'Покоритель Этапа', desc: 'Полностью пройдите любой учебный этап', icon: '🗺️', check: s => {
                                 for (const stage of STAGES) {
                                     let ok = true;
                                     for (let g = stage.range[0]; g <= stage.range[1]; g++) {
@@ -2754,7 +3212,50 @@
                                 }
                                 return false;
                             }
-                        }
+                        },
+                        {
+                            id: 'bonus_slayer', name: 'Истребитель Бонусов', desc: 'Пройдите любой бонусный уровень', icon: '🔥', check: s => {
+                                for (const k of Object.keys(s.completedLevels || {})) {
+                                    const l = Number(k.split('_')[1]);
+                                    if (l > LEVELS_MAIN) return true;
+                                }
+                                return false;
+                            }
+                        },
+                        {
+                            id: 'bonus_trio', name: 'Тройной Бонус', desc: 'Пройдите все 3 бонусных уровня в одном модуле', icon: '💥', check: s => {
+                                for (let g = 1; g <= MODULE_COUNT; g++) {
+                                    if (s.completedLevels[`${g}_21`] && s.completedLevels[`${g}_22`] && s.completedLevels[`${g}_23`]) return true;
+                                }
+                                return false;
+                            }
+                        },
+                        { id: 'speed_runner', name: 'Скоростной Кодер', desc: 'Пройдите уровень на скорости 4x', icon: '⚡', check: s => !!(s.stats && Object.values(s.stats).some(st => st && st.done && (s.settings || {}).speed === 4)) || ((s.settings || {}).speed === 4 && Object.keys(s.completedLevels).length >= 1) },
+                        { id: 'hint_free_5', name: 'Без Подсказок', desc: 'Пройдите 5 уровней без использования подсказок', icon: '🧠', check: s => {
+                            let n = 0;
+                            for (const [k, v] of Object.entries(s.stats || {})) {
+                                if (s.completedLevels[k] && (v.hints || 0) === 0) n++;
+                            }
+                            return n >= 5;
+                        }},
+                        { id: 'debug_detective', name: 'Детектив Багов', desc: 'Пройдите любой debug-уровень (модуль отладки)', icon: '🕵️', check: s => !!(s.completedLevels['20_1'] || s.completedLevels['21_1']) },
+                        { id: 'loop_master', name: 'Повелитель Циклов', desc: 'Пройдите модуль с циклами (модуль 9 или 10)', icon: '🔁', check: s => {
+                            for (const g of [9, 10, 11, 12]) {
+                                let ok = true;
+                                for (let l = 1; l <= 5; l++) if (!s.completedLevels[`${g}_${l}`]) ok = false;
+                                if (ok) return true;
+                            }
+                            return false;
+                        }},
+                        { id: 'function_wizard', name: 'Волшебник Функций', desc: 'Пройдите 5 уровней в модулях про функции', icon: '🪄', check: s => {
+                            let n = 0;
+                            for (const g of [18, 19]) for (let l = 1; l <= LEVELS_PER_GAME; l++) if (s.completedLevels[`${g}_${l}`]) n++;
+                            return n >= 5;
+                        }},
+                        { id: 'rank_junior', name: 'Звание: Джуниор', desc: 'Наберите более 80 звёзд (ранг Джуниор)', icon: '📘', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) > 80 },
+                        { id: 'rank_middle', name: 'Звание: Мидл Кодер', desc: 'Наберите более 250 звёзд', icon: '📗', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) > 250 },
+                        { id: 'rank_senior', name: 'Звание: Сеньор', desc: 'Наберите более 500 звёзд', icon: '📙', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) > 500 },
+                        { id: 'rank_legend', name: 'Легенда CodeQuest', desc: 'Наберите более 1600 звёзд', icon: '🏅', check: s => Object.values(s.completedLevels).reduce((a, b) => a + ((typeof b === 'object' ? b.stars : b) || 0), 0) > 1600 }
                     ];
                     if (this.userState.settings?.muted) sound.muted = true;
                 }
@@ -3349,10 +3850,11 @@
                     palette.innerHTML = '';
                     blocks.forEach(block => {
                         const btn = document.createElement('button');
-                        btn.className = 'block-btn px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 rounded-lg text-xs font-extrabold text-white shadow border border-indigo-400/30 flex items-center space-x-1.5 focus-ring';
+                        btn.className = 'block-btn px-3 py-1.5 rounded-lg text-xs font-extrabold text-white shadow border flex items-center space-x-1.5 focus-ring ' + getBlockColorClass(block);
                         btn.addEventListener('click', () => this.addBlockToProgram(block));
                         btn.draggable = true; btn.addEventListener('dragstart', e => { this.dragBlock = block; this.dragIdx = null; try { e.dataTransfer.setData('text/plain', block.id); } catch (_) { } });
-                        btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]"></i> <span>${escapeHtml(block.text)}</span>`;
+                        btn.innerHTML = `<i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i> <span>${escapeHtml(block.text)}</span>`;
+                        btn.setAttribute('aria-label', 'Добавить блок: ' + block.text);
                         palette.appendChild(btn);
                     });
                 }
@@ -3426,7 +3928,7 @@
                         item.id = `program-block-${idx}`;
                         item.draggable = !locked;
                         item.style.marginLeft = (depth * 18) + 'px';
-                        item.className = 'glass-panel px-2 py-1.5 rounded-lg border border-slate-700 border-l-4 ' + (COL[block.type] || COL[block.action] || 'border-l-cyan-400') + ' flex items-center justify-between text-xs font-bold text-cyan-300 transition-all duration-150 bg-slate-900/80 ' + (locked ? '' : 'cursor-pointer');
+                        item.className = 'program-block glass-panel px-2 py-1.5 rounded-lg border border-slate-700 border-l-4 flex items-center justify-between text-xs font-bold transition-all duration-150 ' + getBlockColorClass(block) + ' ' + (locked ? '' : 'cursor-pointer');
                         item.setAttribute('role', 'listitem');
                         const textSpan = document.createElement('div');
                         textSpan.className = 'flex items-center space-x-2 min-w-0';
@@ -3584,11 +4086,15 @@
                             const result = this.interpreter.step();
                             this.renderWorld();
                             sound.playStep();
-                            // highlight
+                            // highlight + SR narration
                             this.currentProgram.forEach((_, idx) => {
                                 const el = document.getElementById(`program-block-${idx}`);
                                 if (el) el.classList.toggle('block-active', idx === result.highlightIndex);
                             });
+                            if (result.highlightIndex != null && this.currentProgram[result.highlightIndex]) {
+                                const b = this.currentProgram[result.highlightIndex];
+                                narrate('Шаг: ' + (b.text || b.id) + '. Герой: столбец ' + (this.world.hero.x+1) + ', строка ' + (this.world.hero.y+1));
+                            }
                             this.updateDebug();
                             if (result.done) {
                                 this.finishExecution(result.error);
@@ -3787,11 +4293,58 @@
                             }
                         }, (idx + 1) * 250);
                     });
+                    // Reflection layer (v11.4)
+                    const refBox = document.getElementById('vic-reflection');
+                    const refQ = document.getElementById('vic-reflection-q');
+                    const refOpts = document.getElementById('vic-reflection-opts');
+                    const refFb = document.getElementById('vic-reflection-feedback');
+                    if (refBox && refQ && refOpts && this.world && !md) {
+                        const topic = reflectionTopicFor(this.world.config);
+                        const bank = REFLECTION_BANK[topic] || REFLECTION_BANK.default;
+                        const item = bank[Math.floor(Math.random() * bank.length)];
+                        // Shuffle options so correct answer is not always first
+                        const order = item.opts.map((text, i) => ({ text, correct: i === item.ok }));
+                        for (let i = order.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [order[i], order[j]] = [order[j], order[i]];
+                        }
+                        const correctText = item.opts[item.ok];
+                        refQ.textContent = item.q;
+                        refOpts.innerHTML = '';
+                        refFb.classList.add('hidden');
+                        refFb.textContent = '';
+                        order.forEach((entry) => {
+                            const b = document.createElement('button');
+                            b.className = 'px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600 text-xs font-bold focus-ring';
+                            b.textContent = entry.text;
+                            b.addEventListener('click', () => {
+                                refOpts.querySelectorAll('button').forEach(x => x.disabled = true);
+                                if (entry.correct) {
+                                    b.classList.add('bg-emerald-600');
+                                    refFb.textContent = 'Верно! Так держать 💡';
+                                    refFb.classList.remove('hidden');
+                                    narrate('Правильный ответ на вопрос для размышления.');
+                                } else {
+                                    b.classList.add('bg-rose-700');
+                                    refFb.textContent = 'Не совсем. Правильный ответ: «' + correctText + '».';
+                                    refFb.classList.remove('hidden');
+                                    narrate('Подсказка по теме уровня: ' + correctText);
+                                }
+                            });
+                            refOpts.appendChild(b);
+                        });
+                        refBox.classList.remove('hidden');
+                    } else if (refBox) {
+                        refBox.classList.add('hidden');
+                    }
                     modal.classList.remove('hidden');
+                    this._victoryFocusRelease = trapFocus(modal);
                     document.getElementById('vic-next-btn').focus();
+                    narrate((md ? 'Модуль пройден. ' : 'Уровень пройден. ') + stars + ' звезды. Монеты плюс ' + coins);
                 }
                 closeVictoryModal() {
                     document.getElementById('modal-victory').classList.add('hidden');
+                    if (this._victoryFocusRelease) { this._victoryFocusRelease(); this._victoryFocusRelease = null; }
                 }
                 nextLevel() {
                     this.closeVictoryModal();
@@ -3810,10 +4363,15 @@
                 openHintModal() {
                     sound.playClick();
                     document.getElementById('hint-content').innerHTML = '<p class="text-slate-400">Выберите уровень подсказки. Более сильные подсказки снижают максимальную награду.</p>';
-                    document.getElementById('modal-hint').classList.remove('hidden');
+                    const m = document.getElementById('modal-hint');
+                    m.classList.remove('hidden');
+                    this._hintFocusRelease = trapFocus(m);
+                    const first = m.querySelector('button');
+                    if (first) first.focus();
                 }
                 closeHintModal() {
                     document.getElementById('modal-hint').classList.add('hidden');
+                    if (this._hintFocusRelease) { this._hintFocusRelease(); this._hintFocusRelease = null; }
                 }
                 showHint(level) {
                     const config = this.levelsData[this.currentGameId][this.currentLevelNum - 1];
@@ -4167,8 +4725,12 @@
                     document.body.innerHTML = '<div style="padding:2rem;color:#f87171;font-family:sans-serif"><h1>Ошибка загрузки CodeQuest</h1><pre>' + escapeHtml(String(e.stack || e)) + '</pre></div>';
                 }
             }
-            function runSelfTest() {
+            async function runSelfTest() {
                 const qa = runCurriculumAudit(app);
+                const cov = runCurriculumCoverageAudit(app);
+                const div = runDiversityAudit(app);
+                const units = runUnitTests();
+                const e2e = await runE2ESelfTest(app);
                 const smoke = [];
                 try {
                     app.currentGameId = 1;
@@ -4180,28 +4742,48 @@
                     app.currentGameId = 22;
                     app.startLevel(1);
                     smoke.push('startLevel(22,1): OK');
+                    app.currentGameId = 25;
+                    app.startLevel(1);
+                    smoke.push('startLevel(25,1 modulo): OK');
                     app.showScreen('games');
                 } catch (e) {
                     smoke.push('UI smoke FAIL: ' + (e.message || e));
                 }
                 const textReport = [
-                    'CodeQuest QA AUDIT',
+                    'CodeQuest v11.4 FULL AUDIT',
                     `Modules: ${GAMES_DATA.length}/${MODULE_COUNT}`,
                     `Levels: ${qa.total}/${MODULE_COUNT * LEVELS_PER_GAME}`,
                     `Reference executions passed: ${qa.referencePassed}/${qa.total}`,
                     `Mission checks passed: ${qa.missionPassed}`,
                     `Schema/structure issues: ${qa.issues.length}`,
                     `CLEAN: ${qa.clean ? 'YES' : 'NO'}`,
+                    '',
+                    '--- Curriculum Coverage ---',
+                    `Concepts: ${cov.concepts}`,
+                    ...Object.entries(cov.coverage).slice(0, 20).map(([k, v]) => `  ${k}: levels=${v.levels} req=${v.withRequired} limits=${v.withLimits} modules=${v.modules.join(',')}`),
+                    '',
+                    '--- Diversity ---',
+                    `Unique paths: ${div.uniquePaths}/${div.total} (similarity ${div.similarityScore}%)`,
+                    `Unique grids: ${div.uniqueGrids}, path dupes: ${div.pathDupes}, max path repeat: ${div.maxPathRepeat}`,
+                    `Avg difficulty: ${div.avgDifficulty}`,
+                    '',
+                    '--- Unit Tests ---',
+                    `Passed: ${units.passed}/${units.total}`,
+                    ...units.results.filter(r => !r.ok).map(r => '  FAIL ' + r.name),
+                    '',
+                    '--- E2E ---',
+                    ...e2e.log,
+                    '',
                     ...smoke,
                     '',
-                    ...qa.issues.slice(0, 80).map(x => `[${x.type}] G${x.game} L${x.level}: ${x.message}`)
+                    ...qa.issues.slice(0, 40).map(x => `[${x.type}] G${x.game} L${x.level}: ${x.message}`)
                 ].join('\n');
                 console.log(textReport);
-                window.__codequestQA = qa;
+                window.__codequestQA = { qa, cov, div, units, e2e };
                 const qaOut = document.getElementById('qa-output');
                 if (qaOut) qaOut.textContent = textReport;
-                if (!new URLSearchParams(location.search).has('silent')) alert('CodeQuest QA: ' + (qa.clean ? 'PASS' : 'FAIL') + `\n690 уровней; reference ${qa.referencePassed}/${qa.total}. См. Console.`);
-                return qa;
+                if (!new URLSearchParams(location.search).has('silent')) alert('CodeQuest v11.4: ' + (qa.clean && units.failed === 0 && e2e.ok ? 'PASS' : 'CHECK') + `\nRef ${qa.referencePassed}/${qa.total}; Units ${units.passed}/${units.total}; E2E ${e2e.ok ? 'OK' : 'FAIL'}`);
+                return window.__codequestQA;
             }
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', boot, { once: true });
