@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="version" content="11.7">
+    <meta name="version" content="11.6">
     <title>CodeQuest: Школьная Академия Программирования</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="favicon.png">
@@ -362,7 +362,7 @@
             <div class="min-w-0">
                 <h1
                     class="font-extrabold text-base sm:text-lg md:text-xl tracking-wide bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent truncate">
-                    CodeQuest v11.7</h1>
+                    CodeQuest v11.6</h1>
                 <p class="text-xs text-slate-400 hidden md:block">Школьная Академия Программирования</p>
             </div>
         </div>
@@ -1831,191 +1831,7 @@
                 if (teach.includes('if_wall')) c.requiredActions = ['if_wall'];
                 return c;
             }
-            /* ===================== SPIRAL CURRICULUM (v11.7) =====================
-               Пройденные концепции обязаны возвращаться в следующих модулях:
-               • лимит блоков — на каждом уровне, начиная с модуля 5 (кроме «Угадай заранее»);
-               • циклы (модули 9–11) — применяются в модулях 13–17 и 22–25;
-               • функции (модули 18–19) — применяются в модулях 22–25;
-               • условия (13–17) — «Ключ и Дверь» (14) теперь требует ЕСЛИ есть ключ.
-               Если повтор в маршруте реально сокращает код (экономия ≥ 2 блоков), лимит поставлен ниже длины
-               «развёрнутого» решения — без цикла/функции уложиться нельзя. */
-            const SPIRAL_LIMIT_FROM = 5;
-            const SPIRAL_LOOP_MODULES = new Set([13, 14, 15, 16, 17, 22, 23, 24, 25]);
-            const SPIRAL_FN_MODULES = new Set([22, 23, 24, 25]);
-            const SPIRAL_DEBUG_MODULES = new Set([20, 21]); // «Найди ошибку»: на КАЖДОМ уровне есть сломанная программа
-            const SPIRAL_FORCE_FROM = 6;   // уровни 1–5 каждого модуля — знакомство с новой темой
-            const SPIRAL_SEARCH_FROM = 8;  // с 8-го уровня генератор ищет вариант карты, где повтор есть
-            const SPIRAL_OPEN = ['if_wall', 'if_key', 'if_even', 'if_collect', 'and_check', 'or_check', 'not_check'];
-            const SPIRAL_LOOP_BLOCKS = ['repeat_2', 'repeat_3', 'repeat_4', 'end_loop'];
-            const SPIRAL_FN_BLOCKS = ['def_fn', 'call_fn', 'end_fn'];
-            function spiralBalanced(chunk) {
-                let d = 0;
-                for (const id of chunk) {
-                    if (SPIRAL_OPEN.includes(id)) d++;
-                    else if (id === 'else') { if (d <= 0) return false; }
-                    else if (id === 'end_if') { d--; if (d < 0) return false; }
-                }
-                return d === 0;
-            }
-            function spiralLoopPlan(seq) {
-                const n = seq.length, best = Array(n + 1).fill(Infinity), from = Array(n + 1).fill(null);
-                const bad = new Set(['set_var', 'while_lt', 'def_fn', 'call_fn', 'end_fn', 'end_loop', 'repeat_2', 'repeat_3', 'repeat_4']);
-                best[0] = 0;
-                for (let i = 0; i < n; i++) {
-                    if (best[i] === Infinity) continue;
-                    if (best[i] + 1 < best[i + 1]) { best[i + 1] = best[i] + 1; from[i + 1] = { t: 'raw' }; }
-                    for (let p = 1; p <= 8 && i + p <= n; p++) {
-                        const chunk = seq.slice(i, i + p);
-                        if (chunk.some(x => bad.has(x)) || !spiralBalanced(chunk)) continue;
-                        for (const k of [2, 3, 4]) {
-                            const e = i + p * k; if (e > n) break;
-                            let ok = true; for (let q = p; q < p * k && ok; q++) if (seq[i + q] !== seq[i + (q % p)]) ok = false;
-                            if (ok && best[i] + p + 2 < best[e]) { best[e] = best[i] + p + 2; from[e] = { t: 'rep', i, p, k }; }
-                        }
-                    }
-                }
-                const parts = []; let e = n;
-                while (e > 0) { const f = from[e]; if (f.t === 'raw') { parts.push([seq[e - 1]]); e--; } else { parts.push(['repeat_' + f.k, ...seq.slice(f.i, f.i + f.p), 'end_loop']); e = f.i; } }
-                return { cost: best[n], prog: parts.reverse().flat(), kind: 'repeat' };
-            }
-            function spiralFnPlan(seq) {
-                const safe = new Set(['fwd', 'turn_l', 'turn_r', 'collect']), n = seq.length; let best = null;
-                for (let p = 2; p <= 6; p++) for (let i = 0; i + p <= n; i++) {
-                    const P = seq.slice(i, i + p); if (!P.every(x => safe.has(x))) continue;
-                    const key = P.join(), prog = []; let m = 0;
-                    for (let j = 0; j < n;) { if (j + p <= n && seq.slice(j, j + p).join() === key) { prog.push('call_fn'); m++; j += p; } else { prog.push(seq[j]); j++; } }
-                    if (m < 2) continue;
-                    const cost = p + 2 + prog.length;
-                    if (!best || cost < best.cost) best = { cost, prog: ['def_fn', ...P, 'end_fn', ...prog], kind: 'function' };
-                }
-                return best;
-            }
-            function spiralSetBlocks(t, add, drop) {
-                t.blocks = t.blocks.filter(b => !drop.includes(b.id));
-                add.forEach(id => { if (!t.blocks.some(b => b.id === id)) t.blocks.push({ ...BLOCK_CATALOG[id] }); });
-            }
-            function spiralSlack(L) { return L <= 5 ? 3 : 2; }
-            // Возвращает true, если для уровня достигнуто «принудительное» применение цикла/функции.
-            function applySpiral(c) {
-                if (!c || c.gameId < SPIRAL_LIMIT_FROM || c.mission === 'predict' || c.maxBlocks || c.maxUse) return false;
-                const g = c.gameId, L = c.id, t = { ...c, blocks: c.blocks.slice(), hints: (c.hints || []).slice(), requiredActions: (c.requiredActions || []).slice() };
-                if (SPIRAL_DEBUG_MODULES.has(g) && !t.mission) {
-                    const base = referenceProgramFor(t).map(b => b.id), mk0 = id => tokenToBlock(id);
-                    const labels = { wrong_order: 'неверный порядок команд', missing_block: 'пропущенный блок' };
-                    const cands = [], seen = new Set([base.join()]);
-                    const tryAdd = (bad, bug) => { const k = bad.join(); if (seen.has(k)) return; seen.add(k); if (bad.length && spiralBalanced(bad) && !simulate(t, bad.map(mk0)).ok) cands.push({ bad, bug }); };
-                    for (let i = 0; i + 1 < base.length; i++) { const b = base.slice(); [b[i], b[i + 1]] = [b[i + 1], b[i]]; tryAdd(b, 'wrong_order'); }
-                    for (let i = 0; i < base.length; i++) { const b = base.slice(); b.splice(i, 1); tryAdd(b, 'missing_block'); }
-                    let done = false;
-                    if (cands.length) {
-                        const pick = cands[(g * 7 + L * 3) % cands.length], bug = pick.bug;
-                        const pre = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(t.instructions || '') || [''])[0];
-                        t.mission = 'debug'; t.debugBugType = bug; t.prefilledProgram = pick.bad.map(mk0);
-                        t.instructions = pre + '🐞 Найди ошибку (' + labels[bug] + '): программа уже написана, но герой не справляется. Запусти или иди по шагам ⏭, найди и исправь.' + (t.turnIn === 'if_wall' ? ' 🔒 Поворачивать можно только внутри «ЕСЛИ стена».' : '');
-                        t.hints = ['Запусти и посмотри, где герой свернул не туда.', 'Иди по шагам ⏭ и следи за подсветкой блока.', 'Тип бага: ' + labels[bug] + '. Исправь точечно.'];
-                        done = true;
-                    }
-                    if (!done) return false;
-                }
-                const hasPre = !!(t.prefilledProgram && t.prefilledProgram.length);
-                if (g === 14 && !t.mission && !hasPre && !t.guard) {
-                    if (!keyGuard(t)) return false;
-                    if (!t.requiredActions.includes('if_key')) t.requiredActions.push('if_key');
-                }
-                const seq = referenceProgramFor(t).map(b => b.id);
-                if (!seq.length) return false;
-                const raw = seq.length, mk = id => tokenToBlock(id);
-                const loopOk = SPIRAL_LOOP_MODULES.has(g), fnOk = SPIRAL_FN_MODULES.has(g);
-                const note = (txt) => { if (!/📏/.test(t.instructions || '')) t.instructions = (t.instructions || '') + ' 📏 ' + txt; };
-                let forced = null;
-                if ((t.mission === 'debug' || hasPre)) {
-                    const lim = Math.max(raw, hasPre ? t.prefilledProgram.length : 0) + 1;
-                    t.maxBlocks = lim; note('Лимит: не больше ' + lim + ' блоков — исправь ошибку точечно, без переписывания программы.');
-                } else {
-                    let plan = null;
-                    if (!t.mission && L >= SPIRAL_FORCE_FROM && (loopOk || fnOk)) {
-                        const cands = [];
-                        if (loopOk) cands.push(spiralLoopPlan(seq));
-                        if (fnOk) { const f = spiralFnPlan(seq); if (f) cands.push(f); }
-                        cands.sort((a, b) => a.cost - b.cost || (a.kind === 'repeat' ? -1 : 1));
-                        for (const cand of cands) {
-                            if (raw - cand.cost < 2) continue;
-                            const lim = cand.cost + 1, prog = cand.prog.map(mk);
-                            const probe = { ...t, maxBlocks: lim, refIds: cand.prog };
-                            if (!simulate(probe, prog).ok || checkLimits(prog, probe)) continue;
-                            plan = { ...cand, lim }; break;
-                        }
-                    }
-                    if (plan) {
-                        forced = plan.kind;
-                        t.maxBlocks = plan.lim; t.refIds = plan.prog; t.examplePath = plan.prog;
-                        if (plan.kind === 'repeat') {
-                            spiralSetBlocks(t, SPIRAL_LOOP_BLOCKS, SPIRAL_FN_BLOCKS);
-                            if (!t.requiredActions.includes('repeat')) t.requiredActions.push('repeat');
-                            note('Лимит: не больше ' + plan.lim + ' блоков. 🔁 Ты уже знаешь циклы: повторяющийся кусок маршрута запиши блоком «Повторить».');
-                            t.hints[0] = 'Найди в решении кусок, который повторяется подряд, и запиши его один раз внутрь «Повторить».';
-                        } else {
-                            spiralSetBlocks(t, SPIRAL_FN_BLOCKS, SPIRAL_LOOP_BLOCKS);
-                            ['def_fn', 'call_fn'].forEach(a => { if (!t.requiredActions.includes(a)) t.requiredActions.push(a); });
-                            note('Лимит: не больше ' + plan.lim + ' блоков. 🧩 Ты уже знаешь функции: повторяющийся кусок маршрута оформи функцией и вызови её.');
-                            t.hints[0] = 'Найди кусок маршрута, который встречается несколько раз: ОПРЕДЕЛИТЬ → команды → КОНЕЦ, затем ВЫЗВАТЬ.';
-                        }
-                    } else {
-                        const lim = raw + spiralSlack(L); t.maxBlocks = lim;
-                        if (!t.mission) { if (loopOk) spiralSetBlocks(t, SPIRAL_LOOP_BLOCKS, []); if (fnOk) spiralSetBlocks(t, SPIRAL_FN_BLOCKS, []); }
-                        note('Лимит: не больше ' + lim + ' блоков — без лишних команд.');
-                    }
-                }
-                const ref = referenceProgramFor(t);
-                if (checkLimits(ref, t) || !simulate(t, ref).ok || analyzeProgramConcept(ref, t).hardMissing.length) return false;
-                t.spiral = { limit: t.maxBlocks, raw, forced };
-                Object.assign(c, t);
-                return !!forced;
-            }
             function generateLevel(gameId, levelNum) {
-                if (gameId >= SPIRAL_LIMIT_FROM && levelNum >= SPIRAL_SEARCH_FROM && (SPIRAL_LOOP_MODULES.has(gameId) || SPIRAL_FN_MODULES.has(gameId))) {
-                    for (let salt = 0; salt < 60; salt++) {
-                        const c = enforceGeneratedRequirements(generateLevelRaw(gameId, levelNum, salt));
-                        if (c.mission || c.downgraded) break; // миссии (угадай/ошибка) повторы не требуют
-                        if (!addLimits(c)) continue;
-                        fixText(c);
-                        if (applySpiral(c)) return spiralFixText(spiralFixHints(c));
-                    }
-                }
-                const c = generateLevelBase(gameId, levelNum);
-                applySpiral(c);
-                return spiralFixText(spiralFixHints(c));
-            }
-
-            // Тексты должны описывать то, что реально проверяется на уровне.
-            function spiralFixText(c) {
-                if (!c) return c;
-                const pal = c.blocks.map(b => b.id);
-                if (c.mission === 'debug' && c.debugBugType) {
-                    const lab = { bad_loop: 'неправильный цикл', bad_function: 'ошибка в функции', bad_condition: 'неправильное условие' }[c.debugBugType];
-                    const absent = (c.debugBugType === 'bad_loop' && !pal.some(p => /^repeat_/.test(p))) || (c.debugBugType === 'bad_function' && !pal.includes('def_fn')) || (c.debugBugType === 'bad_condition' && !pal.some(p => /^if_|_check$/.test(p)));
-                    if (lab && absent) {
-                        c.instructions = c.instructions.replace(lab, 'лишний фрагмент в программе');
-                        c.hints = (c.hints || []).map(h => h.replace(lab, 'лишний фрагмент в программе'));
-                        c.debugBugType = 'extra_block';
-                    }
-                }
-                if (c.gameId === 15 && !c.mission && c.objective && c.objective.type === 'activate_switches') {
-                    const pre = (/^(🔥 БОНУС: |📚 Новая тема: )/.exec(c.instructions || '') || [''])[0], lim = (c.instructions.match(/📏[\s\S]*$/) || [''])[0];
-                    const body = c.keys.length
-                        ? 'Ключ 🔑 лежит на клетке с переключателем ⚡. Включи переключатель командой «Взаимодействовать» внутри «ЕСЛИ есть ключ», а в «ИНАЧЕ» оставь безопасное «Ждать». Затем дойди до 🏁.'
-                        : 'Ключа здесь нет, поэтому «ЕСЛИ есть ключ» не сработает. Включи переключатель ⚡ командой «Взаимодействовать» в ветке «ИНАЧЕ», а в «ЕСЛИ» оставь «Ждать». Затем дойди до 🏁.';
-                    c.instructions = pre + body + (c.isBonus ? ' Сложная карта, строгая оценка по шагам.' : '') + (lim ? ' ' + lim : '');
-                }
-                return c;
-            }
-            // Подсказки не должны отсылать к блоку, которого нет в палитре уровня (модули 12 и 28 — только ПОКА).
-            function spiralFixHints(c) {
-                if (c && c.hints && !c.blocks.some(b => /^repeat_/.test(b.id)))
-                    c.hints = c.hints.map(h => (/Повторить/.test(h) && !/ПОКА/.test(h)) ? 'Счётчик: count = 0 до цикла, а внутри цикла — count += 1. Цикл идёт ПОКА count < N.' : h);
-                return c;
-            }
-            function generateLevelBase(gameId, levelNum) {
                 let first = null;
                 for (let salt = 0; salt < 40; salt++) {
                     const c = enforceGeneratedRequirements(generateLevelRaw(gameId, levelNum, salt));
@@ -4813,7 +4629,6 @@
                         if (!Array.isArray(c.hints) || c.hints.length < 3 || c.hints.slice(0,3).some(x => !String(x).trim())) problems.push('неполные подсказки');
                         if (c.hints?.some(x => String(x).includes('Маршрут-образец'))) problems.push('подсказка содержит готовый маршрут');
                         if (!isFinite(c.optimalSteps)) problems.push('нет конечной оптимальной длины');
-                        if (game.id >= SPIRAL_LIMIT_FROM && c.mission !== 'predict' && !c.maxBlocks && !c.maxUse) problems.push('нет лимита блоков (обязателен с модуля ' + SPIRAL_LIMIT_FROM + ')');
                         if (!c.solvable) problems.push('уровень помечен как нерешаемый');
                         if (c.objective.type === 'collect_all' && c.objective.password && !c.collectibles.some(x => x.letter)) problems.push('есть password, но нет букв');
                         const ref = referenceProgramFor(c);
